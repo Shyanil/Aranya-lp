@@ -205,7 +205,7 @@ function Hero({ tweaks }) {
           opacity: loaded ? 1 : 0,
           transition: 'opacity 1.4s ease 0.3s',
         }}>
-          RH Aerocity, Dharapur, Guwahati, Assam
+          RH AEROCITY,DHARAPUR,GUWAHATI, ASSAM
         </div>
 
         <div style={{
@@ -356,7 +356,7 @@ function Manifesto() {
             <div style={{
               fontFamily: 'DM Sans, sans-serif', fontSize: 12, letterSpacing: '0.15em',
               textTransform: 'uppercase', color: '#7a9e7e',
-            }}>RH Aerocity, Dharapur, Guwahati</div>
+            }}>RH AEROCITY,DHARAPUR,GUWAHATI, ASSAM</div>
           </div>
 
           <div style={{
@@ -975,6 +975,11 @@ function LocationSection() {
                 <circle cx="170" cy="110" r="10" fill="#c9a96e" opacity="0.9" />
                 <circle cx="170" cy="110" r="18" fill="none" stroke="#c9a96e" strokeWidth="1.5" opacity="0.5" />
                 <circle cx="170" cy="110" r="28" fill="none" stroke="#c9a96e" strokeWidth="1" opacity="0.25" />
+                {/* Red pin pointing to (170, 110) */}
+                <g style={{ transform: 'translate(170px, 110px)' }}>
+                  <path d="M0,0 C-6,-9 -12,-14 -12,-21 A12,12 0 1,1 12,-21 C12,-14 6,-9 0,0 Z" fill="#ff0000" />
+                  <circle cx="0" cy="-21" r="4.5" fill="#faf8f3" />
+                </g>
                 {/* Landmark dots */}
                 {[
                   [90, 70, 'Airport 4.7KM'], [280, 85, 'University'],
@@ -1161,7 +1166,7 @@ function DeveloperSection() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {[
                   ['Principal Architect', 'Confluence Consultancy Services'],
-                  ['ConfluenceConsultancy Services', 'S.P.A Consultants'],
+                  ['Confluence Consultancy Services', 'S.P.A Consultants'],
                   ['MEP', 'AEPL'],
                   ['Local Architect- Banka & Associates', 'Swati Structure Solutions Pvt. Ltd'],
                 ].map(([role, firm], i) => (
