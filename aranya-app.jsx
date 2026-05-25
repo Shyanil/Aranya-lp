@@ -884,20 +884,24 @@ function HomesSection({ tweaks }) {
   );
 }
 
-// ── Location ──────────────────────────────────────────────────────────────────
-function LocationSection() {
+
+
+    // ── Location ──────────────────────────────────────────────────────────────────
+    function LocationSection() {
   const [ref, visible] = useReveal(0.15);
   const [activeCategory, setActiveCategory] = useState(0);
-  const [isMapOpen, setIsMapOpen] = useState(false);
+
+  const googleMapsUrl = "https://www.google.com/maps/place/Rang+Homes+Dharapur/@26.1342888,91.6106832,121m/data=!3m1!1e3!4m6!3m5!1s0x375a45e9f3abda0b:0xa3fdc54d80ad06b1!8m2!3d26.1355178!4d91.6115151!16s%2Fg%2F11g4d6v_tz?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D";
 
   const categories = [
     {
       name: 'Education', color: '#7a9e7e',
       places: [
         { name: 'Dharapur Higher Secondary', dist: '2.2 km' },
-        { name: 'Girijananda Chowdhury University', dist: '2.9 km' },
-        { name: 'Assam Don Bosco University', dist: '3.2 km' },
-        { name: 'Guwahati University', dist: '5.4 km' },
+        { name: 'Kinderjoy Montessori and Playschool', dist: '2.8 km' },
+        { name: 'Radha Bora High School', dist: '3.6 km' },
+        { name: 'Chandraprava Bora High School, Azara', dist: '3.7 km' },
+        { name: 'St. Joseph\'s School', dist: '5.1 km' },
       ],
     },
     {
@@ -965,7 +969,7 @@ function LocationSection() {
               background: 'rgba(245,240,232,0.04)', border: '1px solid rgba(201,169,110,0.2)',
               height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center',
               position: 'relative', overflow: 'hidden', cursor: 'pointer',
-            }} onClick={() => setIsMapOpen(true)}>
+            }} onClick={() => { window.location.href = googleMapsUrl; }}>
               {/* Schematic map */}
               <svg viewBox="0 0 340 220" width="100%" style={{ opacity: 0.7 }}>
                 {/* Roads */}
@@ -977,7 +981,7 @@ function LocationSection() {
                 <circle cx="170" cy="110" r="18" fill="none" stroke="#c9a96e" strokeWidth="1.5" opacity="0.5" />
                 <circle cx="170" cy="110" r="28" fill="none" stroke="#c9a96e" strokeWidth="1" opacity="0.25" />
                 {/* Red pin pointing to (170, 110) */}
-                <g style={{ transform: 'translate(170px, 110px)', cursor: 'pointer' }} onClick={() => setIsMapOpen(true)}>
+                <g style={{ transform: 'translate(170px, 110px)', cursor: 'pointer' }} onClick={() => { window.location.href = googleMapsUrl; }}>
                   <path d="M0,0 C-6,-9 -12,-14 -12,-21 A12,12 0 1,1 12,-21 C12,-14 6,-9 0,0 Z" fill="#ff0000" />
                   <circle cx="0" cy="-21" r="4.5" fill="#faf8f3" />
                 </g>
@@ -1063,24 +1067,7 @@ function LocationSection() {
           </div>
         </div>
       </div>
-      {/* Same-page Map Modal/Overlay */}
-      {isMapOpen && (
-        <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) setIsMapOpen(false); }} style={{ zIndex: 9000, position: 'fixed', inset: 0, background: 'rgba(5,15,5,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-          <div className="modal-box" style={{ maxWidth: 850, width: '92%', height: '75vh', display: 'flex', flexDirection: 'column', background: '#1a2e1a', border: '1px solid rgba(201,169,110,0.3)', borderRadius: 0 }}>
-            <div style={{ padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(201,169,110,0.2)', background: '#1a2e1a' }}>
-              <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 20, color: '#f5f0e8', fontWeight: 300, letterSpacing: '0.04em' }}>Interactive Location Map — Aranya</span>
-              <button onClick={() => setIsMapOpen(false)} style={{ background: 'none', border: 'none', color: '#c9a96e', fontSize: 20, cursor: 'pointer', padding: '4px', fontFamily: 'DM Sans' }}>✕</button>
-            </div>
-            <div style={{ flex: 1, position: 'relative', background: '#fff' }}>
-              <iframe
-                src="https://www.openstreetmap.org/export/embed.html?bbox=91.601068%2C26.124476%2C91.621068%2C26.144476&layer=mapnik&marker=26.134476%2C91.611068"
-                style={{ width: '100%', height: '100%', border: 'none' }}
-                allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Aranya Interactive Map"
-              />
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Dedicated Premium Full-Screen Map Page Overlay Removed */}
 
     </section>
   );
