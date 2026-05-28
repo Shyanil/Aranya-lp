@@ -1131,23 +1131,23 @@
       const thumbsRef = useRef(null);
 
       const images = [
-        { src: 'uploads/Entrance Cam_rang Homes.webp', label: 'Club Entrance', cat: 'Exterior' },
-        { src: 'uploads/Shot 15_V2.webp', label: 'Garden View', cat: 'Exterior' },
+        { src: 'uploads/Entrance Cam_rang Homes.webp', label: '', cat: 'Exterior' },
+        { src: 'uploads/Shot 15_V2.webp', label: 'Terrace View', cat: 'Exterior' },
         { src: 'uploads/Cam-02_Revised.webp', label: 'Street View', cat: 'Exterior' },
         { src: 'uploads/Club Cam_rang Homes_rev.webp', label: 'Club Exterior', cat: 'Exterior' },
         { src: 'uploads/Pool Cam.webp', label: 'Swimming Pool', cat: 'Amenities' },
-        { src: 'uploads/Kids Cam_Rang Homes.webp', label: 'Kids Landscape', cat: 'Amenities' },
+        { src: 'uploads/Kids Cam_Rang Homes.webp', label: 'Kids Outdoor Play Area', cat: 'Amenities' },
         { src: 'uploads/GYM (00000)_6K.webp', label: 'Active @Aranya', cat: 'Club' },
         { src: 'uploads/Club lobby (00120)_6K.webp', label: 'Club Lobby', cat: 'Club' },
-        { src: 'uploads/Gaming Room (00000)_6K.webp', label: 'Gaming Room', cat: 'Club' },
+        { src: 'uploads/Gaming Room (00000)_6K.webp', label: 'Game ON @ Aranya', cat: 'Club' },
         { src: 'uploads/KIDs_Play (00000)_5k.webp', label: "Kids' Play Studio", cat: 'Club' },
         { src: 'uploads/Banquet (00000)_6K.webp', label: 'Banquet Hall', cat: 'Club' },
-        { src: 'uploads/Tower Lobby_001 (00000)_6K.webp', label: 'Tower Lobby', cat: 'Interiour' },
-        { src: 'uploads/Living Dining (00000)_6K.webp', label: 'Living & Dining', cat: 'Interiour' },
-        { src: 'uploads/Master Bedroom_0015k.webp', label: 'Master Bedroom', cat: 'Interiour' },
+        { src: 'uploads/Tower Lobby_001 (00000)_6K.webp', label: 'Tower Lobby', cat: 'Interior' },
+        { src: 'uploads/Living Dining (00000)_6K.webp', label: 'Living & Dining', cat: 'Interior' },
+        { src: 'uploads/Master Bedroom_0015k.webp', label: 'Master Bedroom', cat: 'Interior' },
       ];
 
-      const cats = ['All', 'Exterior', 'Club', 'Amenities', 'Interiour'];
+      const cats = ['All', 'Exterior', 'Club', 'Amenities', 'Interior'];
       const filtered = filter === 'All' ? images : images.filter(i => i.cat === filter);
 
       const goTo = useCallback((idx) => {
