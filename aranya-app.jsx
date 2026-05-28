@@ -615,8 +615,9 @@ function ClubAranya() {
           textAlign: 'center', marginBottom: 60,
           opacity: visible ? 1 : 0, transition: 'opacity 0.8s ease',
         }}>
+          <img src="uploads/logo design.jpeg" alt="Club Aranya Logo" style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 20, border: '1px solid rgba(201,169,110,0.3)', padding: '4px', background: 'rgba(255,255,255,0.05)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)' }} />
           <div style={{
-            fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.3em',
+            fontFamily: 'DM Sans', fontSize: 22, fontWeight: 500, letterSpacing: '0.32em',
             textTransform: 'uppercase', color: '#c9a96e', marginBottom: 20,
           }}>Club Aranya</div>
           <h2 style={{
@@ -706,16 +707,18 @@ function HomesSection({ tweaks }) {
 
   const units = [
     {
-      type: '3 BHK', label: 'Celestial',
+      type: '3 BHK + 2T', label: 'Celestial',
       size: '1,148 – 1,479 sq ft', floors: 'Ground to 10th Floor',
       highlights: ['East-West cross ventilation', 'Utility balcony with kitchen', 'Jumbo vitrified tile flooring', 'Smart digital door lock'],
       tag: 'Most Popular',
+      tower: '2T',
     },
     {
-      type: '3 BHK + Terrace', label: 'Garden Home',
+      type: '3 BHK + 3T + Terrace', label: 'Garden Home',
       size: '2,280 – 2,687 sq ft', floors: '1st & 2nd Floor',
       highlights: ['Private terrace up to 1,326 sq ft', 'Garden-level living', 'Exclusive green views', 'Personal outdoor escape'],
       tag: 'Limited Edition',
+      tower: '3T',
     },
     {
       type: '4 BHK', label: 'Prestige',
@@ -848,6 +851,23 @@ function HomesSection({ tweaks }) {
                 <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 6 }}>Available</div>
                 <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 18, fontWeight: 400, color: '#1a2e1a' }}>{units[activeUnit].floors}</div>
               </div>
+              {units[activeUnit].tower ? (
+                <>
+                  <div>
+                    <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 6 }}>Tower</div>
+                    <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 22, fontWeight: 400, color: '#1a2e1a' }}>{units[activeUnit].tower}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 6 }}>Possession</div>
+                    <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 22, fontWeight: 400, color: '#1a2e1a' }}>2031</div>
+                  </div>
+                </>
+              ) : (
+                <div style={{ gridColumn: 'span 2' }}>
+                  <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 6 }}>Possession</div>
+                  <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 22, fontWeight: 400, color: '#1a2e1a' }}>2031</div>
+                </div>
+              )}
             </div>
             <div style={{ marginBottom: 32 }}>
               <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 16 }}>Highlights</div>
@@ -1172,10 +1192,11 @@ function DeveloperSection() {
               }}>Design Team</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {[
-                  ['Principal Architect', 'Confluence Consultancy Services'],
-                  ['Confluence Consultancy Services', 'S.P.A Consultants'],
-                  ['MEP', 'AEPL'],
-                  ['Local Architect- Banka & Associates', 'Swati Structure Solutions Pvt. Ltd'],
+                  ['Principal Architect', 'Confluence Consultancy Services, Delhi'],
+                  ['Landscape', 'S.P Consultants, Delhi'],
+                  ['MEP', 'AEPL, Delhi'],
+                  ['Structural', 'Swati Structure Solutions Pvt. Ltd, Delhi'],
+                  ['Local Architect', 'Banka & Associates, Guwahati'],
                 ].map(([role, firm], i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ fontFamily: 'DM Sans', fontSize: 13, fontWeight: 300, color: 'rgba(245,240,232,0.5)' }}>{role}</span>
