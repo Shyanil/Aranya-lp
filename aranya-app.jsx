@@ -857,7 +857,7 @@ function HomesSection({ tweaks }) {
                 <>
                   <div>
                     <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 6 }}>Tower</div>
-                    <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 22, fontWeight: 400, color: '#1a2e1a' }}>{units[activeUnit].tower}</div>
+                    <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 22, fontWeight: 500, color: '#1a2e1a' }}>{units[activeUnit].tower}</div>
                   </div>
                   <div>
                     <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 6 }}>Possession</div>
@@ -1409,7 +1409,7 @@ function EnquireForm({ tweaks }) {
                 onMouseEnter={e => { e.target.style.background = '#dfc28e'; e.target.style.transform = 'translateY(-2px)'; }}
                 onMouseLeave={e => { e.target.style.background = '#c9a96e'; e.target.style.transform = 'translateY(0)'; }}
               >
-                {defaultInterest ? 'Download Brochure' : 'Request Private Visit'}
+                DOWNLOAD BROCHURE
               </button>
             </div>
           </form>

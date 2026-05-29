@@ -568,7 +568,7 @@
                     <button type="submit" style={{ background: '#1a2e1a', color: '#c9a96e', border: 'none', cursor: 'pointer', padding: '14px 36px', fontFamily: 'DM Sans', fontSize: 11, fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', transition: 'all 0.3s', flexShrink: 0 }}
                       onMouseEnter={e => { e.currentTarget.style.background = '#c9a96e'; e.currentTarget.style.color = '#1a2e1a'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                       onMouseLeave={e => { e.currentTarget.style.background = '#1a2e1a'; e.currentTarget.style.color = '#c9a96e'; e.currentTarget.style.transform = 'translateY(0)'; }}>
-                      {defaultInterest ? 'Download Brochure' : 'Request Private Visit'}
+                      DOWNLOAD BROCHURE
                     </button>
                   </div>
                 </form>
@@ -1053,7 +1053,7 @@
                         {stats.map(([k, v], i) => (
                           <div key={i} style={{ background: 'rgba(245,240,232,0.05)', padding: '14px 16px', borderLeft: '2px solid rgba(201,169,110,0.3)', gridColumn: (stats.length === 3 && i === 2) ? 'span 2' : 'auto' }}>
                             <p style={{ fontFamily: 'DM Sans', fontSize: 8, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.4)', marginBottom: 5 }}>{k}</p>
-                            <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 16, fontWeight: 300, color: '#f5f0e8', lineHeight: 1.3 }}>{v}</p>
+                            <p style={{ fontFamily: k === 'Tower' ? 'DM Sans, sans-serif' : 'Cormorant Garamond, serif', fontSize: 16, fontWeight: k === 'Tower' ? 400 : 300, color: '#f5f0e8', lineHeight: 1.3 }}>{v}</p>
                           </div>
                         ))}
                       </div>
@@ -1546,7 +1546,7 @@
                 <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(20px,2.5vw,28px)', fontWeight: 300, color: '#f5f0e8', marginBottom: 6 }}>Still have questions?</h3>
                 <p style={{ fontFamily: 'DM Sans', fontSize: 13, fontWeight: 300, color: 'rgba(245,240,232,0.5)' }}>Our team is happy to walk you through anything.</p>
               </div>
-              <CTAButton label="Speak to Our Team" variant="gold" interest="" />
+              <CTAButton label="Speak to Our Team" variant="gold" onClick={() => window.open('https://wa.me/919311852020', '_blank')} />
             </div>
           </div>
         </section>
