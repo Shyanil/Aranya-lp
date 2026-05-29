@@ -857,7 +857,7 @@ function HomesSection({ tweaks }) {
                 <>
                   <div>
                     <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 6 }}>Tower</div>
-                    <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 22, fontWeight: 500, color: '#1a2e1a' }}>{units[activeUnit].tower}</div>
+                    <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 22, fontWeight: 500, color: '#1a2e1a' }}>{units[activeUnit].tower && units[activeUnit].tower.replace('T', 'T ')}</div>
                   </div>
                   <div>
                     <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 6 }}>Possession</div>
