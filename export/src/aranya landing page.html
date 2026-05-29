@@ -568,7 +568,7 @@
                     <button type="submit" style={{ background: '#1a2e1a', color: '#c9a96e', border: 'none', cursor: 'pointer', padding: '14px 36px', fontFamily: 'DM Sans', fontSize: 11, fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', transition: 'all 0.3s', flexShrink: 0 }}
                       onMouseEnter={e => { e.currentTarget.style.background = '#c9a96e'; e.currentTarget.style.color = '#1a2e1a'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                       onMouseLeave={e => { e.currentTarget.style.background = '#1a2e1a'; e.currentTarget.style.color = '#c9a96e'; e.currentTarget.style.transform = 'translateY(0)'; }}>
-                      Request Private Visit
+                      {defaultInterest ? 'Download Brochure' : 'Request Private Visit'}
                     </button>
                   </div>
                 </form>
@@ -819,7 +819,7 @@
         { name: 'CLUB LOBBY', tag: 'Ground Level', desc: 'The grand entrance to Club Aranya — a space that sets the tone with its warm materiality and curated art.', img: 'uploads/Club lobby (00120)_6K.webp' },
         { name: 'BANQUET HALL', tag: 'Ground Level', desc: 'A column-free double-height space designed for celebrations to shine. Versatile. Impeccable.', img: 'uploads/Banquet (00000)_6K.webp' },
         { name: 'ACTIVE@ARANYA', tag: 'Ground Level', desc: 'A premium gymnasium where strength meets form. Designed for those who treat fitness as a philosophy, not a routine.', img: 'uploads/GYM (00000)_6K.webp' },
-        { name: 'GAME ON @ARANYA', tag: 'Ground Level', desc: 'Billiards, table tennis, arcade machines — a space where friendly competition thrives.', img: 'uploads/Gaming Room (00000)_6K.webp' },
+        { name: 'GAMEON@ARANYA', tag: 'Ground Level', desc: 'Billiards, table tennis, arcade machines — a space where friendly competition thrives.', img: 'uploads/Gaming Room (00000)_6K.webp' },
         { name: 'EIEIO PLAY STUDIO', tag: 'Ground Level', desc: "A toddlers' world where little feet make big memories. Safe, imaginative, and delightful in every corner.", img: 'uploads/KIDs_Play (00000)_5k.webp' }
       ];
       return (
@@ -879,7 +879,7 @@
           planImg: 'uploads/unit-d-2bhk.webp',
           hl: ['Efficient 2 BHK layout', 'Optimized room planning', 'Clear circulation flow', 'Comfort-focused apartment design'],
           interest: '2bhk',
-          tower: '2T',
+          tower: 'T2',
         },
         {
           type: '3 BHK + 2T', label: 'Celestial', size: '1,148 – 1,479', unit: 'sq ft',
@@ -887,7 +887,7 @@
           planImg: 'uploads/unit-a.webp',
           hl: ['East-West cross ventilation', 'Utility balcony with kitchen', 'Jumbo vitrified tile flooring', 'Smart digital main-door lock'],
           interest: '3bhk',
-          tower: '2T',
+          tower: 'T2',
         },
         {
           type: '3BHK+3T', label: 'Grande', size: '1,326 – 1,687', unit: 'sq ft',
@@ -895,7 +895,7 @@
           planImg: 'uploads/unit-a.webp',
           hl: ['Spacious 3 BHK + 3 Toilet layout', 'East-West cross ventilation', 'Utility balcony with kitchen', 'Smart digital main-door lock'],
           interest: '3bhk-3t',
-          tower: '3T',
+          tower: 'T1',
           subtabs: [
             { name: 'Unit B1', planImg: 'uploads/UNIT-B1.webp' },
             { name: 'Unit B1B', planImg: 'uploads/UNIT-B1B.webp' },
@@ -913,7 +913,7 @@
           planImg: 'uploads/unit-b1c.webp',
           hl: ['Private terrace up to 1,326 sq ft', 'Garden-level seclusion', 'Exclusive green views', 'Personal outdoor retreat'],
           interest: '3bhk-t',
-          tower: '3T',
+          tower: 'T1',
           subtabs: [
             { name: 'Unit B3A', planImg: 'uploads/UNIT-B3A.webp' },
             { name: 'Unit B4A', planImg: 'uploads/UNIT-B4A.webp' }
@@ -925,6 +925,7 @@
           planImg: 'uploads/unit-a.webp',
           hl: ['Dedicated staff room', 'Puja room option', 'Expansive corner balconies', 'Premium finishes throughout'],
           interest: '4bhk',
+          tower: 'T1',
           subtabs: [
             { name: 'Unit C2', planImg: 'uploads/UNIT-C2.webp' },
             { name: 'Unit C2A', planImg: 'uploads/UNIT-C2A.webp' }
@@ -936,6 +937,7 @@
           planImg: 'uploads/unit-b1c.webp',
           hl: ['Terrace up to 1,177 sq ft', 'Puja + staff rooms', 'Full-perimeter views', 'Legacy-grade specification'],
           interest: '4bhk-t',
+          tower: 'T1',
           subtabs: [
             { name: 'Unit C1', planImg: 'uploads/UNIT-C1.webp' },
             { name: 'Unit C1A', planImg: 'uploads/UNIT-C1A.webp' },
@@ -1553,32 +1555,7 @@
 
     // ─── FOOTER ───────────────────────────────────────────────────────────────────
 
-    function DisclaimerSection() {
-      return (
-        <section id="disclaimer" style={{ background: '#0b160b', padding: '48px clamp(20px,8vw,120px)', borderTop: '1px solid rgba(245,240,232,0.06)' }}>
-          <div style={{ maxWidth: 1180, margin: '0 auto' }}>
-            <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 18, fontWeight: 500 }}>Disclaimer</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <p style={{ fontFamily: 'DM Sans', fontSize: 11, fontWeight: 300, color: 'rgba(245,240,232,0.35)', lineHeight: 1.85 }}>
-                The floor plans are as per the approved plans and specifications as of date. These plans may vary by +/- 3% and are subject to changes. The furniture, accessories, etc. shown in the plans does not form a part of the offering. Customers are requested to visit the site office and apprise themselves of all the necessary details prior to making any purchase decisions.
-              </p>
-              <p style={{ fontFamily: 'DM Sans', fontSize: 11, fontWeight: 300, color: 'rgba(245,240,232,0.35)', lineHeight: 1.85 }}>
-                Views & photographs used in this brochure are artist’s impression for illustration purpose only. The information, features, offerings and other details herein are only indicative and the developer/owner reserves its right to change any or all of these in its discretion subject to grant of approval from relevant authorities.
-              </p>
-              <p style={{ fontFamily: 'DM Sans', fontSize: 11, fontWeight: 300, color: 'rgba(245,240,232,0.35)', lineHeight: 1.85 }}>
-                This printed material does not constitute an offer, an invitation to an offer and/or commitment of any nature between the developer/owner and recipients. The developer’s/owner’s website(s) and other advertising and publicity material include artist’s impression indicating the anticipated appearance of completed development.
-              </p>
-              <p style={{ fontFamily: 'DM Sans', fontSize: 11, fontWeight: 300, color: 'rgba(245,240,232,0.35)', lineHeight: 1.85 }}>
-                No warranty is given that the completed development will comply in any degree with such artist’s impression. Costs, designs, facilities and/or specifications may be subject to change without notice.
-              </p>
-              <p style={{ fontFamily: 'DM Sans', fontSize: 11, fontWeight: 300, color: 'rgba(245,240,232,0.35)', lineHeight: 1.85 }}>
-                Any decorative item and furniture shown in any unit/private terrace/private area are not a part of our offering. This is just to give an idea of how the unit can be utilized in the best possible way.
-              </p>
-            </div>
-          </div>
-        </section>
-      );
-    }
+    
   
 
     function Footer() {
@@ -1602,6 +1579,14 @@
                 RERA Registration: Under Process. Possession: 2031. Views are artist's impressions only. Information is indicative and subject to change without notice. This does not constitute an offer. Indotech Infracon Pvt. Ltd. © 2026.
               </p>
               <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 16, fontStyle: 'italic', color: 'rgba(201,169,110,0.32)', flexShrink: 0 }}>"The whistling winds are getting greener."</p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, borderTop: '1px solid rgba(245,240,232,0.06)', paddingTop: 16, marginTop: 16 }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 9, fontWeight: 300, color: 'rgba(245,240,232,0.18)', lineHeight: 1.6 }}>
+                <strong>Disclaimer:</strong> The floor plans are as per the approved plans and specifications as of date. These plans may vary by +/- 3% and are subject to changes. The furniture, accessories, etc. shown in the plans does not form a part of the offering. Customers are requested to visit the site office and apprise themselves of all the necessary details prior to making any purchase decisions. Any decorative item and furniture shown in any unit/private terrace/private area are not a part of our offering. This is just to give an idea of how the unit can be utilized in the best possible way.
+              </p>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 9, fontWeight: 300, color: 'rgba(245,240,232,0.18)', lineHeight: 1.6 }}>
+                Views & photographs used in this brochure are artist’s impression for illustration purpose only. The information, features, offerings and other details herein are only indicative and the developer/owner reserves its right to change any or all of these in its discretion subject to grant of approval from relevant authorities. This printed material does not constitute an offer, an invitation to an offer and/or commitment of any nature between the developer/owner and recipients. The developer’s/owner’s website(s) and other advertising and publicity material include artist’s impression indicating the anticipated appearance of completed development. No warranty is given that the completed development will comply in any degree with such artist’s impression. Costs, designs, facilities and/or specifications may be subject to change without notice.
+              </p>
             </div>
           </div>
         </footer>
@@ -1643,8 +1628,7 @@
           <LocationSection />
           <DeveloperSection />
           <FAQSection />
-          <DisclaimerSection />
-          <Footer />
+                    <Footer />
         </ModalCtx.Provider>
       );
     }

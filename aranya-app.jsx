@@ -590,7 +590,7 @@ function ClubAranya() {
   const [activeTab, setActiveTab] = useState(0);
 
   const spaces = [
-    { name: 'Active @Aranya', desc: 'A premium gymnasium where strength meets form. Designed for those who treat fitness as a philosophy, not a routine.', tag: 'Ground Level' },
+    { name: 'ACTIVE@ARANYA', desc: 'A premium gymnasium where strength meets form. Designed for those who treat fitness as a philosophy, not a routine.', tag: 'Ground Level' },
     { name: 'Open Café & Restaurant', desc: 'Brewing conversations over curated food and coffee. The place where the community gathers, lingers, and connects.', tag: 'Ground Level' },
     { name: 'Mini Theatre', desc: 'Intimate cinematic experiences for residents. Private screenings, film evenings, curated cultural programmes.', tag: 'Ground Level' },
     { name: 'EIEIO Play Studio', desc: "A toddlers' world where little feet make big memories. Thoughtfully designed for safety, play, and imagination.", tag: 'Ground Level' },
@@ -711,26 +711,28 @@ function HomesSection({ tweaks }) {
       size: '1,148 – 1,479 sq ft', floors: 'Ground to 10th Floor',
       highlights: ['East-West cross ventilation', 'Utility balcony with kitchen', 'Jumbo vitrified tile flooring', 'Smart digital door lock'],
       tag: 'Most Popular',
-      tower: '2T',
+      tower: 'T2',
     },
     {
       type: '3 BHK + 3T + Terrace', label: 'Garden Home',
       size: '2,280 – 2,687 sq ft', floors: '1st & 2nd Floor',
       highlights: ['Private terrace up to 1,326 sq ft', 'Garden-level living', 'Exclusive green views', 'Personal outdoor escape'],
       tag: 'Limited Edition',
-      tower: '3T',
+      tower: 'T1',
     },
     {
       type: '4 BHK', label: 'Prestige',
       size: '1,623 – 1,895 sq ft', floors: '1st Floor onwards',
       highlights: ['Dedicated staff room', 'Puja room option', 'Expansive balconies', 'Corner apartment layouts'],
       tag: 'Select Floors',
+      tower: 'T1',
     },
     {
       type: '4 BHK + Terrace', label: 'Signature',
       size: '2,532 – 3,044 sq ft', floors: '1st–2nd Floor',
       highlights: ['Private terrace up to 1,177 sq ft', 'Puja + staff rooms', 'Premium tower views', 'Legacy-grade living'],
       tag: 'Ultra Premium',
+      tower: 'T1',
     },
   ];
 
@@ -1407,7 +1409,7 @@ function EnquireForm({ tweaks }) {
                 onMouseEnter={e => { e.target.style.background = '#dfc28e'; e.target.style.transform = 'translateY(-2px)'; }}
                 onMouseLeave={e => { e.target.style.background = '#c9a96e'; e.target.style.transform = 'translateY(0)'; }}
               >
-                Request Private Visit
+                {defaultInterest ? 'Download Brochure' : 'Request Private Visit'}
               </button>
             </div>
           </form>
@@ -1485,6 +1487,14 @@ function Footer() {
             "The whistling winds are getting greener."
           </div>
         </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, borderTop: '1px solid rgba(245,240,232,0.06)', paddingTop: 16, marginTop: 16 }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 9, fontWeight: 300, color: 'rgba(245,240,232,0.18)', lineHeight: 1.6 }}>
+                <strong>Disclaimer:</strong> The floor plans are as per the approved plans and specifications as of date. These plans may vary by +/- 3% and are subject to changes. The furniture, accessories, etc. shown in the plans does not form a part of the offering. Customers are requested to visit the site office and apprise themselves of all the necessary details prior to making any purchase decisions. Any decorative item and furniture shown in any unit/private terrace/private area are not a part of our offering. This is just to give an idea of how the unit can be utilized in the best possible way.
+              </p>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 9, fontWeight: 300, color: 'rgba(245,240,232,0.18)', lineHeight: 1.6 }}>
+                Views & photographs used in this brochure are artist’s impression for illustration purpose only. The information, features, offerings and other details herein are only indicative and the developer/owner reserves its right to change any or all of these in its discretion subject to grant of approval from relevant authorities. This printed material does not constitute an offer, an invitation to an offer and/or commitment of any nature between the developer/owner and recipients. The developer’s/owner’s website(s) and other advertising and publicity material include artist’s impression indicating the anticipated appearance of completed development. No warranty is given that the completed development will comply in any degree with such artist’s impression. Costs, designs, facilities and/or specifications may be subject to change without notice.
+              </p>
+            </div>
       </div>
     </footer>
   );
