@@ -205,7 +205,7 @@ function Hero({ tweaks }) {
           opacity: loaded ? 1 : 0,
           transition: 'opacity 1.4s ease 0.3s',
         }}>
-          RH AEROCITY,DHARAPUR,GUWAHATI, ASSAM
+          4JM6+R77, AZARA, GUWAHATI, ASSAM 781017
         </div>
 
         <div style={{
@@ -356,7 +356,7 @@ function Manifesto() {
             <div style={{
               fontFamily: 'DM Sans, sans-serif', fontSize: 12, letterSpacing: '0.15em',
               textTransform: 'uppercase', color: '#7a9e7e',
-            }}>RH AEROCITY,DHARAPUR,GUWAHATI, ASSAM</div>
+            }}>4JM6+R77, AZARA, GUWAHATI, ASSAM 781017</div>
           </div>
 
           <div style={{
@@ -913,7 +913,7 @@ function HomesSection({ tweaks }) {
   const [ref, visible] = useReveal(0.15);
   const [activeCategory, setActiveCategory] = useState(0);
 
-  const googleMapsUrl = "https://www.google.com/maps/place/Rang+Homes+Dharapur/@26.1342888,91.6106832,121m/data=!3m1!1e3!4m6!3m5!1s0x375a45e9f3abda0b:0xa3fdc54d80ad06b1!8m2!3d26.1355178!4d91.6115151!16s%2Fg%2F11g4d6v_tz?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D";
+  const googleMapsUrl = "https://www.google.com/maps/place/ARANYA+BY+RANG+HOMES+PHASE+1,+4JM6%2BR77,+Azara,+Guwahati,+Assam+781017";
 
   const categories = [
     {
@@ -1024,7 +1024,7 @@ function HomesSection({ tweaks }) {
                 position: 'absolute', bottom: 12, right: 12,
                 fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.15em',
                 textTransform: 'uppercase', color: 'rgba(245,240,232,0.3)',
-              }}>Dharapur, Palashbari Road</div>
+              }}>4JM6+R77, Azara, Guwahati, Assam 781017</div>
             </div>
           </div>
 
@@ -1421,7 +1421,7 @@ function EnquireForm({ tweaks }) {
           opacity: visible ? 1 : 0, transition: 'opacity 0.8s ease 0.4s',
         }}>
           {[
-            { label: 'Site Address', value: 'RH Aerocity, Dharapur\nPalashbari Road, Assam' },
+            { label: 'Site Address', value: '4JM6+R77, Azara\nGuwahati, Assam 781017' },
             { label: 'Phone', value: '1800 12012 5555\n+91 11-71834410' },
             { label: 'Email', value: 'info@indogroup.in\nwww.ranghomes.com' },
           ].map((c, i) => (
