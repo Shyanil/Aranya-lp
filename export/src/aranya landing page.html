@@ -897,14 +897,14 @@
           interest: '3bhk-3t',
           tower: 'T1',
           subtabs: [
-            { name: 'Unit B1', planImg: 'uploads/UNIT-B1.webp' },
-            { name: 'Unit B1B', planImg: 'uploads/UNIT-B1B.webp' },
-            { name: 'Unit B1C', planImg: 'uploads/unit-b1c.webp' },
-            { name: 'Unit B2', planImg: 'uploads/UNIT-B2.webp' },
-            { name: 'Unit B3', planImg: 'uploads/UNIT-B3.webp' },
-            { name: 'Unit B3B', planImg: 'uploads/UNIT-B3B.webp' },
-            { name: 'Unit B4', planImg: 'uploads/UNIT-B4.webp' },
-            { name: 'Unit B6', planImg: 'uploads/UNIT-B6.webp' }
+            { name: '3 BHK + 3T (1221)', size: '1221', planImg: 'uploads/UNIT-B1.webp' },
+            { name: '3 BHK + 3T (1321)', size: '1321', planImg: 'uploads/UNIT-B1B.webp' },
+            { name: '3 BHK + 3T (1348)', size: '1348', planImg: 'uploads/unit-b1c.webp' },
+            { name: '3 BHK + 3T (1361)', size: '1361', planImg: 'uploads/UNIT-B2.webp' },
+            { name: '3 BHK + 3T (1442)', size: '1442', planImg: 'uploads/UNIT-B3.webp' },
+            { name: '3 BHK + 3T (1446)', size: '1446', planImg: 'uploads/UNIT-B3B.webp' },
+            { name: '3 BHK + 3T (1479)', size: '1479', planImg: 'uploads/UNIT-B4.webp' },
+            { name: '3 BHK + 3T (1631)', size: '1631', planImg: 'uploads/UNIT-B6.webp' }
           ]
         },
         {
@@ -915,8 +915,8 @@
           interest: '3bhk-t',
           tower: 'T1',
           subtabs: [
-            { name: 'Unit B3A', planImg: 'uploads/UNIT-B3A.webp' },
-            { name: 'Unit B4A', planImg: 'uploads/UNIT-B4A.webp' }
+            { name: '3 BHK + 3T + TERRACE (2280)', size: '2280', planImg: 'uploads/UNIT-B3A.webp' },
+            { name: '3 BHK + 3T + TERRACE (2687)', size: '2687', planImg: 'uploads/UNIT-B4A.webp' }
           ]
         },
         {
@@ -1023,7 +1023,7 @@
                 {/* Plan label badge */}
                 <div style={{ position: 'absolute', top: 16, left: 16, background: '#1a2e1a', padding: '6px 14px' }}>
                   <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#c9a96e' }}>
-                    {u.type} · {u.subtabs && u.subtabs[activeSub] ? `${u.label} (${u.subtabs[activeSub].name})` : u.label}
+                    {u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub].name : `${u.type} · ${u.label}`}
                   </p>
                 </div>
                 <p style={{ position: 'absolute', bottom: 12, right: 14, fontFamily: 'DM Sans', fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(26,46,26,0.3)' }}>Indicative Floor Plan — Not to Scale</p>
@@ -1034,14 +1034,19 @@
                 <div>
                   <p style={{ fontFamily: 'DM Sans', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 8 }}>{u.type}</p>
                   <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 300, color: '#f5f0e8', marginBottom: 6, lineHeight: 1.1 }}>
-                    {u.subtabs && u.subtabs[activeSub] ? `${u.label} · ${u.subtabs[activeSub].name}` : u.label}
+                    {u.subtabs && u.subtabs[activeSub]
+                      ? `${u.label === 'Garden Home' ? 'Garden Homes' : u.label}. ${u.subtabs[activeSub].name}`
+                      : u.label}
                   </h3>
                   <p style={{ fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.35)', marginBottom: 28 }}>{u.tag}</p>
 
                   {/* Key stats */}
                   {(() => {
+                    const currentSize = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].size
+                      ? u.subtabs[activeSub].size
+                      : u.size;
                     const stats = [
-                      ['SUPER BUILT-UP AREA', `${u.size} ${u.unit}`],
+                      ['SUPER BUILT-UP AREA', `${currentSize} ${u.unit}`],
                       ['Floors', u.floors]
                     ];
                     if (u.tower) {
@@ -1072,7 +1077,7 @@
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <CTAButton label={`Enquire — ${u.subtabs && u.subtabs[activeSub] ? `${u.label} (${u.subtabs[activeSub].name})` : u.label}`} variant="gold" interest={u.interest} />
+                  <CTAButton label={`Enquire — ${u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub].name : u.label}`} variant="gold" interest={u.interest} />
                   <CTAButton label="Download Brochure" variant="outline" interest={u.interest} />
                 </div>
               </div>
