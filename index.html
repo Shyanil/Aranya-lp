@@ -845,14 +845,14 @@
           interest: '3bhk-3t',
           tower: 'T1',
           subtabs: [
-            { name: '3 BHK + 3T (1221)', size: '1221', planImg: 'uploads/UNIT-B1.webp' },
-            { name: '3 BHK + 3T (1321)', size: '1321', planImg: 'uploads/UNIT-B1B.webp' },
-            { name: '3 BHK + 3T (1348)', size: '1348', planImg: 'uploads/unit-b1c.webp' },
-            { name: '3 BHK + 3T (1361)', size: '1361', planImg: 'uploads/UNIT-B2.webp' },
-            { name: '3 BHK + 3T (1442)', size: '1442', planImg: 'uploads/UNIT-B3.webp' },
-            { name: '3 BHK + 3T (1446)', size: '1446', planImg: 'uploads/UNIT-B3B.webp' },
-            { name: '3 BHK + 3T (1479)', size: '1479', planImg: 'uploads/UNIT-B4.webp' },
-            { name: '3 BHK + 3T (1631)', size: '1631', planImg: 'uploads/UNIT-B6.webp' }
+            { name: '3 BHK + 3T (1221)', size: '1221', planImg: 'uploads/unit-b1c.webp', floors: 'Ground Floor' },
+            { name: '3 BHK + 3T (1321)', size: '1321', planImg: 'uploads/UNIT-B3.webp', floors: '1st to 10th Floor' },
+            { name: '3 BHK + 3T (1348)', size: '1348', planImg: 'uploads/UNIT-B1.webp', floors: '1st to 10th Floor' },
+            { name: '3 BHK + 3T (1361)', size: '1361', planImg: 'uploads/UNIT-B4.webp', floors: '1st to 10th Floor' },
+            { name: '3 BHK + 3T (1442)', size: '1442', planImg: 'uploads/UNIT-B3B.webp', floors: 'Ground Floor' },
+            { name: '3 BHK + 3T (1446)', size: '1446', planImg: 'uploads/UNIT-B2.webp', floors: '1st to 10th Floor' },
+            { name: '3 BHK + 3T (1479)', size: '1479', planImg: 'uploads/UNIT-B1B.webp', floors: 'Ground Floor' },
+            { name: '3 BHK + 3T (1631)', size: '1631', planImg: 'uploads/UNIT-B6.webp', floors: 'Ground to 9th Floor', tower: 'T2' }
           ]
         },
         {
@@ -863,7 +863,13 @@
           interest: '3bhk-t',
           tower: 'T1',
           subtabs: [
-            { name: '3 BHK + 3T + TERRACE (2280)', size: '2280', planImg: 'uploads/UNIT-B3A.webp' },
+            {
+              name: '3 BHK + 3T + TERRACE (2280)',
+              size: '2280',
+              planImg: 'uploads/UNIT-B3A.webp',
+              floors: '2nd Floor',
+              hl: ['Private terrace up to 959 sq ft', 'Garden-level seclusion', 'Exclusive green views', 'Personal outdoor retreat']
+            },
             { name: '3 BHK + 3T + TERRACE (2687)', size: '2687', planImg: 'uploads/UNIT-B4A.webp' }
           ]
         },
@@ -875,8 +881,19 @@
           interest: '4bhk',
           tower: 'T1',
           subtabs: [
-            { name: 'Unit C2', planImg: 'uploads/UNIT-C2.webp' },
-            { name: 'Unit C2A', planImg: 'uploads/UNIT-C2A.webp' }
+            {
+              name: '4 BHK (1867)',
+              size: '1867',
+              planImg: 'uploads/UNIT-C2.webp',
+              floors: '3rd–10th Floor',
+              hl: ['Dedicated staff room', 'Staff room', 'Expansive corner balconies', 'Premium finishes throughout']
+            },
+            {
+              name: '4 BHK (1895)',
+              size: '1895',
+              planImg: 'uploads/UNIT-C2A.webp',
+              floors: '2nd–10th Floor'
+            }
           ]
         },
         {
@@ -887,9 +904,27 @@
           interest: '4bhk-t',
           tower: 'T1',
           subtabs: [
-            { name: 'Unit C1', planImg: 'uploads/UNIT-C1.webp' },
-            { name: 'Unit C1A', planImg: 'uploads/UNIT-C1A.webp' },
-            { name: 'Unit C1B', planImg: 'uploads/UNIT-C1B.webp' }
+            {
+              name: '4 BHK + TERRACE (2236)',
+              size: '2236',
+              planImg: 'uploads/UNIT-C1A.webp',
+              floors: '1st Floor',
+              hl: ['Terrace up to 341 sq ft', 'Staff rooms', 'Full-perimeter views', 'Legacy-grade specification']
+            },
+            {
+              name: '4 BHK + TERRACE (2532)',
+              size: '2532',
+              planImg: 'uploads/UNIT-C1B.webp',
+              floors: '2nd Floor',
+              hl: ['Terrace up to 637 sq ft', 'Staff rooms', 'Full-perimeter views', 'Legacy-grade specification']
+            },
+            {
+              name: '4 BHK + TERRACE (3044)',
+              size: '3044',
+              planImg: 'uploads/UNIT-C2A.webp',
+              floors: '2nd Floor',
+              hl: ['Terrace up to 1,177 sq ft', 'Puja Room', 'Full-perimeter views', 'Legacy-grade specification']
+            }
           ]
         },
       ];
@@ -993,12 +1028,18 @@
                     const currentSize = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].size
                       ? u.subtabs[activeSub].size
                       : u.size;
+                    const currentFloors = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].floors
+                      ? u.subtabs[activeSub].floors
+                      : u.floors;
+                    const currentTower = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].tower
+                      ? u.subtabs[activeSub].tower
+                      : u.tower;
                     const stats = [
                       ['SUPER BUILT-UP AREA', `${currentSize} ${u.unit}`],
-                      ['Floors', u.floors]
+                      ['Floors', currentFloors]
                     ];
-                    if (u.tower) {
-                      stats.push(['Tower', u.tower]);
+                    if (currentTower) {
+                      stats.push(['Tower', currentTower]);
                     }
                     stats.push(['Possession', '2031']);
                     return (
@@ -1016,7 +1057,10 @@
                   {/* Highlights */}
                   <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.4)', marginBottom: 12 }}>Highlights</p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 28 }}>
-                    {u.hl.map((h, i) => (
+                    {(u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].hl
+                      ? u.subtabs[activeSub].hl
+                      : u.hl
+                    ).map((h, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '9px 0', borderBottom: '1px solid rgba(245,240,232,0.06)', fontFamily: 'DM Sans', fontSize: 14, fontWeight: 300, color: 'rgba(245,240,232,0.78)', }}>
                         <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#c9a96e', flexShrink: 0 }} />{h}
                       </div>
