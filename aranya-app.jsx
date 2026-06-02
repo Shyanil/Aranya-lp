@@ -205,7 +205,7 @@ function Hero({ tweaks }) {
           opacity: loaded ? 1 : 0,
           transition: 'opacity 1.4s ease 0.3s',
         }}>
-          4JM6+R77, AZARA, GUWAHATI, ASSAM 781017
+          RANG HOMES AEROCITY, DHARAPUR, GUWAHATI, ASSAM
         </div>
 
         <div style={{
