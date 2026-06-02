@@ -708,13 +708,13 @@ function HomesSection({ tweaks }) {
   const units = [
     {
       type: '3 BHK + 2T', label: 'Celestial',
-      size: '1,148 – 1,479 sq ft', floors: 'Ground to 9th Floor',
+      size: '1161 – 1379 sq ft', floors: 'Ground to 9th Floor',
       highlights: ['East-West cross ventilation', 'Utility balcony with kitchen', 'Jumbo vitrified tile flooring', 'Smart digital door lock'],
       tag: 'Most Popular',
       tower: 'T2',
     },
     {
-      type: '3 BHK + 3T + Terrace', label: 'Garden Home',
+      type: '3 BHK + 3T + Terrace', label: 'Garden Homes',
       size: '2,280 – 2,687 sq ft', floors: '1st & 2nd Floor',
       highlights: ['Private terrace up to 1,326 sq ft', 'Garden-level living', 'Exclusive green views', 'Personal outdoor escape'],
       tag: 'Limited Edition',
