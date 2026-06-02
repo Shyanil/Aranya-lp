@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aranya by Rang Homes — Your Sanctuary of Senses</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preload" href="uploads/unit-d-2bhk.webp" as="image" type="image/webp" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
@@ -820,6 +821,30 @@
         setActiveSub(0);
       }, [active]);
 
+      useEffect(() => {
+        const preloadImages = () => {
+          units.forEach(u => {
+            if (u.planImg) {
+              const img = new Image();
+              img.src = u.planImg;
+            }
+            if (u.subtabs) {
+              u.subtabs.forEach(sub => {
+                if (sub.planImg) {
+                  const img = new Image();
+                  img.src = sub.planImg;
+                }
+              });
+            }
+          });
+        };
+        if (window.requestIdleCallback) {
+          window.requestIdleCallback(preloadImages);
+        } else {
+          setTimeout(preloadImages, 1000);
+        }
+      }, []);
+
       const units = [
         {
           type: '2 BHK + 2T', label: 'Aura', size: '825–924', unit: 'sq ft',
@@ -993,7 +1018,8 @@
                 <img
                   src={currentPlanImg}
                   alt={`${u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub].name : u.label} Floor Plan`}
-                  style={{ width: '100%', maxWidth: 620, height: 'auto', objectFit: 'contain', position: 'relative', zIndex: 1, transition: 'opacity 0.4s ease' }}
+                  style={{ width: '100%', maxWidth: 620, height: 'auto', aspectRatio: '1.5', objectFit: 'contain', position: 'relative', zIndex: 1, transition: 'opacity 0.4s ease' }}
+                  loading="lazy"
                   onError={(e)=>{
                     if (e.target.src.endsWith('.webp')) {
                       e.target.src = e.target.src.replace('.webp', '.jpg');
