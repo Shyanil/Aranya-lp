@@ -708,7 +708,7 @@ function HomesSection({ tweaks }) {
   const units = [
     {
       type: '3 BHK + 2T', label: 'Celestial',
-      size: '1,148 – 1,479 sq ft', floors: 'Ground to 10th Floor',
+      size: '1,148 – 1,479 sq ft', floors: 'Ground to 9th Floor',
       highlights: ['East-West cross ventilation', 'Utility balcony with kitchen', 'Jumbo vitrified tile flooring', 'Smart digital door lock'],
       tag: 'Most Popular',
       tower: 'T2',
@@ -913,7 +913,7 @@ function HomesSection({ tweaks }) {
   const [ref, visible] = useReveal(0.15);
   const [activeCategory, setActiveCategory] = useState(0);
 
-  const googleMapsUrl = "https://www.google.com/maps/place/ARANYA+BY+RANG+HOMES+PHASE+1,+4JM6%2BR77,+Azara,+Guwahati,+Assam+781017";
+  const googleMapsUrl = "https://maps.app.goo.gl/NpVxBNaDy3ejKS8UA";
 
   const categories = [
     {
