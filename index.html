@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aranya by Rang Homes — Your Sanctuary of Senses</title>
+  <link rel="icon" type="image/webp" href="uploads/logo design.webp" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preload" href="uploads/unit-d-2bhk.webp" as="image" type="image/webp" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -275,10 +276,298 @@
       color: #1a2e1a;
     }
   
-    @media (max-width: 991px) {
-      #homes > div > div[style*="display:grid"],
-      #homes > div > div[style*="display: grid"] {
+    /* Modal Form Responsive Grid */
+    .modal-form-grid {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+    }
+    @media (max-width: 480px) {
+      .modal-form-grid {
         grid-template-columns: 1fr !important;
+      }
+    }
+
+    /* Stats Section Responsive Grid */
+    .stats-grid {
+      display: grid !important;
+      grid-template-columns: repeat(5, 1fr) !important;
+    }
+    .stats-item {
+      border-right: 1px solid rgba(201, 169, 110, 0.18) !important;
+      border-bottom: none !important;
+    }
+    .stats-item:last-child {
+      border-right: none !important;
+    }
+    @media (max-width: 991px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      .stats-item {
+        border-right: 1px solid rgba(201, 169, 110, 0.18) !important;
+        border-bottom: 1px solid rgba(201, 169, 110, 0.18) !important;
+      }
+      .stats-item:nth-child(2n) {
+        border-right: none !important;
+      }
+      .stats-item:nth-child(5) {
+        grid-column: span 2;
+        border-right: none !important;
+        border-bottom: none !important;
+      }
+    }
+    @media (max-width: 576px) {
+      .stats-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .stats-item {
+        border-right: none !important;
+        border-bottom: 1px solid rgba(201, 169, 110, 0.18) !important;
+      }
+      .stats-item:last-child {
+        border-bottom: none !important;
+      }
+      .stats-item:nth-child(5) {
+        grid-column: span 1;
+      }
+    }
+
+    /* Manifesto Section Responsive Grid */
+    .manifesto-grid {
+      display: grid !important;
+      grid-template-columns: 1fr 1.7fr !important;
+    }
+    @media (max-width: 991px) {
+      .manifesto-grid {
+        grid-template-columns: 1fr !important;
+        gap: 32px !important;
+      }
+    }
+
+    /* Sustainable Section Responsive Grid */
+    .sustainable-grid {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+    }
+    @media (max-width: 768px) {
+      .sustainable-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+    }
+
+    /* Wellness Section Responsive Grid */
+    .wellness-main-grid {
+      display: grid !important;
+      grid-template-columns: 1fr 2fr !important;
+    }
+    .wellness-cards-grid {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+    }
+    @media (max-width: 991px) {
+      .wellness-main-grid {
+        grid-template-columns: 1fr !important;
+        gap: 40px !important;
+      }
+      .wellness-main-grid > div:first-child {
+        position: relative !important;
+        top: 0 !important;
+      }
+    }
+    @media (max-width: 576px) {
+      .wellness-cards-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+    }
+
+    /* Club Section Responsive Grid */
+    .club-grid {
+      display: grid !important;
+      grid-template-columns: 1fr 1.2fr !important;
+    }
+    @media (max-width: 991px) {
+      .club-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+      }
+    }
+
+    /* Homes Section Responsive Tabs & Grids */
+    .homes-tabs {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      gap: 3px !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .homes-tabs::-webkit-scrollbar {
+      display: none;
+    }
+    .homes-tabs button {
+      flex: 1 0 160px !important;
+    }
+    .homes-subtabs {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      gap: 3px !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .homes-subtabs::-webkit-scrollbar {
+      display: none;
+    }
+    .homes-subtabs button {
+      flex: 0 0 auto !important;
+      white-space: nowrap !important;
+    }
+    .homes-main-grid {
+      display: grid !important;
+      grid-template-columns: 1.5fr 1fr !important;
+    }
+    .homes-stats-grid {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+    }
+    @media (max-width: 991px) {
+      .homes-main-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+      }
+    }
+    @media (max-width: 576px) {
+      .homes-stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+    }
+
+    /* Location Section Responsive Grids */
+    .location-header-grid {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+    }
+    .location-map-grid {
+      display: grid !important;
+      grid-template-columns: 1.6fr 1fr !important;
+    }
+    .location-cats-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+    }
+    @media (max-width: 991px) {
+      .location-header-grid {
+        grid-template-columns: 1fr !important;
+        gap: 24px !important;
+      }
+      .location-map-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+      .location-cats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+    }
+    @media (max-width: 768px) {
+      .location-cats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+    }
+
+    /* Developer Section Responsive Grid */
+    .developer-grid {
+      display: grid !important;
+      grid-template-columns: 1.3fr 1fr !important;
+    }
+    @media (max-width: 991px) {
+      .developer-grid {
+        grid-template-columns: 1fr !important;
+        gap: 36px !important;
+      }
+    }
+
+    /* FAQ Section Responsive Grids */
+    .faq-main-grid {
+      display: grid !important;
+      grid-template-columns: 280px 1fr !important;
+    }
+    .faq-cols-grid {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+    }
+    @media (max-width: 991px) {
+      .faq-main-grid {
+        grid-template-columns: 1fr !important;
+        gap: 36px !important;
+      }
+      .faq-main-grid > div:first-child {
+        position: relative !important;
+        top: 0 !important;
+      }
+    }
+    @media (max-width: 768px) {
+      .faq-cols-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0 !important;
+      }
+    }
+
+    /* Responsive Navigation Styles */
+    .nav-links-desktop {
+      display: flex !important;
+      align-items: center;
+      gap: clamp(16px, 2vw, 28px);
+    }
+
+    .nav-hamburger {
+      display: none !important;
+    }
+
+    .nav-drawer {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 19, 10, 0.98);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 490;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      transform: translateY(-100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .nav-drawer.open {
+      transform: translateY(0);
+    }
+
+    .nav-drawer a {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(245, 240, 232, 0.85);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .nav-drawer a:hover {
+      color: #c9a96e;
+    }
+
+    @media (max-width: 991px) {
+      .nav-links-desktop {
+        display: none !important;
+      }
+      .nav-hamburger {
+        display: block !important;
       }
     }
   </style>
@@ -482,7 +771,7 @@
                 </div>
               ) : (
                 <form onSubmit={submit} noValidate>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+                  <div className="modal-form-grid" style={{ gap: 10, marginBottom: 10 }}>
                     <div>
                       <label style={{ display: 'block', fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(26,46,26,0.5)', marginBottom: 7 }}>Full Name *</label>
                       <input type="text" value={form.name} placeholder="Your name" style={inp(errors.name)} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onFocus={e => e.target.style.borderColor = '#c9a96e'} onBlur={e => e.target.style.borderColor = errors.name ? '#e07a5f' : 'rgba(26,46,26,0.2)'} />
@@ -492,7 +781,7 @@
                       <input type="tel" value={form.phone} placeholder="+91 ———" style={inp(errors.phone)} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} onFocus={e => e.target.style.borderColor = '#c9a96e'} onBlur={e => e.target.style.borderColor = errors.phone ? '#e07a5f' : 'rgba(26,46,26,0.2)'} />
                     </div>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+                  <div className="modal-form-grid" style={{ gap: 10, marginBottom: 10 }}>
                     <div>
                       <label style={{ display: 'block', fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(26,46,26,0.5)', marginBottom: 7 }}>Email *</label>
                       <input type="email" value={form.email} placeholder="your@email.com" style={inp(errors.email)} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} onFocus={e => e.target.style.borderColor = '#c9a96e'} onBlur={e => e.target.style.borderColor = errors.email ? '#e07a5f' : 'rgba(26,46,26,0.2)'} />
@@ -547,24 +836,46 @@
         fn(); window.addEventListener('scroll', fn, { passive: true }); return () => window.removeEventListener('scroll', fn);
       }, []);
       const links = [['#manifesto', 'Vision'], ['#wellness', 'Life at Aranya'], ['#club', 'Club'], ['#homes', 'Homes'], ['#gallery', 'Gallery'], ['#location', 'Location']];
+      
+      const toggleMenu = () => setMenuOpen(!menuOpen);
+
       return (
-        <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 500, height: 80, padding: '0 clamp(20px,5vw,72px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: scrolled ? 'rgba(10,19,10,0.98)' : 'rgba(10,19,10,0.75)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)', borderBottom: `1px solid rgba(201,169,110,${scrolled ? '0.3' : '0.12'})`, transition: 'background 0.4s ease, border-color 0.4s ease' }}>
-          <a href="#hero" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-            <img src="uploads/Asset 1@3x.webp" alt="Aranya by Rang Homes" style={{ height: 68, width: 'auto', objectFit: 'contain', filter: 'brightness(0) saturate(100%) invert(72%) sepia(42%) saturate(480%) hue-rotate(2deg) brightness(98%) contrast(90%)' }} />
-          </a>
-          <div style={{ display: 'flex', gap: 'clamp(16px,2vw,28px)', alignItems: 'center' }}>
+        <>
+          <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 500, height: 80, padding: '0 clamp(20px,5vw,72px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: scrolled || menuOpen ? 'rgba(10,19,10,0.98)' : 'rgba(10,19,10,0.75)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)', borderBottom: `1px solid rgba(201,169,110,${scrolled || menuOpen ? '0.3' : '0.12'})`, transition: 'background 0.4s ease, border-color 0.4s ease' }}>
+            <a href="#hero" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', zIndex: 510 }} onClick={() => setMenuOpen(false)}>
+              <img src="uploads/asset 1@3x.webp" alt="Aranya by Rang Homes" style={{ height: 56, width: 'auto', objectFit: 'contain', filter: 'brightness(0) saturate(100%) invert(72%) sepia(42%) saturate(480%) hue-rotate(2deg) brightness(98%) contrast(90%)' }} />
+            </a>
+            
+            {/* Desktop Links */}
+            <div className="nav-links-desktop">
+              {links.map(([href, label]) => (
+                <a key={href} href={href} className="gold-line" style={{ color: 'rgba(245,240,232,0.75)', textDecoration: 'none', fontFamily: 'DM Sans', fontSize: 11, fontWeight: 400, letterSpacing: '0.08em', textTransform: 'uppercase', transition: 'color 0.3s', paddingBottom: 4 }}
+                  onMouseEnter={e => { e.currentTarget.style.color = '#c9a96e'; }} onMouseLeave={e => { e.currentTarget.style.color = 'rgba(245,240,232,0.75)'; }}
+                >{label}</a>
+              ))}
+              <button onClick={() => openModal('')} style={{ color: '#c9a96e', border: '1px solid #c9a96e', padding: '9px 22px', background: 'transparent', fontFamily: 'DM Sans', fontSize: 11, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'all 0.3s', cursor: 'pointer' }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#c9a96e'; e.currentTarget.style.color = '#1a2e1a'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#c9a96e'; }}>
+                Enquire
+              </button>
+            </div>
+
+            {/* Hamburger Toggle */}
+            <button className="nav-hamburger" onClick={toggleMenu} style={{ background: 'none', border: 'none', color: '#c9a96e', fontSize: 24, padding: 8, cursor: 'pointer', zIndex: 510 }}>
+              {menuOpen ? '✕' : '☰'}
+            </button>
+          </nav>
+
+          {/* Mobile Menu Drawer */}
+          <div className={`nav-drawer ${menuOpen ? 'open' : ''}`}>
             {links.map(([href, label]) => (
-              <a key={href} href={href} className="gold-line" style={{ color: 'rgba(245,240,232,0.75)', textDecoration: 'none', fontFamily: 'DM Sans', fontSize: 11, fontWeight: 400, letterSpacing: '0.08em', textTransform: 'uppercase', transition: 'color 0.3s', paddingBottom: 4 }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#c9a96e'; }} onMouseLeave={e => { e.currentTarget.style.color = 'rgba(245,240,232,0.75)'; }}
-              >{label}</a>
+              <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>
             ))}
-            <button onClick={() => openModal('')} style={{ color: '#c9a96e', border: '1px solid #c9a96e', padding: '9px 22px', background: 'transparent', fontFamily: 'DM Sans', fontSize: 11, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'all 0.3s', cursor: 'pointer' }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#c9a96e'; e.currentTarget.style.color = '#1a2e1a'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#c9a96e'; }}>
-              Enquire
+            <button onClick={() => { setMenuOpen(false); openModal(''); }} style={{ color: '#1a2e1a', background: '#c9a96e', border: 'none', padding: '12px 32px', fontFamily: 'DM Sans', fontSize: 12, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'all 0.3s', cursor: 'pointer', marginTop: 12 }}>
+              Enquire Now
             </button>
           </div>
-        </nav>
+        </>
       );
     }
 
@@ -577,7 +888,7 @@
       const ov = tweaks.heroOverlay / 100;
       return (
         <section id="hero" style={{ position: 'relative', width: '100%', height: '100vh', minHeight: 680, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: `url('uploads/Shot_07_5KShot_07_5K.webp')`, backgroundSize: 'cover', backgroundPosition: 'center 40%', transform: `translateY(${scrollY * 0.35}px)`, willChange: 'transform' }} />
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: `url('uploads/shot_07_5kshot_07_5k.webp')`, backgroundSize: 'cover', backgroundPosition: 'center 40%', transform: `translateY(${scrollY * 0.35}px)`, willChange: 'transform' }} />
           <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, rgba(8,18,8,0.6) 0%, rgba(8,18,8,0.32) 50%, rgba(8,18,8,0.75) 100%)` }} />
           <div style={{ position: 'absolute', inset: 0, background: `rgba(5,12,5,${ov})` }} />
 
@@ -610,9 +921,9 @@
       const [ref, vis] = useReveal(0.3);
       const stats = [{ n: '257', l: 'Curated Residences' }, { n: '70%', l: 'Green Open Space' }, { n: '16,000+', l: 'Sq Ft Clubhouse' }, { n: 'Oasis', l: 'Swimming Pool' }, { n: '2031', l: 'Possession' }];
       return (
-        <div ref={ref} style={{ background: '#1a2e1a', padding: 'clamp(36px,5vw,64px) clamp(20px,5vw,80px)', display: 'grid', gridTemplateColumns: 'repeat(5,1fr)' }}>
+        <div ref={ref} className="stats-grid" style={{ background: '#1a2e1a', padding: 'clamp(36px,5vw,64px) clamp(20px,5vw,80px)' }}>
           {stats.map((s, i) => (
-            <div key={i} className="hover-lift" style={{ textAlign: 'center', padding: '12px 16px', borderRight: i < 4 ? '1px solid rgba(201,169,110,0.18)' : 'none', opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(18px)', transition: `opacity 0.7s ease ${i * 0.08}s, transform 0.7s ease ${i * 0.08}s`, cursor: 'default' }}>
+            <div key={i} className="stats-item hover-lift" style={{ textAlign: 'center', padding: '12px 16px', opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(18px)', transition: `opacity 0.7s ease ${i * 0.08}s, transform 0.7s ease ${i * 0.08}s`, cursor: 'default' }}>
               <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,3.5vw,46px)', fontWeight: 300, color: '#c9a96e', lineHeight: 1 }}>{s.n}</div>
               <div style={{ fontFamily: 'DM Sans', fontSize: 10, fontWeight: 400, color: 'rgba(245,240,232,0.5)', letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: 10 }}>{s.l}</div>
             </div>
@@ -630,7 +941,7 @@
           <div style={{ position: 'absolute', right: '-2%', top: '45%', transform: 'translateY(-50%)', fontFamily: 'Cormorant Garamond, serif', fontSize: 'min(260px,22vw)', fontWeight: 300, color: 'rgba(26,46,26,0.04)', lineHeight: 1, userSelect: 'none', pointerEvents: 'none', letterSpacing: '-0.02em' }}>Aranya</div>
 
           <div ref={ref} style={{ maxWidth: 1140, margin: '0 auto' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.7fr', gap: 'clamp(40px,6vw,96px)', alignItems: 'center', marginBottom: 'clamp(48px,6vw,80px)' }}>
+            <div className="manifesto-grid" style={{ gap: 'clamp(40px,6vw,96px)', alignItems: 'center', marginBottom: 'clamp(48px,6vw,80px)' }}>
               <div style={{ opacity: vis ? 1 : 0, transform: vis ? 'translateX(0)' : 'translateX(-28px)', transition: 'opacity 0.9s ease, transform 0.9s ease' }}>
                 <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.3em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 20 }}>The Vision</p>
                 <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,3.8vw,52px)', fontWeight: 300, lineHeight: 1.18, color: '#1a2e1a', marginBottom: 28 }}>
@@ -656,7 +967,7 @@
             {/* Image strip with parallax */}
             <div ref={pRef} className="img-zoom" style={{ overflow: 'hidden', opacity: vis ? 1 : 0, transition: 'opacity 0.9s ease 0.35s', position: 'relative' }}>
               <div style={{ height: 400, overflow: 'hidden', position: 'relative' }}>
-                <div className="parallax-inner" style={{ position: 'absolute', inset: '-15% 0', backgroundImage: `url('uploads/Entrance Cam_rang Homes.webp')`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                <div className="parallax-inner" style={{ position: 'absolute', inset: '-15% 0', backgroundImage: `url('uploads/entrance cam_rang homes.webp')`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
                 <div style={{ position: 'absolute', bottom: 16, left: 16, background: 'rgba(10,20,10,0.65)', border: '1px solid rgba(245,240,232,0.2)', padding: '5px 12px', zIndex: 3 }}>
                   <p style={{ fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#f5f0e8', fontWeight: 400 }}>Artist's Impression</p>
                 </div>
@@ -684,10 +995,10 @@
               </h2>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3, marginBottom: 3 }}>
+            <div className="sustainable-grid" style={{ gap: 3, marginBottom: 3 }}>
               {[
-                { img: 'uploads/Pool Cam.webp', title: 'The Urban Oasis', sub: 'Cool & Immersive', desc: 'Tree-lined pathways and layered gardens create a cooler microclimate. The pool sits at the heart of it all — your daily refresh.' },
-                { img: 'uploads/Kids Cam_Rang Homes.webp', title: 'The Urban Boulevard', sub: 'Shared Green Spine', desc: 'The central stretch of curated greenery shared by both towers — a living corridor where light and shadow play through the day.' },
+                { img: 'uploads/pool cam.webp', title: 'The Urban Oasis', sub: 'Cool & Immersive', desc: 'Tree-lined pathways and layered gardens create a cooler microclimate. The pool sits at the heart of it all — your daily refresh.' },
+                { img: 'uploads/kids cam_rang homes.webp', title: 'The Urban Boulevard', sub: 'Shared Green Spine', desc: 'The central stretch of curated greenery shared by both towers — a living corridor where light and shadow play through the day.' },
               ].map((z, i) => (
                 <div key={i} className="img-zoom" style={{ position: 'relative', height: 420, overflow: 'hidden', opacity: vis ? 1 : 0, transition: `opacity 0.75s ease ${0.2 + i * 0.12}s`, cursor: 'pointer' }} onClick={() => { }}>
                   <div style={{ position: 'absolute', inset: 0, backgroundImage: `url('${z.img}')`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
@@ -725,12 +1036,12 @@
         { cat: 'Physical Wellness', items: ['Swimming Pool', 'Jogging Track', 'Multipurpose Court', 'Active @Aranya Gym'] },
         { cat: 'Emotional & Mental', items: ['Butterfly Garden', 'Bamboo Garden', 'Hedge Garden', 'Flower Garden', 'Landscape Lawn'] },
         { cat: 'Social & Community', items: ['Club Aranya — 16,000 sq ft', 'Rooftop Social Lounge', 'Double-Height Banquet Hall', 'Open Café & Restaurant', 'Mini Theatre'] },
-        { cat: 'For Families', items: ['EIEIO Play Studio', 'Kid\'s Outdoor Play Area', 'Outdoor Children\'s Zone', 'Stargazing Deck', 'Senior Seating Grove'] },
+        { cat: 'For Families', items: ['EIEIO Play Studio', 'Outdoor Kids\' Play Area', 'Floating Cabana', 'Stargazing Deck', 'Senior Seating Grove'] },
       ];
       return (
         <section style={{ background: '#f5f0e8', padding: 'clamp(72px,9vw,130px) clamp(20px,8vw,120px)', position: 'relative', overflow: 'hidden' }}>
           <div ref={ref} style={{ maxWidth: 1180, margin: '0 auto' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 'clamp(40px,5vw,80px)', alignItems: 'start' }}>
+            <div className="wellness-main-grid" style={{ gap: 'clamp(40px,5vw,80px)', alignItems: 'start' }}>
               <div style={{ position: 'sticky', top: 100, opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(22px)', transition: 'opacity 0.8s ease, transform 0.8s ease' }}>
                 <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.3em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 20 }}>Holistic Wellness</p>
                 <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px,3.2vw,46px)', fontWeight: 300, lineHeight: 1.2, color: '#1a2e1a', marginBottom: 24 }}>
@@ -740,7 +1051,7 @@
                 <p style={{ fontFamily: 'DM Sans', fontSize: 14, fontWeight: 300, color: '#4a5a4a', lineHeight: 1.9, marginBottom: 32 }}>Whether a morning swim, an evening walk through the butterfly garden, or a quiet hour at the café — every moment at Aranya feels unhurried.</p>
                 <CTAButton label="Explore Club Aranya" variant="outlineDark" onClick={() => { const el = document.getElementById('club'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
+              <div className="wellness-cards-grid" style={{ gap: 3 }}>
                 {groups.map((g, i) => (
                   <div key={i} className="hover-lift" style={{ background: i % 2 === 0 ? '#ede7d9' : '#e6dfd1', padding: 'clamp(24px,3vw,36px) clamp(20px,2.5vw,32px)', opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(22px)', transition: `opacity 0.7s ease ${0.1 + i * 0.1}s, transform 0.7s ease ${0.1 + i * 0.1}s` }}>
                     <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 16 }}>{g.cat}</p>
@@ -765,18 +1076,18 @@
       const [ref, vis] = useReveal(0.1);
       const [active, setActive] = useState(0);
       const spaces = [
-        { name: 'CLUB LOBBY', tag: 'Ground Level', desc: 'The grand entrance to Club Aranya — a space that sets the tone with its warm materiality and curated art.', img: 'uploads/Club lobby (00120)_6K.webp' },
-        { name: 'BANQUET HALL', tag: 'Ground Level', desc: 'A column-free double-height space designed for celebrations to shine. Versatile. Impeccable.', img: 'uploads/Banquet (00000)_6K.webp' },
-        { name: 'ACTIVE@ARANYA', tag: 'Ground Level', desc: 'A premium gymnasium where strength meets form. Designed for those who treat fitness as a philosophy, not a routine.', img: 'uploads/GYM (00000)_6K.webp' },
-        { name: 'GAMEON@ARANYA', tag: 'Ground Level', desc: 'Billiards, table tennis, arcade machines — a space where friendly competition thrives.', img: 'uploads/Gaming Room (00000)_6K.webp' },
-        { name: 'EIEIO PLAY STUDIO', tag: 'Ground Level', desc: "A toddlers' world where little feet make big memories. Safe, imaginative, and delightful in every corner.", img: 'uploads/KIDs_Play (00000)_5k.webp' }
+        { name: 'CLUB LOBBY', tag: 'Ground Level', desc: 'The grand entrance to Club Aranya — a space that sets the tone with its warm materiality and curated art.', img: 'uploads/club lobby (00120)_6k.webp' },
+        { name: 'BANQUET HALL', tag: 'Ground Level', desc: 'A column-free double-height space designed for celebrations to shine. Versatile. Impeccable.', img: 'uploads/banquet (00000)_6k.webp' },
+        { name: 'ACTIVE@ARANYA', tag: 'Ground Level', desc: 'A premium gymnasium where strength meets form. Designed for those who treat fitness as a philosophy, not a routine.', img: 'uploads/gym (00000)_6k.webp' },
+        { name: 'GAMEON@ARANYA', tag: 'Ground Level', desc: 'Billiards, table tennis, arcade machines — a space where friendly competition thrives.', img: 'uploads/gaming room (00000)_6k.webp' },
+        { name: 'EIEIO PLAY STUDIO', tag: 'Ground Level', desc: "A toddlers' world where little feet make big memories. Safe, imaginative, and delightful in every corner.", img: 'uploads/kids_play (00000)_5k.webp' }
       ];
       return (
         <section id="club" style={{ background: '#243a24', padding: 'clamp(72px,9vw,130px) clamp(20px,8vw,120px)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: '70%', height: '55%', background: 'radial-gradient(ellipse, rgba(201,169,110,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
           <div ref={ref} style={{ maxWidth: 1180, margin: '0 auto', position: 'relative', zIndex: 1 }}>
             <div style={{ textAlign: 'center', marginBottom: 56, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease' }}>
-              <img src="uploads/logo design.jpeg" alt="Club Aranya Logo" style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 20, border: '1px solid rgba(201,169,110,0.3)', padding: '4px', background: 'rgba(255,255,255,0.05)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)' }} />
+              <img src="uploads/logo design.webp" alt="Club Aranya Logo" style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 20, border: '1px solid rgba(201,169,110,0.3)', padding: '4px', background: 'rgba(255,255,255,0.05)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)' }} />
               <p style={{ fontFamily: 'DM Sans', fontSize: 22, fontWeight: 500, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 20 }}>Club Aranya</p>
               <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,4vw,56px)', fontWeight: 300, color: '#f5f0e8', lineHeight: 1.15, marginBottom: 18 }}>
                 Double-tiered social spaces<br /><em style={{ color: '#c9a96e' }}>spread over 16,000+ sq ft.</em>
@@ -792,7 +1103,7 @@
               ))}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.7s ease 0.25s' }}>
+            <div className="club-grid" style={{ gap: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.7s ease 0.25s' }}>
               <div style={{ background: 'rgba(245,240,232,0.04)', border: '1px solid rgba(201,169,110,0.15)', padding: 'clamp(32px,4vw,56px) clamp(28px,4vw,52px)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 16 }}>{spaces[active].tag}</p>
                 <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,3.5vw,46px)', fontWeight: 300, color: '#f5f0e8', marginBottom: 22, lineHeight: 1.15 }}>{spaces[active].name}</h3>
@@ -866,11 +1177,11 @@
           type: '3BHK+3T', label: 'Grande', size: '1,326 – 1,687', unit: 'sq ft',
           floors: 'Ground to 10th Floor', tag: 'Executive Choice', price: '₹5,200 – ₹6,200 /sq ft',
           planImg: 'uploads/unit-a.webp',
-          hl: ['Spacious 3 BHK + 3 Toilet layout', 'East-West cross ventilation', 'Utility balcony with kitchen', 'Smart digital main-door lock'],
+          hl: ['Spacious 3 BHK + 3 Toilet layout', 'East-West cross ventilation', 'Jumbo vitrified tile flooring', 'Smart digital main-door lock'],
           interest: '3bhk-3t',
           tower: 'T1',
           subtabs: [
-            { name: '3 BHK + 3T (1221)', size: '1221', planImg: 'uploads/unit-b1c.webp', floors: 'Ground Floor' },
+            { name: '3 BHK + 3T (1221 sq)', size: '1221', carpet: '952', planImg: 'uploads/unit-b1c.webp', floors: 'Ground Floor' },
             { name: '3 BHK + 3T (1321)', size: '1321', planImg: 'uploads/UNIT-B3.webp', floors: '1st to 10th Floor' },
             { name: '3 BHK + 3T (1348)', size: '1348', planImg: 'uploads/UNIT-B1.webp', floors: '1st to 10th Floor' },
             { name: '3 BHK + 3T (1361)', size: '1361', planImg: 'uploads/UNIT-B4.webp', floors: '1st to 10th Floor' },
@@ -911,7 +1222,7 @@
               size: '1867',
               planImg: 'uploads/UNIT-C2.webp',
               floors: '3rd–10th Floor',
-              hl: ['Puja Room', 'Expansive corner balcony', 'Premium finishes throughout']
+              hl: ['Dedicated Puja/Store Room', 'Expansive balconies', 'Premium finishes throughout']
             },
             {
               name: '4 BHK (1895)',
@@ -949,7 +1260,7 @@
               size: '3044',
               planImg: 'uploads/UNIT-C2A.webp',
               floors: '2nd Floor',
-              hl: ['Terrace up to 1,177 sq ft', 'Puja Room', 'Full-perimeter views', 'Legacy-grade specification']
+              hl: ['Terrace up to 1,177 sq ft', 'Dedicated Puja/Store Room', 'Full-perimeter views', 'Legacy-grade specification']
             }
           ]
         },
@@ -973,9 +1284,9 @@
             </div>
 
             {/* Unit type tab selector */}
-            <div style={{ display: 'flex', gap: 3, marginBottom: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.1s' }}>
+            <div className="homes-tabs" style={{ marginBottom: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.1s' }}>
               {units.map((u, i) => (
-                <button key={i} onClick={() => setActive(i)} style={{ flex: '1 1 0', padding: '16px 12px', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.3s', background: active === i ? '#1a2e1a' : '#ede7d9', borderBottom: active === i ? '2px solid #c9a96e' : '2px solid transparent' }}>
+                <button key={i} onClick={() => setActive(i)} style={{ padding: '16px 12px', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.3s', background: active === i ? '#1a2e1a' : '#ede7d9', borderBottom: active === i ? '2px solid #c9a96e' : '2px solid transparent' }}>
                   <p style={{ fontFamily: 'DM Sans', fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: active === i ? '#c9a96e' : '#7a9e7e', marginBottom: 5 }}>{u.type}</p>
                   <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 24, fontWeight: 400, color: active === i ? '#f5f0e8' : '#1a2e1a', lineHeight: 1.2 }}>{u.label}</p>
                   <p style={{ fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#c9a96e', marginTop: 6 }}>{u.tag}</p>
@@ -985,10 +1296,9 @@
 
             {/* Subtabs Selector */}
             {u.subtabs && u.subtabs.length > 0 && (
-              <div style={{ display: 'flex', gap: 3, marginBottom: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.15s', flexWrap: 'wrap' }}>
+              <div className="homes-subtabs" style={{ marginBottom: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.15s' }}>
                 {u.subtabs.map((sub, idx) => (
                   <button key={idx} onClick={() => setActiveSub(idx)} style={{
-                    flex: '1 1 auto',
                     padding: '12px 14px',
                     border: 'none',
                     cursor: 'pointer',
@@ -1010,7 +1320,7 @@
             )}
 
             {/* Main content: floor plan left, specs right */}
-            <div key={active + '-' + activeSub} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 3, animation: 'fadeIn 0.4s ease', opacity: vis ? 1 : 0, transition: 'opacity 0.6s ease 0.2s' }}>
+            <div key={active + '-' + activeSub} className="homes-main-grid" style={{ gap: 3, animation: 'fadeIn 0.4s ease', opacity: vis ? 1 : 0, transition: 'opacity 0.6s ease 0.2s' }}>
 
               {/* Floor Plan Image — large, clean, prominent */}
               <div style={{ background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(24px,4vw,52px)', position: 'relative', minHeight: 500 }}>
@@ -1052,6 +1362,9 @@
 
                   {/* Key stats */}
                   {(() => {
+                    const currentCarpet = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].carpet
+                      ? u.subtabs[activeSub].carpet
+                      : u.carpet;
                     const currentSize = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].size
                       ? u.subtabs[activeSub].size
                       : u.size;
@@ -1061,16 +1374,22 @@
                     const currentTower = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].tower
                       ? u.subtabs[activeSub].tower
                       : u.tower;
-                    const stats = [
-                      ['SUPER BUILT-UP AREA', `${currentSize} ${u.unit}`],
-                      ['Floors', currentFloors]
-                    ];
+                    const stats = [];
+                    if (currentCarpet) {
+                      stats.push(['Carpet Area', `${currentCarpet} ${u.unit}`]);
+                      stats.push(['Super Built-UP Area', `${currentSize} ${u.unit}`]);
+                    } else {
+                      stats.push(['SUPER BUILT-UP AREA', `${currentSize} ${u.unit}`]);
+                    }
+                    stats.push(['Location', currentFloors]);
                     if (currentTower) {
                       stats.push(['Tower', currentTower]);
                     }
-                    stats.push(['Possession', '2031']);
+                    if (!currentCarpet) {
+                      stats.push(['Possession', '2031']);
+                    }
                     return (
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3, marginBottom: 28 }}>
+                      <div className="homes-stats-grid" style={{ gap: 3, marginBottom: 28 }}>
                         {stats.map(([k, v], i) => (
                           <div key={i} style={{ background: 'rgba(245,240,232,0.05)', padding: '14px 16px', borderLeft: '2px solid rgba(201,169,110,0.3)', gridColumn: (stats.length === 3 && i === 2) ? 'span 2' : 'auto' }}>
                             <p style={{ fontFamily: 'DM Sans', fontSize: 8, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.4)', marginBottom: 5 }}>{k}</p>
@@ -1127,7 +1446,7 @@
                 <iframe style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }} src="https://www.youtube.com/embed/0xOfYiOB6iM?autoplay=1" title="Aranya Walkthrough" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
               ) : (
                 <div style={{ position: 'absolute', inset: 0, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20 }} onClick={() => setPlaying(true)}>
-                  <div style={{ position: 'absolute', inset: 0, backgroundImage: `url('uploads/Club Cam_rang Homes_rev.webp')`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                  <div style={{ position: 'absolute', inset: 0, backgroundImage: `url('uploads/club cam_rang homes_rev.webp')`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
                   <div style={{ position: 'absolute', inset: 0, background: 'rgba(5,15,5,0.58)' }} />
                   <div style={{ position: 'relative', zIndex: 1, width: 80, height: 80, borderRadius: '50%', background: 'rgba(201,169,110,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'pulse 2.5s ease-in-out infinite', transition: 'transform 0.3s' }}
                     onMouseEnter={e => { e.currentTarget.style.animation = 'none'; e.currentTarget.style.transform = 'scale(1.12)'; }}
@@ -1157,20 +1476,20 @@
       const thumbsRef = useRef(null);
 
       const images = [
-        { src: 'uploads/Entrance Cam_rang Homes.webp', label: '', cat: 'Exterior' },
-        { src: 'uploads/Shot 15_V2.webp', label: 'Terrace View', cat: 'Exterior' },
-        { src: 'uploads/Cam-02_Revised.webp', label: 'Street View', cat: 'Exterior' },
-        { src: 'uploads/Club Cam_rang Homes_rev.webp', label: 'Club Exterior', cat: 'Exterior' },
-        { src: 'uploads/Pool Cam.webp', label: 'Swimming Pool', cat: 'Amenities' },
-        { src: 'uploads/Kids Cam_Rang Homes.webp', label: 'Kids Outdoor Play Area', cat: 'Amenities' },
-        { src: 'uploads/GYM (00000)_6K.webp', label: 'Active @Aranya', cat: 'Club' },
-        { src: 'uploads/Club lobby (00120)_6K.webp', label: 'Club Lobby', cat: 'Club' },
-        { src: 'uploads/Gaming Room (00000)_6K.webp', label: 'Game ON @ Aranya', cat: 'Club' },
-        { src: 'uploads/KIDs_Play (00000)_5k.webp', label: "Kids' Play Studio", cat: 'Club' },
-        { src: 'uploads/Banquet (00000)_6K.webp', label: 'Banquet Hall', cat: 'Club' },
-        { src: 'uploads/Tower Lobby_001 (00000)_6K.webp', label: 'Tower Lobby', cat: 'Interior' },
-        { src: 'uploads/Living Dining (00000)_6K.webp', label: 'Living & Dining', cat: 'Interior' },
-        { src: 'uploads/Master Bedroom_0015k.webp', label: 'Master Bedroom', cat: 'Interior' },
+        { src: 'uploads/entrance cam_rang homes.webp', label: '', cat: 'Exterior' },
+        { src: 'uploads/shot 15_v2.webp', label: 'Terrace View', cat: 'Exterior' },
+        { src: 'uploads/cam-02_revised.webp', label: 'Street View', cat: 'Exterior' },
+        { src: 'uploads/club cam_rang homes_rev.webp', label: 'Club Exterior', cat: 'Exterior' },
+        { src: 'uploads/pool cam.webp', label: 'Swimming Pool', cat: 'Amenities' },
+        { src: 'uploads/kids cam_rang homes.webp', label: 'Kids\' Outdoor Play Area', cat: 'Amenities' },
+        { src: 'uploads/gym (00000)_6k.webp', label: 'Active @Aranya', cat: 'Club' },
+        { src: 'uploads/club lobby (00120)_6k.webp', label: 'Club Lobby', cat: 'Club' },
+        { src: 'uploads/gaming room (00000)_6k.webp', label: 'Game ON @ Aranya', cat: 'Club' },
+        { src: 'uploads/kids_play (00000)_5k.webp', label: "Kids' Play Studio", cat: 'Club' },
+        { src: 'uploads/banquet (00000)_6k.webp', label: 'Banquet Hall', cat: 'Club' },
+        { src: 'uploads/tower lobby_001 (00000)_6k.webp', label: 'Tower Lobby', cat: 'Interior' },
+        { src: 'uploads/living dining (00000)_6k.webp', label: 'Living & Dining', cat: 'Interior' },
+        { src: 'uploads/master bedroom_0015k.webp', label: 'Master Bedroom', cat: 'Interior' },
       ];
 
       const cats = ['All', 'Exterior', 'Club', 'Amenities', 'Interior'];
@@ -1360,7 +1679,7 @@
           <div ref={ref} style={{ maxWidth: 1180, margin: '0 auto', position: 'relative', zIndex: 1 }}>
 
             {/* Header */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(32px,5vw,72px)', alignItems: 'end', marginBottom: 56, opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(22px)', transition: 'opacity 0.8s ease, transform 0.8s ease' }}>
+            <div className="location-header-grid" style={{ gap: 'clamp(32px,5vw,72px)', alignItems: 'end', marginBottom: 56, opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(22px)', transition: 'opacity 0.8s ease, transform 0.8s ease' }}>
               <div>
                 <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 16 }}>Location</p>
                 <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,4vw,52px)', fontWeight: 300, color: '#f5f0e8', lineHeight: 1.15 }}>
@@ -1379,7 +1698,7 @@
             </div>
 
             {/* Map + quick stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 3, marginBottom: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.85s ease 0.2s' }}>
+            <div className="location-map-grid" style={{ gap: 3, marginBottom: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.85s ease 0.2s' }}>
               {/* Google Maps embed */}
               <div style={{ position: 'relative', minHeight: 320, overflow: 'hidden' }}>
                 <iframe
@@ -1423,7 +1742,7 @@
             </div>
 
             {/* Category grid — 3 cols, inspired by reference */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.85s ease 0.35s' }}>
+            <div className="location-cats-grid" style={{ gap: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.85s ease 0.35s' }}>
               {categories.map((cat, ci) => (
                 <div key={ci} style={{ background: 'rgba(245,240,232,0.03)', border: '1px solid rgba(201,169,110,0.1)', padding: '28px 28px 24px', transition: 'background 0.3s' }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,240,232,0.05)'}
@@ -1460,7 +1779,7 @@
       const projects = [{ name: 'Rang Homes Phase 1', loc: 'Dharapur, Guwahati' }, { name: 'Rang Homes Phase 2', loc: 'Dharapur, Guwahati' }, { name: 'Rang Homes Punjabi Bagh', loc: 'New Delhi' }];
       return (
         <section style={{ background: '#ede7d9', padding: 'clamp(72px,9vw,130px) clamp(20px,8vw,120px)', position: 'relative', overflow: 'hidden' }}>
-          <div ref={ref} style={{ maxWidth: 1180, margin: '0 auto', display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 'clamp(40px,5vw,80px)', alignItems: 'center' }}>
+          <div ref={ref} className="developer-grid" style={{ maxWidth: 1180, margin: '0 auto', gap: 'clamp(40px,5vw,80px)', alignItems: 'center' }}>
             <div style={{ opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(22px)', transition: 'opacity 0.8s ease, transform 0.8s ease' }}>
               <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.3em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 20 }}>About the Developer</p>
               <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px,3.5vw,48px)', fontWeight: 300, color: '#1a2e1a', lineHeight: 1.2, marginBottom: 26 }}>Built on integrity.<br /><em>Delivered with precision.</em></h2>
@@ -1539,7 +1858,7 @@
           <TreeLine opacity={0.045} dark="#070f07" />
 
           <div ref={ref} style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 'clamp(40px,5vw,80px)', alignItems: 'start', opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease' }}>
+            <div className="faq-main-grid" style={{ gap: 'clamp(40px,5vw,80px)', alignItems: 'start', opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease' }}>
               {/* Left heading */}
               <div style={{ position: 'sticky', top: 100 }}>
                 <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 16 }}>FAQ</p>
@@ -1552,7 +1871,7 @@
               </div>
 
               {/* 2-column FAQ grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 40px', opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.2s' }}>
+              <div className="faq-cols-grid" style={{ gap: '0 40px', opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.2s' }}>
                 <div>
                   {col1.map((faq, i) => <FaqItem key={i} faq={faq} i={i} globalIdx={i} />)}
                 </div>
@@ -1586,7 +1905,7 @@
         <footer style={{ background: '#0b160b', padding: '36px clamp(20px,8vw,120px)' }}>
           <div style={{ maxWidth: 1180, margin: '0 auto' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24, marginBottom: 32 }}>
-              <img src="uploads/Asset 1@3x.webp" alt="Aranya by Rang Homes" style={{ height: 52, objectFit: 'contain', filter: 'brightness(0) saturate(100%) invert(72%) sepia(42%) saturate(480%) hue-rotate(2deg) brightness(98%) contrast(90%)' }} />
+              <img src="uploads/asset 1@3x.webp" alt="Aranya by Rang Homes" style={{ height: 52, objectFit: 'contain', filter: 'brightness(0) saturate(100%) invert(72%) sepia(42%) saturate(480%) hue-rotate(2deg) brightness(98%) contrast(90%)' }} />
               <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
                 {[['#manifesto', 'Vision'], ['#wellness', 'Life'], ['#club', 'Club'], ['#homes', 'Homes'], ['#gallery', 'Gallery'], ['#location', 'Location'], ['#faq', 'FAQ']].map(([h, l]) => (
                   <a key={h} href={h} style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.38)', textDecoration: 'none', transition: 'color 0.3s' }}

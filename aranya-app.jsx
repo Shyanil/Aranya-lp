@@ -514,7 +514,7 @@ function WellnessSection() {
     { category: 'Physical Wellness', items: ['Swimming Pool', 'Jogging Track', 'Multipurpose Court', 'Gym — Active @Aranya'] },
     { category: 'Emotional & Mental', items: ['Butterfly Garden', 'Bamboo Garden', 'Hedge Garden', 'Flower Garden', 'Landscape Lawn'] },
     { category: 'Social & Community', items: ['Club Aranya — 16,000 sq ft', 'Rooftop Social', 'Banquet Hall', 'Open Café & Restaurant', 'Mini Theatre'] },
-    { category: 'For Children', items: ['EIEIO Play Studio', "Kids' Play Area", 'Children\'s Outdoor Zone', 'Toddler\'s Splash Area', 'Stargazing Deck'] },
+    { category: 'For Families', items: ['EIEIO Play Studio', "Outdoor Kids' Play Area", 'Floating Cabana', 'Stargazing Deck', 'Senior Seating Grove'] },
   ];
   return (
     <section style={{
@@ -615,7 +615,7 @@ function ClubAranya() {
           textAlign: 'center', marginBottom: 60,
           opacity: visible ? 1 : 0, transition: 'opacity 0.8s ease',
         }}>
-          <img src="uploads/logo design.jpeg" alt="Club Aranya Logo" style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 20, border: '1px solid rgba(201,169,110,0.3)', padding: '4px', background: 'rgba(255,255,255,0.05)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)' }} />
+          <img src="uploads/logo design.webp" alt="Club Aranya Logo" style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 20, border: '1px solid rgba(201,169,110,0.3)', padding: '4px', background: 'rgba(255,255,255,0.05)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)' }} />
           <div style={{
             fontFamily: 'DM Sans', fontSize: 22, fontWeight: 500, letterSpacing: '0.32em',
             textTransform: 'uppercase', color: '#c9a96e', marginBottom: 20,
