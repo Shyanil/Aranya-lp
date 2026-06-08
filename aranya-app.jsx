@@ -356,7 +356,7 @@ function Manifesto() {
             <div style={{
               fontFamily: 'DM Sans, sans-serif', fontSize: 12, letterSpacing: '0.15em',
               textTransform: 'uppercase', color: '#7a9e7e',
-            }}>4JM6+R77, AZARA, GUWAHATI, ASSAM 781017</div>
+            }}>RANG HOMES AEROCITY, DHARAPUR, GUWAHATI</div>
           </div>
 
           <div style={{
@@ -1129,7 +1129,7 @@ function DeveloperSection() {
               fontFamily: 'DM Sans', fontSize: 15, fontWeight: 300,
               color: '#4a5a4a', lineHeight: 1.9, marginBottom: 20,
             }}>
-              Indotech Infracon Private Limited — the force behind Aranya by Rang Homes - has shaped the residential landscape of Guwahati over eight years, delivering 600+ homes that stand as long-term assets for their residents.
+              Indotech Infracon Private Limited — the force behind Aranya by Rang Homes Phase 1 - has shaped the residential landscape of Guwahati over the years, delivering 600+ homes that stand as long-term assets for their residents.
             </p>
             <p style={{
               fontFamily: 'DM Sans', fontSize: 15, fontWeight: 300,
