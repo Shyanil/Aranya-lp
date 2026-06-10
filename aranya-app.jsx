@@ -700,214 +700,339 @@ function ClubAranya() {
   );
 }
 
-// ── Homes / Units ─────────────────────────────────────────────────────────────
-function HomesSection({ tweaks }) {
-  const [ref, visible] = useReveal(0.15);
-  const [activeUnit, setActiveUnit] = useState(0);
+// ─── HOMES / FLOOR PLANS ──────────────────────────────────────────────────────
+function HomesSection() {
+  const [ref, vis] = useReveal(0.1);
+  const [active, setActive] = useState(0);
+  const [activeSub, setActiveSub] = useState(0);
+
+  useEffect(() => {
+    setActiveSub(0);
+  }, [active]);
 
   const units = [
     {
-      type: '3 BHK + 2T', label: 'Celestial',
-      size: '1161 – 1379 sq ft', floors: 'Ground to 9th Floor',
-      highlights: ['East-West cross ventilation', 'Utility balcony with kitchen', 'Jumbo vitrified tile flooring', 'Smart digital door lock'],
-      tag: 'Most Popular',
+      type: '2 BHK + 2T', label: 'Aura', size: '924', carpet: '644', unit: 'sq ft',
+      floors: '0-9', tag: 'Boutique Collection', price: '',
+      planImg: 'uploads/unit-d-2bhk.webp',
+      hl: ['Efficient 2 BHK layout', 'Optimized room planning', 'Clear circulation flow', 'Comfort-focused apartment design'],
+      interest: '2bhk',
       tower: 'T2',
     },
     {
-      type: '3 BHK + 3T + Terrace', label: 'Garden Homes',
-      size: '2,280 – 2,687 sq ft', floors: '1st & 2nd Floor',
-      highlights: ['Private terrace up to 1,326 sq ft', 'Garden-level living', 'Exclusive green views', 'Personal outdoor escape'],
-      tag: 'Limited Edition',
-      tower: 'T1',
+      type: '3 BHK + 2T', label: 'Celestial', size: '1379', carpet: '906', unit: 'sq ft',
+      floors: '0-9', tag: 'Most Popular', price: '₹5,000 – ₹6,000 /sq ft',
+      planImg: 'uploads/unit-a.webp',
+      hl: ['East-West cross ventilation', 'Utility balcony with kitchen', 'Jumbo vitrified tile flooring', 'Smart digital main-door lock'],
+      interest: '3bhk',
+      tower: 'T2',
     },
     {
-      type: '4 BHK', label: 'Prestige',
-      size: '1,623 – 1,895 sq ft', floors: '1st Floor onwards',
-      highlights: ['Dedicated staff room', 'Puja room option', 'Expansive balconies', 'Corner apartment layouts'],
-      tag: 'Select Floors',
+      type: '3BHK+3T', label: 'Grande', size: '1,326 – 1,687', unit: 'sq ft',
+      floors: 'Ground to 10th Floor', tag: 'Executive Choice', price: '₹5,200 – ₹6,200 /sq ft',
+      planImg: 'uploads/unit-a.webp',
+      hl: ['Spacious 3 BHK + 3 Toilet layout', 'East-West cross ventilation', 'Jumbo vitrified tile flooring', 'Smart digital main-door lock'],
+      interest: '3bhk-3t',
       tower: 'T1',
+      subtabs: [
+        { name: '3 BHK + 3T (1221 sq ft)', size: '1221', carpet: '952', planImg: 'uploads/unit-b1c.webp', floors: 'Ground Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1321 sq ft)', size: '1321', carpet: '952', planImg: 'uploads/UNIT-B3.webp', floors: '1st to 10th Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1348 sq ft)', size: '1348', carpet: '952', planImg: 'uploads/UNIT-B1.webp', floors: '1st to 10th Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1361 sq ft)', size: '1361', carpet: '956', planImg: 'uploads/UNIT-B4.webp', floors: '1st to 10th Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1442 sq ft)', size: '1442', carpet: '952', planImg: 'uploads/UNIT-B3B.webp', floors: 'Ground Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1446 sq ft)', size: '1446', carpet: '1023', planImg: 'uploads/UNIT-B2.webp', floors: '1st to 10th Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1479 sq ft)', size: '1479', carpet: '952', planImg: 'uploads/UNIT-B1B.webp', floors: 'Ground Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1631 sq ft)', size: '1631', carpet: '1090', planImg: 'uploads/UNIT-B6.webp', floors: 'Ground to 9th Floor', tower: 'T2' }
+      ]
     },
     {
-      type: '4 BHK + Terrace', label: 'Signature',
-      size: '2,532 – 3,044 sq ft', floors: '1st–2nd Floor',
-      highlights: ['Private terrace up to 1,177 sq ft', 'Puja + staff rooms', 'Premium tower views', 'Legacy-grade living'],
-      tag: 'Ultra Premium',
+      type: '3 BHK + 3T + Terrace', label: 'Garden Homes', size: '2,280 – 2,687', unit: 'sq ft',
+      floors: '1st & 2nd Floor', tag: 'Limited Edition', price: '₹5,500 – ₹6,500 /sq ft',
+      planImg: 'uploads/unit-b1c.webp',
+      hl: ['Private terrace up to 1,326 sq ft', 'Garden-level seclusion', 'Exclusive green views', 'Personal outdoor retreat'],
+      interest: '3bhk-t',
       tower: 'T1',
+      subtabs: [
+        {
+          name: '3 BHK + 3T + TERRACE (2280 sq ft)',
+          size: '2280',
+          carpet: '952',
+          planImg: 'uploads/UNIT-B3A.webp',
+          floors: '2nd',
+          tower: 'T1',
+          hl: ['Private terrace up to 959 sq ft', 'Garden-level seclusion', 'Exclusive green views', 'Personal outdoor retreat']
+        },
+        { name: '3 BHK + 3T + TERRACE (2687 sq ft)', size: '2687', carpet: '956', planImg: 'uploads/UNIT-B4A.webp', floors: '2nd', tower: 'T1' }
+      ]
+    },
+    {
+      type: '4 BHK', label: 'Prestige', size: '1,623 – 1,895', unit: 'sq ft',
+      floors: '1st Floor onwards', tag: 'Select Floors', price: '₹5,500 – ₹6,500 /sq ft',
+      planImg: 'uploads/unit-a.webp',
+      hl: ['Dedicated staff room', 'Puja room option', 'Expansive corner balconies', 'Premium finishes throughout'],
+      interest: '4bhk',
+      tower: 'T1',
+      subtabs: [
+        {
+          name: '4 BHK (1867 sq ft)',
+          size: '1867',
+          carpet: '1343',
+          planImg: 'uploads/UNIT-C2.webp',
+          floors: '3rd-10th',
+          tower: 'T1',
+          hl: ['Dedicated Puja/Store Room', 'Expansive balconies', 'Premium finishes throughout']
+        },
+        {
+          name: '4 BHK (1895 sq ft)',
+          size: '2236',
+          carpet: '1332',
+          planImg: 'uploads/UNIT-C1.webp',
+          floors: '1st',
+          tower: 'T1',
+          hl: ['Staff Room Option', 'Expansive corner balconies', 'Premium finishes throughout']
+        }
+      ]
+    },
+    {
+      type: '4 BHK + Terrace', label: 'Signature', size: '2,532 – 3,044', unit: 'sq ft',
+      floors: '1st–2nd Floor', tag: 'Ultra Premium', price: '₹6,000 – ₹7,000 /sq ft',
+      planImg: 'uploads/unit-b1c.webp',
+      hl: ['Terrace up to 1,177 sq ft', 'Puja + staff rooms', 'Full-perimeter views', 'Legacy-grade specification'],
+      interest: '4bhk-t',
+      tower: 'T1',
+      subtabs: [
+        {
+          name: '4 BHK + TERRACE (2236 sq ft)',
+          size: '2236',
+          planImg: 'uploads/UNIT-C1A.webp',
+          floors: '1st Floor',
+          tower: 'T1',
+          hl: ['Terrace up to 341 sq ft', 'Staff Room', 'Full-perimeter views', 'Legacy-grade specification']
+        },
+        {
+          name: '4 BHK + TERRACE (2532 sq ft)',
+          size: '2532',
+          carpet: '1332',
+          planImg: 'uploads/UNIT-C1B.webp',
+          floors: '2nd',
+          tower: 'T1',
+          hl: ['Terrace up to 637 sq ft', 'Staff Room', 'Full-perimeter views', 'Legacy-grade specification']
+        },
+        {
+          name: '4 BHK + TERRACE (3044 sq ft)',
+          size: '3044',
+          carpet: '1343',
+          planImg: 'uploads/UNIT-C2A.webp',
+          floors: '2nd',
+          tower: 'T1',
+          hl: ['Terrace up to 1,177 sq ft', 'Dedicated Puja/Store Room', 'Full-perimeter views', 'Legacy-grade specification']
+        }
+      ]
     },
   ];
 
-  return (
-    <section id="homes" style={{
-      background: '#f5f0e8', padding: 'clamp(80px,10vw,140px) clamp(24px,8vw,120px)',
-      position: 'relative', overflow: 'hidden',
-    }}>
-      <div style={{
-        position: 'absolute', left: -80, bottom: -80,
-        fontFamily: 'Cormorant Garamond, serif', fontSize: 320, fontWeight: 300,
-        color: 'rgba(26,46,26,0.03)', lineHeight: 1, userSelect: 'none', pointerEvents: 'none',
-      }}>Home</div>
+  useEffect(() => {
+    const preloadImages = () => {
+      units.forEach(u => {
+        if (u.planImg) {
+          const img = new Image();
+          img.src = u.planImg;
+        }
+        if (u.subtabs) {
+          u.subtabs.forEach(sub => {
+            if (sub.planImg) {
+              const img = new Image();
+              img.src = sub.planImg;
+            }
+          });
+        }
+      });
+    };
 
-      <div ref={ref} style={{ maxWidth: 1200, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-        <div style={{
-          textAlign: 'center', marginBottom: 64,
-          opacity: visible ? 1 : 0, transition: 'opacity 0.8s ease',
-        }}>
-          <div style={{
-            fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.3em',
-            textTransform: 'uppercase', color: '#c9a96e', marginBottom: 20,
-          }}>Celestial Apartments</div>
-          <h2 style={{
-            fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(36px,4.5vw,60px)',
-            fontWeight: 300, color: '#1a2e1a', lineHeight: 1.15,
-          }}>
+    if (window.requestIdleCallback) {
+      window.requestIdleCallback(preloadImages);
+    } else {
+      setTimeout(preloadImages, 1000);
+    }
+  }, []);
+
+  const u = units[active];
+  const currentSub = u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub] : null;
+  const currentPlanImg = currentSub ? currentSub.planImg : u.planImg;
+
+  const currentCarpet = currentSub?.carpet || u.carpet;
+  const currentSize = currentSub?.size || u.size;
+  const currentFloors = currentSub?.floors || u.floors;
+  const currentTower = currentSub?.tower || u.tower;
+  const currentHighlights = currentSub?.hl || u.hl;
+
+  const titleText = currentSub
+    ? `${u.label}_ ${currentSub.name}`
+    : u.label;
+
+  const stats = [
+    ['Carpet Area', currentCarpet ? `${currentCarpet} ${u.unit}` : '—'],
+    ['Super Built-up Area', `${currentSize} ${u.unit}`],
+    ['Location', currentFloors],
+    ['Tower', currentTower || '—'],
+  ];
+
+  return (
+    <section id="homes" style={{ background: '#f5f0e8', padding: 'clamp(72px,9vw,120px) clamp(20px,8vw,120px)', position: 'relative', overflow: 'hidden' }}>
+      <div ref={ref} style={{ maxWidth: 1280, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+
+        <div style={{ textAlign: 'center', marginBottom: 52, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease' }}>
+          <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 16 }}>Celestial Apartments</p>
+          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,4vw,52px)', fontWeight: 300, color: '#1a2e1a', lineHeight: 1.15 }}>
             Curated, comfortable,<br /><em>consciously designed.</em>
           </h2>
         </div>
 
-        {/* Unit selector */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 3, marginBottom: 3 }}>
+        <div className="homes-tabs" style={{ marginBottom: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.1s' }}>
           {units.map((u, i) => (
-            <button key={i} onClick={() => setActiveUnit(i)} style={{
-              background: activeUnit === i ? '#1a2e1a' : '#ede7d9',
-              border: 'none', cursor: 'pointer', padding: '24px 20px', textAlign: 'left',
-              transition: 'all 0.3s',
-            }}>
-              <div style={{
-                fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.2em',
-                textTransform: 'uppercase', color: activeUnit === i ? '#c9a96e' : '#7a9e7e',
-                marginBottom: 8,
-              }}>{u.type}</div>
-              <div style={{
-                fontFamily: 'Cormorant Garamond, serif', fontSize: 22, fontWeight: 400,
-                color: activeUnit === i ? '#f5f0e8' : '#1a2e1a',
-              }}>{u.label}</div>
-              {u.tag && (
-                <div style={{
-                  display: 'inline-block', marginTop: 10,
-                  fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.12em',
-                  textTransform: 'uppercase', color: '#c9a96e',
-                  borderBottom: '1px solid #c9a96e', paddingBottom: 2,
-                }}>{u.tag}</div>
-              )}
+            <button key={i} onClick={() => setActive(i)} style={{ padding: '16px 12px', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.3s', background: active === i ? '#1a2e1a' : '#ede7d9', borderBottom: active === i ? '2px solid #c9a96e' : '2px solid transparent' }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: active === i ? '#c9a96e' : '#7a9e7e', marginBottom: 5 }}>{u.type}</p>
+              <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 24, fontWeight: 400, color: active === i ? '#f5f0e8' : '#1a2e1a', lineHeight: 1.2 }}>{u.label}</p>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#c9a96e', marginTop: 6 }}>{u.tag}</p>
             </button>
           ))}
         </div>
 
-        {/* Active unit detail */}
-        <div style={{
-          display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 3,
-          opacity: visible ? 1 : 0, transition: 'opacity 0.8s ease 0.2s',
-        }}>
-          {/* Floor plan placeholder */}
-          <div style={{
-            background: '#ede7d9', minHeight: 380,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            position: 'relative', overflow: 'hidden',
-          }}>
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'linear-gradient(135deg, rgba(245,240,232,0.5) 0%, rgba(237,231,217,0.8) 100%)',
-            }} />
-            {/* Schematic floor plan SVG placeholder */}
-            <svg viewBox="0 0 300 280" width="240" style={{ position: 'relative', zIndex: 1, opacity: 0.7 }}>
-              {/* Outer walls */}
-              <rect x="20" y="20" width="260" height="240" fill="none" stroke="#7a9e7e" strokeWidth="2" />
-              {/* Rooms */}
-              <rect x="20" y="20" width="120" height="100" fill="rgba(122,158,126,0.12)" stroke="#7a9e7e" strokeWidth="1" />
-              <rect x="140" y="20" width="140" height="100" fill="rgba(201,169,110,0.1)" stroke="#7a9e7e" strokeWidth="1" />
-              <rect x="20" y="120" width="80" height="80" fill="rgba(122,158,126,0.08)" stroke="#7a9e7e" strokeWidth="1" />
-              <rect x="100" y="120" width="80" height="80" fill="rgba(122,158,126,0.08)" stroke="#7a9e7e" strokeWidth="1" />
-              <rect x="180" y="120" width="100" height="80" fill="rgba(201,169,110,0.08)" stroke="#7a9e7e" strokeWidth="1" />
-              <rect x="20" y="200" width="260" height="60" fill="rgba(122,158,126,0.06)" stroke="#7a9e7e" strokeWidth="1" />
-              {/* Labels */}
-              <text x="80" y="74" textAnchor="middle" fontFamily="DM Sans" fontSize="9" fill="#7a9e7e">Master Bed</text>
-              <text x="210" y="74" textAnchor="middle" fontFamily="DM Sans" fontSize="9" fill="#7a9e7e">Living / Dining</text>
-              <text x="60" y="164" textAnchor="middle" fontFamily="DM Sans" fontSize="8" fill="#7a9e7e">Bed 2</text>
-              <text x="140" y="164" textAnchor="middle" fontFamily="DM Sans" fontSize="8" fill="#7a9e7e">Bed 3</text>
-              <text x="230" y="164" textAnchor="middle" fontFamily="DM Sans" fontSize="8" fill="#7a9e7e">Kitchen</text>
-              <text x="150" y="234" textAnchor="middle" fontFamily="DM Sans" fontSize="8" fill="#7a9e7e">Balcony</text>
-            </svg>
-            <div style={{
-              position: 'absolute', bottom: 16, right: 16,
-              fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.15em',
-              textTransform: 'uppercase', color: 'rgba(26,46,26,0.4)',
-            }}>Indicative Layout</div>
+        {u.subtabs && u.subtabs.length > 0 && (
+          <div className="homes-subtabs" style={{ marginBottom: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.15s' }}>
+            {u.subtabs.map((sub, idx) => (
+              <button key={idx} onClick={() => setActiveSub(idx)} style={{
+                padding: '12px 14px',
+                border: 'none',
+                cursor: 'pointer',
+                textAlign: 'center',
+                fontFamily: 'DM Sans',
+                fontSize: 14,
+                fontWeight: 500,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                transition: 'all 0.3s',
+                background: activeSub === idx ? '#1a2e1a' : '#ede7d9',
+                color: activeSub === idx ? '#c9a96e' : '#1a2e1a',
+                borderBottom: activeSub === idx ? '2px solid #c9a96e' : '2px solid transparent'
+              }}>
+                {sub.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div key={active + '-' + activeSub} className="homes-main-grid" style={{ gap: 3, animation: 'fadeIn 0.4s ease', opacity: vis ? 1 : 0, transition: 'opacity 0.6s ease 0.2s' }}>
+
+          <div style={{ background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(24px,4vw,52px)', position: 'relative', minHeight: 500 }}>
+            <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(122,158,126,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(122,158,126,0.04) 1px,transparent 1px)', backgroundSize: '24px 24px', pointerEvents: 'none' }} />
+
+            <img
+              src={currentPlanImg}
+              alt={`${currentSub ? currentSub.name : u.label} Floor Plan`}
+              style={{ width: '100%', maxWidth: 620, height: 'auto', aspectRatio: '1.5', objectFit: 'contain', position: 'relative', zIndex: 1, transition: 'opacity 0.4s ease' }}
+              loading="lazy"
+              onError={(e) => {
+                if (e.target.src.endsWith('.webp')) {
+                  e.target.src = e.target.src.replace('.webp', '.jpg');
+                } else {
+                  e.target.onerror = null;
+                  e.target.src = 'uploads/unit-a.webp';
+                }
+              }}
+            />
+
+            <div style={{ position: 'absolute', top: 16, left: 16, background: '#1a2e1a', padding: '6px 14px' }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#c9a96e' }}>
+                {currentSub ? currentSub.name : `${u.type} · ${u.label}`}
+              </p>
+            </div>
+
+            <p style={{ position: 'absolute', bottom: 12, right: 14, fontFamily: 'DM Sans', fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(26,46,26,0.3)' }}>
+              Indicative Floor Plan — Not to Scale
+            </p>
           </div>
 
-          {/* Specs */}
-          <div style={{ background: '#ede7d9', padding: '44px 40px' }}>
-            <div style={{
-              fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.2em',
-              textTransform: 'uppercase', color: '#c9a96e', marginBottom: 8,
-            }}>{units[activeUnit].type}</div>
-            <h3 style={{
-              fontFamily: 'Cormorant Garamond, serif', fontSize: 36, fontWeight: 300,
-              color: '#1a2e1a', marginBottom: 24,
-            }}>{units[activeUnit].label}</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 32 }}>
-              <div>
-                <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 6 }}>Size Range</div>
-                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 22, fontWeight: 400, color: '#1a2e1a' }}>{units[activeUnit].size}</div>
-              </div>
-              <div>
-                <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 6 }}>Available</div>
-                <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 18, fontWeight: 400, color: '#1a2e1a' }}>{units[activeUnit].floors}</div>
-              </div>
-              {units[activeUnit].tower ? (
-                <>
-                  <div>
-                    <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 6 }}>Tower</div>
-                    <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 22, fontWeight: 500, color: '#1a2e1a' }}>{units[activeUnit].tower && units[activeUnit].tower.replace('T', 'T ')}</div>
+          <div style={{ background: '#0f351f', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 'clamp(36px,4vw,56px) clamp(26px,3.5vw,42px)' }}>
+            <div>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 12, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 10 }}>
+                {u.type}
+              </p>
+
+              <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,3.5vw,46px)', fontWeight: 300, color: '#f5f0e8', marginBottom: 8, lineHeight: 1.12 }}>
+                {titleText}
+              </h3>
+
+              <p style={{ fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.35)', marginBottom: 30 }}>
+                {u.tag}
+              </p>
+
+              <div className="homes-stats-grid" style={{ gap: 2, marginBottom: 34 }}>
+                {stats.map(([k, v], i) => (
+                  <div key={i} style={{
+                    background: 'rgba(245,240,232,0.055)',
+                    padding: '17px 16px',
+                    border: '1px solid rgba(245,240,232,0.045)',
+                    borderLeft: '1px solid rgba(201,169,110,0.18)'
+                  }}>
+                    <p style={{
+                      fontFamily: 'DM Sans',
+                      fontSize: 8,
+                      letterSpacing: '0.17em',
+                      textTransform: 'uppercase',
+                      color: 'rgba(245,240,232,0.42)',
+                      marginBottom: 7
+                    }}>
+                      {k}
+                    </p>
+                    <p style={{
+                      fontFamily: k === 'Tower' ? 'DM Sans, sans-serif' : 'Cormorant Garamond, serif',
+                      fontSize: k === 'Tower' ? 15 : 18,
+                      fontWeight: k === 'Tower' ? 500 : 300,
+                      color: '#f5f0e8',
+                      lineHeight: 1.25
+                    }}>
+                      {k === 'Tower' && typeof v === 'string' ? v.replace('T', 'T ') : v}
+                    </p>
                   </div>
-                  <div>
-                    <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 6 }}>Possession</div>
-                    <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 22, fontWeight: 400, color: '#1a2e1a' }}>2031</div>
+                ))}
+              </div>
+
+              <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.42)', marginBottom: 14 }}>
+                Highlights
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 30 }}>
+                {currentHighlights.map((h, i) => (
+                  <div key={i} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    padding: '10px 0',
+                    borderBottom: '1px solid rgba(245,240,232,0.06)',
+                    fontFamily: 'DM Sans',
+                    fontSize: 14,
+                    fontWeight: 300,
+                    color: 'rgba(245,240,232,0.8)'
+                  }}>
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#c9a96e', flexShrink: 0 }} />
+                    {h}
                   </div>
-                </>
-              ) : (
-                <div style={{ gridColumn: 'span 2' }}>
-                  <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 6 }}>Possession</div>
-                  <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 22, fontWeight: 400, color: '#1a2e1a' }}>2031</div>
-                </div>
-              )}
+                ))}
+              </div>
             </div>
-            <div style={{ marginBottom: 32 }}>
-              <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 16 }}>Highlights</div>
-              {units[activeUnit].highlights.map((h, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '9px 0', borderBottom: '1px solid rgba(26,46,26,0.08)',
-                  fontFamily: 'DM Sans', fontSize: 14, fontWeight: 300, color: '#2a3a2a',
-                }}>
-                  <span style={{ width: 4, height: 4, background: '#c9a96e', borderRadius: '50%', flexShrink: 0 }} />
-                  {h}
-                </div>
-              ))}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <CTAButton label={`Enquire — ${currentSub ? currentSub.name : u.label}`} variant="gold" interest={u.interest} />
+              <CTAButton label="Download Brochure" variant="outline" interest={u.interest} />
             </div>
-            <div style={{
-              fontFamily: 'Cormorant Garamond, serif', fontSize: 20, fontStyle: 'italic',
-              color: '#1a2e1a', marginBottom: 24,
-            }}>₹5,000 – ₹7,000 per sq ft</div>
-            <a href="#enquire" style={{
-              display: 'inline-block',
-              background: '#1a2e1a', color: '#c9a96e',
-              padding: '14px 36px', textDecoration: 'none',
-              fontFamily: 'DM Sans', fontSize: 11, fontWeight: 500,
-              letterSpacing: '0.15em', textTransform: 'uppercase',
-              transition: 'all 0.3s',
-            }}
-              onMouseEnter={e => { e.target.style.background = '#c9a96e'; e.target.style.color = '#1a2e1a'; }}
-              onMouseLeave={e => { e.target.style.background = '#1a2e1a'; e.target.style.color = '#c9a96e'; }}
-            >Express Interest</a>
           </div>
+
         </div>
       </div>
     </section>
   );
 }
-
-
-
     // ── Location ──────────────────────────────────────────────────────────────────
     function LocationSection() {
   const [ref, visible] = useReveal(0.15);
