@@ -1122,7 +1122,7 @@
       );
     }
 
-    // ─── HOMES / FLOOR PLANS ──────────────────────────────────────────────────────
+   // ─── HOMES / FLOOR PLANS ──────────────────────────────────────────────────────
     function HomesSection() {
       const [ref, vis] = useReveal(0.1);
       const [active, setActive] = useState(0);
@@ -1158,16 +1158,16 @@
 
       const units = [
         {
-          type: '2 BHK + 2T', label: 'Aura', size: '825–924', unit: 'sq ft',
-          floors: 'Ground to 9th Floor', tag: 'Boutique Collection', price: '',
+          type: '2 BHK + 2T', label: 'Aura', size: '924', carpet: '644', unit: 'sq ft',
+          floors: '0-9', tag: 'Boutique Collection', price: '',
           planImg: 'uploads/unit-d-2bhk.webp',
           hl: ['Efficient 2 BHK layout', 'Optimized room planning', 'Clear circulation flow', 'Comfort-focused apartment design'],
           interest: '2bhk',
           tower: 'T2',
         },
         {
-          type: '3 BHK + 2T', label: 'Celestial', size: '1161 – 1379', unit: 'sq ft',
-          floors: 'Ground to 9th Floor', tag: 'Most Popular', price: '₹5,000 – ₹6,000 /sq ft',
+          type: '3 BHK + 2T', label: 'Celestial', size: '1,379', carpet: '906', unit: 'sq ft',
+          floors: '0-9', tag: 'Most Popular', price: '₹5,000 – ₹6,000 /sq ft',
           planImg: 'uploads/unit-a.webp',
           hl: ['East-West cross ventilation', 'Utility balcony with kitchen', 'Jumbo vitrified tile flooring', 'Smart digital main-door lock'],
           interest: '3bhk',
@@ -1181,13 +1181,13 @@
           interest: '3bhk-3t',
           tower: 'T1',
           subtabs: [
-            { name: '3 BHK + 3T (1221 sq ft)', size: '1221', carpet: '952', planImg: 'uploads/unit-b1c.webp', floors: 'Ground Floor' },
-            { name: '3 BHK + 3T (1321 sq ft)', size: '1321', carpet: '952', planImg: 'uploads/UNIT-B3.webp', floors: '1st to 10th Floor' },
-            { name: '3 BHK + 3T (1348 sq ft)', size: '1348', carpet: '952', planImg: 'uploads/UNIT-B1.webp', floors: '1st to 10th Floor' },
-            { name: '3 BHK + 3T (1361 sq ft)', size: '1361', carpet: '956', planImg: 'uploads/UNIT-B4.webp', floors: '1st to 10th Floor' },
-            { name: '3 BHK + 3T (1442 sq ft)', size: '1442', carpet: '952', planImg: 'uploads/UNIT-B3B.webp', floors: 'Ground Floor' },
-            { name: '3 BHK + 3T (1446 sq ft)', size: '1446', carpet: '1023', planImg: 'uploads/UNIT-B2.webp', floors: '1st to 10th Floor' },
-            { name: '3 BHK + 3T (1479 sq ft)', size: '1479', carpet: '952', planImg: 'uploads/UNIT-B1B.webp', floors: 'Ground Floor' },
+            { name: '3 BHK + 3T (1221 sq ft)', size: '1221', carpet: '952', planImg: 'uploads/unit-b1c.webp', floors: 'Ground Floor', tower: 'T1' },
+            { name: '3 BHK + 3T (1321 sq ft)', size: '1321', carpet: '952', planImg: 'uploads/UNIT-B3.webp', floors: '1st to 10th Floor', tower: 'T1' },
+            { name: '3 BHK + 3T (1348 sq ft)', size: '1348', carpet: '952', planImg: 'uploads/UNIT-B1.webp', floors: '1st to 10th Floor', tower: 'T1' },
+            { name: '3 BHK + 3T (1361 sq ft)', size: '1361', carpet: '956', planImg: 'uploads/UNIT-B4.webp', floors: '1st to 10th Floor', tower: 'T1' },
+            { name: '3 BHK + 3T (1442 sq ft)', size: '1442', carpet: '952', planImg: 'uploads/UNIT-B3B.webp', floors: 'Ground Floor', tower: 'T1' },
+            { name: '3 BHK + 3T (1446 sq ft)', size: '1446', carpet: '1023', planImg: 'uploads/UNIT-B2.webp', floors: '1st to 10th Floor', tower: 'T1' },
+            { name: '3 BHK + 3T (1479 sq ft)', size: '1479', carpet: '952', planImg: 'uploads/UNIT-B1B.webp', floors: 'Ground Floor', tower: 'T1' },
             { name: '3 BHK + 3T (1631 sq ft)', size: '1631', carpet: '1090', planImg: 'uploads/UNIT-B6.webp', floors: 'Ground to 9th Floor', tower: 'T2' }
           ]
         },
@@ -1201,12 +1201,14 @@
           subtabs: [
             {
               name: '3 BHK + 3T + TERRACE (2280 sq ft)',
-              size: '2280',
+              size: '2,280',
+              carpet: '952',
               planImg: 'uploads/UNIT-B3A.webp',
-              floors: '2nd Floor',
+              floors: '2nd',
+              tower: 'T1',
               hl: ['Private terrace up to 959 sq ft', 'Garden-level seclusion', 'Exclusive green views', 'Personal outdoor retreat']
             },
-            { name: '3 BHK + 3T + TERRACE (2687 sq ft)', size: '2687', planImg: 'uploads/UNIT-B4A.webp', floors: '2nd Floor' }
+            { name: '3 BHK + 3T + TERRACE (2,687 sq ft)', size: '2,687', carpet: '956', planImg: 'uploads/UNIT-B4A.webp', floors: '2nd', tower: 'T1' }
           ]
         },
         {
@@ -1219,16 +1221,20 @@
           subtabs: [
             {
               name: '4 BHK (1867 sq ft)',
-              size: '1867',
+              size: '1,867',
+              carpet: '1,343',
               planImg: 'uploads/UNIT-C2.webp',
-              floors: '3rd–10th Floor',
+              floors: '3rd-10th',
+              tower: 'T1',
               hl: ['Dedicated Puja/Store Room', 'Expansive balconies', 'Premium finishes throughout']
             },
             {
               name: '4 BHK (1895 sq ft)',
-              size: '1895',
+              size: '1,895',
+              carpet: '1,332',
               planImg: 'uploads/UNIT-C1.webp',
-              floors: '2nd–10th Floor',
+              floors: '1st',
+              tower: 'T1',
               hl: ['Staff Room Option', 'Expansive corner balconies', 'Premium finishes throughout']
             }
           ]
@@ -1243,23 +1249,29 @@
           subtabs: [
             {
               name: '4 BHK + TERRACE (2236 sq ft)',
-              size: '2236',
+              size: '2,236',
+              carpet: '1,332',
               planImg: 'uploads/UNIT-C1A.webp',
               floors: '1st Floor',
+              tower: 'T1',
               hl: ['Terrace up to 341 sq ft', 'Staff Room', 'Full-perimeter views', 'Legacy-grade specification']
             },
             {
               name: '4 BHK + TERRACE (2532 sq ft)',
-              size: '2532',
+              size: '2,532',
+              carpet: '1,332',
               planImg: 'uploads/UNIT-C1B.webp',
-              floors: '2nd Floor',
+              floors: '2nd',
+              tower: 'T1',
               hl: ['Terrace up to 637 sq ft', 'Staff Room', 'Full-perimeter views', 'Legacy-grade specification']
             },
             {
               name: '4 BHK + TERRACE (3044 sq ft)',
-              size: '3044',
+              size: '3,044',
+              carpet: '1,343',
               planImg: 'uploads/UNIT-C2A.webp',
-              floors: '2nd Floor',
+              floors: '2nd',
+              tower: 'T1',
               hl: ['Terrace up to 1,177 sq ft', 'Dedicated Puja/Store Room', 'Full-perimeter views', 'Legacy-grade specification']
             }
           ]
@@ -1396,26 +1408,46 @@
                     const currentTower = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].tower
                       ? u.subtabs[activeSub].tower
                       : u.tower;
-                    const stats = [];
-                    if (currentCarpet) {
-                      stats.push(['Carpet Area', `${currentCarpet} ${u.unit}`]);
-                      stats.push(['Super Built-UP Area', `${currentSize} ${u.unit}`]);
-                    } else {
-                      stats.push(['SUPER BUILT-UP AREA', `${currentSize} ${u.unit}`]);
-                    }
-                    stats.push(['Location', currentFloors]);
-                    if (currentTower) {
-                      stats.push(['Tower', currentTower]);
-                    }
-                    if (!currentCarpet) {
-                      stats.push(['Possession', '2031']);
-                    }
+
+                    const stats = [
+                      ['Carpet Area', currentCarpet ? `${currentCarpet} ${u.unit}` : '—'],
+                      ['Super Built-up Area', `${currentSize} ${u.unit}`],
+                      ['Location', currentFloors],
+                      ['Tower', currentTower || '—'],
+                    ];
+
                     return (
-                      <div className="homes-stats-grid" style={{ gap: 3, marginBottom: 28 }}>
+                      <div className="homes-stats-grid" style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(2, 1fr)',
+                        gap: 3,
+                        marginBottom: 28
+                      }}>
                         {stats.map(([k, v], i) => (
-                          <div key={i} style={{ background: 'rgba(245,240,232,0.05)', padding: '14px 16px', borderLeft: '2px solid rgba(201,169,110,0.3)', gridColumn: (stats.length === 3 && i === 2) ? 'span 2' : 'auto' }}>
-                            <p style={{ fontFamily: 'DM Sans', fontSize: 8, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.4)', marginBottom: 5 }}>{k}</p>
-                            <p style={{ fontFamily: k === 'Tower' ? 'DM Sans, sans-serif' : 'Cormorant Garamond, serif', fontSize: 16, fontWeight: k === 'Tower' ? 400 : 300, color: '#f5f0e8', lineHeight: 1.3 }}>{k === 'Tower' && typeof v === 'string' ? v.replace('T', 'T ') : v}</p>
+                          <div key={i} style={{
+                            background: 'rgba(245,240,232,0.05)',
+                            padding: '14px 16px',
+                            borderLeft: '2px solid rgba(201,169,110,0.3)',
+                            minHeight: 58,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center'
+                          }}>
+                            <p style={{
+                              fontFamily: 'DM Sans',
+                              fontSize: 8,
+                              letterSpacing: '0.16em',
+                              textTransform: 'uppercase',
+                              color: 'rgba(245,240,232,0.4)',
+                              marginBottom: 5
+                            }}>{k}</p>
+                            <p style={{
+                              fontFamily: k === 'Tower' ? 'DM Sans, sans-serif' : 'Cormorant Garamond, serif',
+                              fontSize: 16,
+                              fontWeight: k === 'Tower' ? 400 : 300,
+                              color: '#f5f0e8',
+                              lineHeight: 1.3
+                            }}>{k === 'Tower' && typeof v === 'string' ? v.replace('T', 'T ') : v}</p>
                           </div>
                         ))}
                       </div>
