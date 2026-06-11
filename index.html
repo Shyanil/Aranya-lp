@@ -1122,364 +1122,421 @@
       );
     }
 
-   // ─── HOMES / FLOOR PLANS ──────────────────────────────────────────────────────
-    function HomesSection() {
-      const [ref, vis] = useReveal(0.1);
-      const [active, setActive] = useState(0);
-      const [activeSub, setActiveSub] = useState(0);
+// ─── HOMES / FLOOR PLANS ──────────────────────────────────────────────────────
+function HomesSection() {
+  const [ref, vis] = useReveal(0.1);
+  const [active, setActive] = useState(0);
+  const [activeSub, setActiveSub] = useState(0);
+  const [isPlanZoomed, setIsPlanZoomed] = useState(false);
+  const [planZoomOrigin, setPlanZoomOrigin] = useState('50% 50%');
 
-      useEffect(() => {
-        setActiveSub(0);
-      }, [active]);
+  useEffect(() => {
+    setActiveSub(0);
+    setIsPlanZoomed(false);
+    setPlanZoomOrigin('50% 50%');
+  }, [active]);
 
-      useEffect(() => {
-        const preloadImages = () => {
-          units.forEach(u => {
-            if (u.planImg) {
+  useEffect(() => {
+    setIsPlanZoomed(false);
+    setPlanZoomOrigin('50% 50%');
+  }, [activeSub]);
+
+  const handlePlanZoom = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setPlanZoomOrigin(`${x}% ${y}%`);
+    setIsPlanZoomed(prev => !prev);
+  };
+
+  useEffect(() => {
+    const preloadImages = () => {
+      units.forEach(u => {
+        if (u.planImg) {
+          const img = new Image();
+          img.src = u.planImg;
+        }
+        if (u.subtabs) {
+          u.subtabs.forEach(sub => {
+            if (sub.planImg) {
               const img = new Image();
-              img.src = u.planImg;
-            }
-            if (u.subtabs) {
-              u.subtabs.forEach(sub => {
-                if (sub.planImg) {
-                  const img = new Image();
-                  img.src = sub.planImg;
-                }
-              });
+              img.src = sub.planImg;
             }
           });
-        };
-        if (window.requestIdleCallback) {
-          window.requestIdleCallback(preloadImages);
-        } else {
-          setTimeout(preloadImages, 1000);
         }
-      }, []);
+      });
+    };
+    if (window.requestIdleCallback) {
+      window.requestIdleCallback(preloadImages);
+    } else {
+      setTimeout(preloadImages, 1000);
+    }
+  }, []);
 
-      const units = [
+  const units = [
+    {
+      type: '2 BHK + 2T', label: 'Aura', size: '924', carpet: '644', unit: 'sq ft',
+      floors: 'Ground to 9th Floor', tag: 'Boutique Collection', price: '',
+      planImg: 'uploads/unit-d-2bhk.webp',
+      hl: ['Efficient 2 BHK layout', 'Optimized room planning', 'Clear circulation flow', 'Comfort-focused apartment design'],
+      interest: '2bhk',
+      tower: 'T2',
+    },
+    {
+      type: '3 BHK + 2T', label: 'Celestial', size: '1,379', carpet: '906', unit: 'sq ft',
+      floors: 'Ground to 9th Floor', tag: 'Most Popular', price: '₹5,000 – ₹6,000 /sq ft',
+      planImg: 'uploads/unit-a.webp',
+      hl: ['East-West cross ventilation', 'Utility balcony with kitchen', 'Jumbo vitrified tile flooring', 'Smart digital main-door lock'],
+      interest: '3bhk',
+      tower: 'T2',
+    },
+    {
+      type: '3BHK+3T', label: 'Grande', size: '1,326 – 1,687', unit: 'sq ft',
+      floors: 'Ground to 10th Floor', tag: 'Executive Choice', price: '₹5,200 – ₹6,200 /sq ft',
+      planImg: 'uploads/unit-a.webp',
+      hl: ['Spacious 3 BHK + 3 Toilet layout', 'East-West cross ventilation', 'Jumbo vitrified tile flooring', 'Smart digital main-door lock'],
+      interest: '3bhk-3t',
+      tower: 'T1',
+      subtabs: [
+        { name: '3 BHK + 3T (1221 sq ft)', size: '1221', carpet: '952', planImg: 'uploads/unit-b1c.webp', floors: 'Ground Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1321 sq ft)', size: '1321', carpet: '952', planImg: 'uploads/UNIT-B3.webp', floors: '1st to 10th Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1348 sq ft)', size: '1348', carpet: '952', planImg: 'uploads/UNIT-B1.webp', floors: '1st to 10th Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1361 sq ft)', size: '1361', carpet: '956', planImg: 'uploads/UNIT-B4.webp', floors: '1st to 10th Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1442 sq ft)', size: '1442', carpet: '952', planImg: 'uploads/UNIT-B3B.webp', floors: 'Ground Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1446 sq ft)', size: '1446', carpet: '1023', planImg: 'uploads/UNIT-B2.webp', floors: '1st to 10th Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1479 sq ft)', size: '1479', carpet: '952', planImg: 'uploads/UNIT-B1B.webp', floors: 'Ground Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1631 sq ft)', size: '1631', carpet: '1090', planImg: 'uploads/UNIT-B6.webp', floors: 'Ground to 9th Floor', tower: 'T2' }
+      ]
+    },
+    {
+      type: '3 BHK + 3T + Terrace', label: 'Garden Homes', size: '2,280 – 2,687', unit: 'sq ft',
+      floors: '1st & 2nd Floor', tag: 'Limited Edition', price: '₹5,500 – ₹6,500 /sq ft',
+      planImg: 'uploads/unit-b1c.webp',
+      hl: ['Private terrace up to 1,326 sq ft', 'Garden-level seclusion', 'Exclusive green views', 'Personal outdoor retreat'],
+      interest: '3bhk-t',
+      tower: 'T1',
+      subtabs: [
         {
-          type: '2 BHK + 2T', label: 'Aura', size: '924', carpet: '644', unit: 'sq ft',
-          floors: '0-9', tag: 'Boutique Collection', price: '',
-          planImg: 'uploads/unit-d-2bhk.webp',
-          hl: ['Efficient 2 BHK layout', 'Optimized room planning', 'Clear circulation flow', 'Comfort-focused apartment design'],
-          interest: '2bhk',
-          tower: 'T2',
-        },
-        {
-          type: '3 BHK + 2T', label: 'Celestial', size: '1,379', carpet: '906', unit: 'sq ft',
-          floors: '0-9', tag: 'Most Popular', price: '₹5,000 – ₹6,000 /sq ft',
-          planImg: 'uploads/unit-a.webp',
-          hl: ['East-West cross ventilation', 'Utility balcony with kitchen', 'Jumbo vitrified tile flooring', 'Smart digital main-door lock'],
-          interest: '3bhk',
-          tower: 'T2',
-        },
-        {
-          type: '3BHK+3T', label: 'Grande', size: '1,326 – 1,687', unit: 'sq ft',
-          floors: 'Ground to 10th Floor', tag: 'Executive Choice', price: '₹5,200 – ₹6,200 /sq ft',
-          planImg: 'uploads/unit-a.webp',
-          hl: ['Spacious 3 BHK + 3 Toilet layout', 'East-West cross ventilation', 'Jumbo vitrified tile flooring', 'Smart digital main-door lock'],
-          interest: '3bhk-3t',
+          name: '3 BHK + 3T + TERRACE (2280 sq ft)',
+          size: '2,280',
+          carpet: '952',
+          planImg: 'uploads/UNIT-B3A.webp',
+          floors: '2nd Floor',
           tower: 'T1',
-          subtabs: [
-            { name: '3 BHK + 3T (1221 sq ft)', size: '1221', carpet: '952', planImg: 'uploads/unit-b1c.webp', floors: 'Ground Floor', tower: 'T1' },
-            { name: '3 BHK + 3T (1321 sq ft)', size: '1321', carpet: '952', planImg: 'uploads/UNIT-B3.webp', floors: '1st to 10th Floor', tower: 'T1' },
-            { name: '3 BHK + 3T (1348 sq ft)', size: '1348', carpet: '952', planImg: 'uploads/UNIT-B1.webp', floors: '1st to 10th Floor', tower: 'T1' },
-            { name: '3 BHK + 3T (1361 sq ft)', size: '1361', carpet: '956', planImg: 'uploads/UNIT-B4.webp', floors: '1st to 10th Floor', tower: 'T1' },
-            { name: '3 BHK + 3T (1442 sq ft)', size: '1442', carpet: '952', planImg: 'uploads/UNIT-B3B.webp', floors: 'Ground Floor', tower: 'T1' },
-            { name: '3 BHK + 3T (1446 sq ft)', size: '1446', carpet: '1023', planImg: 'uploads/UNIT-B2.webp', floors: '1st to 10th Floor', tower: 'T1' },
-            { name: '3 BHK + 3T (1479 sq ft)', size: '1479', carpet: '952', planImg: 'uploads/UNIT-B1B.webp', floors: 'Ground Floor', tower: 'T1' },
-            { name: '3 BHK + 3T (1631 sq ft)', size: '1631', carpet: '1090', planImg: 'uploads/UNIT-B6.webp', floors: 'Ground to 9th Floor', tower: 'T2' }
-          ]
+          hl: ['Private terrace up to 959 sq ft', 'Garden-level seclusion', 'Exclusive green views', 'Personal outdoor retreat']
+        },
+        { name: '3 BHK + 3T + TERRACE (2,687 sq ft)', size: '2,687', carpet: '956', planImg: 'uploads/UNIT-B4A.webp', floors: '2nd Floor', tower: 'T1' }
+      ]
+    },
+    {
+      type: '4 BHK', label: 'Prestige', size: '1,623 – 1,895', unit: 'sq ft',
+      floors: '1st Floor onwards', tag: 'Select Floors', price: '₹5,500 – ₹6,500 /sq ft',
+      planImg: 'uploads/unit-a.webp',
+      hl: ['Dedicated staff room', 'Puja room option', 'Expansive corner balconies', 'Premium finishes throughout'],
+      interest: '4bhk',
+      tower: 'T1',
+      subtabs: [
+        {
+          name: '4 BHK (1867 sq ft)',
+          size: '1,867',
+          carpet: '1,343',
+          planImg: 'uploads/UNIT-C2.webp',
+          floors: '3rd to 10th Floor',
+          tower: 'T1',
+          hl: ['Dedicated Puja/Store Room', 'Expansive balconies', 'Premium finishes throughout']
         },
         {
-          type: '3 BHK + 3T + Terrace', label: 'Garden Homes', size: '2,280 – 2,687', unit: 'sq ft',
-          floors: '1st & 2nd Floor', tag: 'Limited Edition', price: '₹5,500 – ₹6,500 /sq ft',
-          planImg: 'uploads/unit-b1c.webp',
-          hl: ['Private terrace up to 1,326 sq ft', 'Garden-level seclusion', 'Exclusive green views', 'Personal outdoor retreat'],
-          interest: '3bhk-t',
+          name: '4 BHK (1895 sq ft)',
+          size: '1,895',
+          carpet: '1,332',
+          planImg: 'uploads/UNIT-C1.webp',
+          floors: '1st Floor',
           tower: 'T1',
-          subtabs: [
-            {
-              name: '3 BHK + 3T + TERRACE (2280 sq ft)',
-              size: '2,280',
-              carpet: '952',
-              planImg: 'uploads/UNIT-B3A.webp',
-              floors: '2nd',
-              tower: 'T1',
-              hl: ['Private terrace up to 959 sq ft', 'Garden-level seclusion', 'Exclusive green views', 'Personal outdoor retreat']
-            },
-            { name: '3 BHK + 3T + TERRACE (2,687 sq ft)', size: '2,687', carpet: '956', planImg: 'uploads/UNIT-B4A.webp', floors: '2nd', tower: 'T1' }
-          ]
+          hl: ['Staff Room Option', 'Expansive corner balconies', 'Premium finishes throughout']
+        }
+      ]
+    },
+    {
+      type: '4 BHK + Terrace', label: 'Signature', size: '2,532 – 3,044', unit: 'sq ft',
+      floors: '1st–2nd Floor', tag: 'Ultra Premium', price: '₹6,000 – ₹7,000 /sq ft',
+      planImg: 'uploads/unit-b1c.webp',
+      hl: ['Terrace up to 1,177 sq ft', 'Puja + staff rooms', 'Full-perimeter views', 'Legacy-grade specification'],
+      interest: '4bhk-t',
+      tower: 'T1',
+      subtabs: [
+        {
+          name: '4 BHK + TERRACE (2236 sq ft)',
+          size: '2,236',
+          carpet: '1,332',
+          planImg: 'uploads/UNIT-C1A.webp',
+          floors: '1st Floor',
+          tower: 'T1',
+          hl: ['Terrace up to 341 sq ft', 'Staff Room', 'Full-perimeter views', 'Legacy-grade specification']
         },
         {
-          type: '4 BHK', label: 'Prestige', size: '1,623 – 1,895', unit: 'sq ft',
-          floors: '1st Floor onwards', tag: 'Select Floors', price: '₹5,500 – ₹6,500 /sq ft',
-          planImg: 'uploads/unit-a.webp',
-          hl: ['Dedicated staff room', 'Puja room option', 'Expansive corner balconies', 'Premium finishes throughout'],
-          interest: '4bhk',
+          name: '4 BHK + TERRACE (2532 sq ft)',
+          size: '2,532',
+          carpet: '1,332',
+          planImg: 'uploads/UNIT-C1B.webp',
+          floors: '2nd Floor',
           tower: 'T1',
-          subtabs: [
-            {
-              name: '4 BHK (1867 sq ft)',
-              size: '1,867',
-              carpet: '1,343',
-              planImg: 'uploads/UNIT-C2.webp',
-              floors: '3rd-10th',
-              tower: 'T1',
-              hl: ['Dedicated Puja/Store Room', 'Expansive balconies', 'Premium finishes throughout']
-            },
-            {
-              name: '4 BHK (1895 sq ft)',
-              size: '1,895',
-              carpet: '1,332',
-              planImg: 'uploads/UNIT-C1.webp',
-              floors: '1st',
-              tower: 'T1',
-              hl: ['Staff Room Option', 'Expansive corner balconies', 'Premium finishes throughout']
-            }
-          ]
+          hl: ['Terrace up to 637 sq ft', 'Staff Room', 'Full-perimeter views', 'Legacy-grade specification']
         },
         {
-          type: '4 BHK + Terrace', label: 'Signature', size: '2,532 – 3,044', unit: 'sq ft',
-          floors: '1st–2nd Floor', tag: 'Ultra Premium', price: '₹6,000 – ₹7,000 /sq ft',
-          planImg: 'uploads/unit-b1c.webp',
-          hl: ['Terrace up to 1,177 sq ft', 'Puja + staff rooms', 'Full-perimeter views', 'Legacy-grade specification'],
-          interest: '4bhk-t',
+          name: '4 BHK + TERRACE (3044 sq ft)',
+          size: '3,044',
+          carpet: '1,343',
+          planImg: 'uploads/UNIT-C2A.webp',
+          floors: '2nd Floor',
           tower: 'T1',
-          subtabs: [
-            {
-              name: '4 BHK + TERRACE (2236 sq ft)',
-              size: '2,236',
-              carpet: '1,332',
-              planImg: 'uploads/UNIT-C1A.webp',
-              floors: '1st Floor',
-              tower: 'T1',
-              hl: ['Terrace up to 341 sq ft', 'Staff Room', 'Full-perimeter views', 'Legacy-grade specification']
-            },
-            {
-              name: '4 BHK + TERRACE (2532 sq ft)',
-              size: '2,532',
-              carpet: '1,332',
-              planImg: 'uploads/UNIT-C1B.webp',
-              floors: '2nd',
-              tower: 'T1',
-              hl: ['Terrace up to 637 sq ft', 'Staff Room', 'Full-perimeter views', 'Legacy-grade specification']
-            },
-            {
-              name: '4 BHK + TERRACE (3044 sq ft)',
-              size: '3,044',
-              carpet: '1,343',
-              planImg: 'uploads/UNIT-C2A.webp',
-              floors: '2nd',
-              tower: 'T1',
-              hl: ['Terrace up to 1,177 sq ft', 'Dedicated Puja/Store Room', 'Full-perimeter views', 'Legacy-grade specification']
-            }
-          ]
-        },
-      ];
+          hl: ['Terrace up to 1,177 sq ft', 'Dedicated Puja/Store Room', 'Full-perimeter views', 'Legacy-grade specification']
+        }
+      ]
+    },
+  ];
 
-      const u = units[active];
-      const currentPlanImg = u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub].planImg : u.planImg;
+  const u = units[active];
+  const currentPlanImg = u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub].planImg : u.planImg;
 
-      return (
-        <section id="homes" style={{ background: '#f5f0e8', padding: 'clamp(72px,9vw,120px) clamp(20px,8vw,120px)', position: 'relative', overflow: 'hidden' }}>
+  return (
+    <section id="homes" style={{ background: '#f5f0e8', padding: 'clamp(72px,9vw,120px) clamp(20px,8vw,120px)', position: 'relative', overflow: 'hidden' }}>
 
+      <div ref={ref} style={{ maxWidth: 1280, margin: '0 auto', position: 'relative', zIndex: 1 }}>
 
-          <div ref={ref} style={{ maxWidth: 1280, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 52, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease' }}>
+          <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 16 }}>Celestial Apartments</p>
+          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,4vw,52px)', fontWeight: 300, color: '#1a2e1a', lineHeight: 1.15 }}>
+            Curated, comfortable,<br /><em>consciously designed.</em>
+          </h2>
+        </div>
 
-            {/* Header */}
-            <div style={{ textAlign: 'center', marginBottom: 52, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease' }}>
-              <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 16 }}>Celestial Apartments</p>
-              <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,4vw,52px)', fontWeight: 300, color: '#1a2e1a', lineHeight: 1.15 }}>
-                Curated, comfortable,<br /><em>consciously designed.</em>
-              </h2>
-            </div>
+        {/* Unit type tab selector */}
+        <div className="homes-tabs" style={{ marginBottom: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.1s' }}>
+          {units.map((u, i) => (
+            <button key={i} onClick={() => setActive(i)} style={{ padding: '16px 12px', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.3s', background: active === i ? '#1a2e1a' : '#ede7d9', borderBottom: active === i ? '2px solid #c9a96e' : '2px solid transparent' }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: active === i ? '#c9a96e' : '#7a9e7e', marginBottom: 5 }}>{u.type}</p>
+              <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 24, fontWeight: 400, color: active === i ? '#f5f0e8' : '#1a2e1a', lineHeight: 1.2 }}>{u.label}</p>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#c9a96e', marginTop: 6 }}>{u.tag}</p>
+            </button>
+          ))}
+        </div>
 
-            {/* Unit type tab selector */}
-            <div className="homes-tabs" style={{ marginBottom: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.1s' }}>
-              {units.map((u, i) => (
-                <button key={i} onClick={() => setActive(i)} style={{ padding: '16px 12px', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.3s', background: active === i ? '#1a2e1a' : '#ede7d9', borderBottom: active === i ? '2px solid #c9a96e' : '2px solid transparent' }}>
-                  <p style={{ fontFamily: 'DM Sans', fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: active === i ? '#c9a96e' : '#7a9e7e', marginBottom: 5 }}>{u.type}</p>
-                  <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 24, fontWeight: 400, color: active === i ? '#f5f0e8' : '#1a2e1a', lineHeight: 1.2 }}>{u.label}</p>
-                  <p style={{ fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#c9a96e', marginTop: 6 }}>{u.tag}</p>
-                </button>
-              ))}
-            </div>
-
-            {/* Subtabs Selector */}
-            {u.subtabs && u.subtabs.length > 0 && (
-              <div className="homes-subtabs" style={{ marginBottom: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.15s' }}>
-                {u.subtabs.map((sub, idx) => (
-                  <button key={idx} onClick={() => setActiveSub(idx)} style={{
-                    padding: '12px 14px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    textAlign: 'center',
-                    fontFamily: 'DM Sans',
-                    fontSize: 14,
-                    fontWeight: 500,
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase',
-                    transition: 'all 0.3s',
-                    background: activeSub === idx ? '#1a2e1a' : '#ede7d9',
-                    color: activeSub === idx ? '#c9a96e' : '#1a2e1a',
-                    borderBottom: activeSub === idx ? '2px solid #c9a96e' : '2px solid transparent'
-                  }}>
-                    {(() => {
-                      const name = sub.name;
-                      const idxOpen = name.indexOf('(');
-                      if (idxOpen !== -1) {
-                        const base = name.substring(0, idxOpen).trim();
-                        const sizePart = name.substring(idxOpen + 1).replace(')', '').trim();
-                        return (
-                          <span>
-                            {base}{' '}
-                            <span style={{ 
-                              fontSize: '11px', 
-                              fontWeight: 400, 
-                              opacity: 0.85, 
-                              textTransform: 'none',
-                              whiteSpace: 'nowrap'
-                            }}>
-                              ({sizePart})
-                            </span>
-                          </span>
-                        );
-                      }
-                      return name;
-                    })()}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Main content: floor plan left, specs right */}
-            <div key={active + '-' + activeSub} className="homes-main-grid" style={{ gap: 3, animation: 'fadeIn 0.4s ease', opacity: vis ? 1 : 0, transition: 'opacity 0.6s ease 0.2s' }}>
-
-              {/* Floor Plan Image — large, clean, prominent */}
-              <div style={{ background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(24px,4vw,52px)', position: 'relative', minHeight: 500 }}>
-                {/* Subtle watermark bg */}
-                <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(122,158,126,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(122,158,126,0.04) 1px,transparent 1px)', backgroundSize: '24px 24px', pointerEvents: 'none' }} />
-                <img
-                  src={currentPlanImg}
-                  alt={`${u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub].name : u.label} Floor Plan`}
-                  style={{ width: '100%', maxWidth: 620, height: 'auto', aspectRatio: '1.5', objectFit: 'contain', position: 'relative', zIndex: 1, transition: 'opacity 0.4s ease' }}
-                  loading="lazy"
-                  onError={(e)=>{
-                    if (e.target.src.endsWith('.webp')) {
-                      e.target.src = e.target.src.replace('.webp', '.jpg');
-                    } else {
-                      e.target.onerror = null;
-                      e.target.src = 'uploads/unit-a.webp';
-                    }
-                  }}
-                />
-                {/* Plan label badge */}
-                <div style={{ position: 'absolute', top: 16, left: 16, background: '#1a2e1a', padding: '6px 14px' }}>
-                  <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#c9a96e' }}>
-                    {u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub].name : `${u.type} · ${u.label}`}
-                  </p>
-                </div>
-                <p style={{ position: 'absolute', bottom: 12, right: 14, fontFamily: 'DM Sans', fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(26,46,26,0.3)' }}>Indicative Floor Plan — Not to Scale</p>
-              </div>
-
-              {/* Specs panel */}
-              <div style={{ background: '#1a2e1a', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 'clamp(28px,3.5vw,48px) clamp(24px,3vw,40px)' }}>
-                <div>
-                  <p style={{ fontFamily: 'DM Sans', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 8 }}>{u.type}</p>
-                  <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 300, color: '#f5f0e8', marginBottom: 6, lineHeight: 1.1 }}>
-                    {u.subtabs && u.subtabs[activeSub]
-                      ? `${u.label === 'Garden Home' ? 'Garden Homes' : u.label}_ ${u.subtabs[activeSub].name}`
-                      : u.label}
-                  </h3>
-                  <p style={{ fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.35)', marginBottom: 28 }}>{u.tag}</p>
-
-                  {/* Key stats */}
-                  {(() => {
-                    const currentCarpet = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].carpet
-                      ? u.subtabs[activeSub].carpet
-                      : u.carpet;
-                    const currentSize = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].size
-                      ? u.subtabs[activeSub].size
-                      : u.size;
-                    const currentFloors = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].floors
-                      ? u.subtabs[activeSub].floors
-                      : u.floors;
-                    const currentTower = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].tower
-                      ? u.subtabs[activeSub].tower
-                      : u.tower;
-
-                    const stats = [
-                      ['Carpet Area', currentCarpet ? `${currentCarpet} ${u.unit}` : '—'],
-                      ['Super Built-up Area', `${currentSize} ${u.unit}`],
-                      ['Location', currentFloors],
-                      ['Tower', currentTower || '—'],
-                    ];
-
+        {/* Subtabs Selector */}
+        {u.subtabs && u.subtabs.length > 0 && (
+          <div
+            className="homes-subtabs-fit"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: `repeat(${u.subtabs.length}, minmax(0, 1fr))`,
+              gap: 3,
+              marginBottom: 3,
+              opacity: vis ? 1 : 0,
+              transition: 'opacity 0.8s ease 0.15s',
+              width: '100%',
+              overflow: 'hidden'
+            }}
+          >
+            {u.subtabs.map((sub, idx) => (
+              <button key={idx} onClick={() => setActiveSub(idx)} style={{
+                padding: '10px 6px',
+                border: 'none',
+                cursor: 'pointer',
+                textAlign: 'center',
+                fontFamily: 'DM Sans',
+                fontSize: 12,
+                fontWeight: 500,
+                letterSpacing: '0.045em',
+                textTransform: 'uppercase',
+                transition: 'all 0.3s',
+                background: activeSub === idx ? '#1a2e1a' : '#ede7d9',
+                color: activeSub === idx ? '#c9a96e' : '#1a2e1a',
+                borderBottom: activeSub === idx ? '2px solid #c9a96e' : '2px solid transparent',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                minWidth: 0
+              }}>
+                {(() => {
+                  const name = sub.name;
+                  const idxOpen = name.indexOf('(');
+                  if (idxOpen !== -1) {
+                    const base = name.substring(0, idxOpen).trim();
+                    const sizePart = name.substring(idxOpen + 1).replace(')', '').trim();
                     return (
-                      <div className="homes-stats-grid" style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(2, 1fr)',
-                        gap: 3,
-                        marginBottom: 28
-                      }}>
-                        {stats.map(([k, v], i) => (
-                          <div key={i} style={{
-                            background: 'rgba(245,240,232,0.05)',
-                            padding: '14px 16px',
-                            borderLeft: '2px solid rgba(201,169,110,0.3)',
-                            minHeight: 58,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center'
-                          }}>
-                            <p style={{
-                              fontFamily: 'DM Sans',
-                              fontSize: 8,
-                              letterSpacing: '0.16em',
-                              textTransform: 'uppercase',
-                              color: 'rgba(245,240,232,0.4)',
-                              marginBottom: 5
-                            }}>{k}</p>
-                            <p style={{
-                              fontFamily: k === 'Tower' ? 'DM Sans, sans-serif' : 'Cormorant Garamond, serif',
-                              fontSize: 16,
-                              fontWeight: k === 'Tower' ? 400 : 300,
-                              color: '#f5f0e8',
-                              lineHeight: 1.3
-                            }}>{k === 'Tower' && typeof v === 'string' ? v.replace('T', 'T ') : v}</p>
-                          </div>
-                        ))}
-                      </div>
+                      <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {base}{' '}
+                        <span style={{ 
+                          fontSize: '10px', 
+                          fontWeight: 400, 
+                          opacity: 0.85, 
+                          textTransform: 'none',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          ({sizePart})
+                        </span>
+                      </span>
                     );
-                  })()}
+                  }
+                  return name;
+                })()}
+              </button>
+            ))}
+          </div>
+        )}
 
-                  {/* Highlights */}
-                  <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.4)', marginBottom: 12 }}>Highlights</p>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 28 }}>
-                    {(u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].hl
-                      ? u.subtabs[activeSub].hl
-                      : u.hl
-                    ).map((h, i) => (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '9px 0', borderBottom: '1px solid rgba(245,240,232,0.06)', fontFamily: 'DM Sans', fontSize: 14, fontWeight: 300, color: 'rgba(245,240,232,0.78)', }}>
-                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#c9a96e', flexShrink: 0 }} />{h}
+        {/* Main content: floor plan left, specs right */}
+        <div key={active + '-' + activeSub} className="homes-main-grid" style={{ gap: 3, animation: 'fadeIn 0.4s ease', opacity: vis ? 1 : 0, transition: 'opacity 0.6s ease 0.2s' }}>
+
+          {/* Floor Plan Image — large, clean, prominent */}
+          <div
+            style={{
+              background: '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 'clamp(24px,4vw,52px)',
+              position: 'relative',
+              minHeight: 500,
+              overflow: 'hidden'
+            }}
+          >
+            {/* Subtle watermark bg */}
+            <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(122,158,126,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(122,158,126,0.04) 1px,transparent 1px)', backgroundSize: '24px 24px', pointerEvents: 'none' }} />
+            <img
+              src={currentPlanImg}
+              alt={`${u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub].name : u.label} Floor Plan`}
+              title={isPlanZoomed ? 'Click to reset zoom' : 'Click to zoom floor plan'}
+              onClick={handlePlanZoom}
+              style={{
+                width: '100%',
+                maxWidth: 620,
+                height: 'auto',
+                aspectRatio: '1.5',
+                objectFit: 'contain',
+                position: 'relative',
+                zIndex: 1,
+                transition: 'opacity 0.4s ease, transform 0.35s ease',
+                transform: isPlanZoomed ? 'scale(2.45)' : 'scale(1)',
+                transformOrigin: planZoomOrigin,
+                cursor: isPlanZoomed ? 'zoom-out' : 'zoom-in'
+              }}
+              loading="lazy"
+              onError={(e)=>{
+                if (e.target.src.endsWith('.webp')) {
+                  e.target.src = e.target.src.replace('.webp', '.jpg');
+                } else {
+                  e.target.onerror = null;
+                  e.target.src = 'uploads/unit-a.webp';
+                }
+              }}
+            />
+            {/* Plan label badge */}
+            <div style={{ position: 'absolute', top: 16, left: 16, background: '#1a2e1a', padding: '6px 14px' }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#c9a96e' }}>
+                {u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub].name : `${u.type} · ${u.label}`}
+              </p>
+            </div>
+
+            <p style={{ position: 'absolute', bottom: 12, right: 14, fontFamily: 'DM Sans', fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(26,46,26,0.3)' }}>Indicative Floor Plan — Not to Scale</p>
+          </div>
+
+          {/* Specs panel */}
+          <div style={{ background: '#1a2e1a', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 'clamp(28px,3.5vw,48px) clamp(24px,3vw,40px)' }}>
+            <div>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 8 }}>{u.type}</p>
+              <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 300, color: '#f5f0e8', marginBottom: 6, lineHeight: 1.1 }}>
+                {u.subtabs && u.subtabs[activeSub]
+                  ? `${u.label === 'Garden Home' ? 'Garden Homes' : u.label}_ ${u.subtabs[activeSub].name}`
+                  : u.label}
+              </h3>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.35)', marginBottom: 28 }}>{u.tag}</p>
+
+              {/* Key stats */}
+              {(() => {
+                const currentCarpet = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].carpet
+                  ? u.subtabs[activeSub].carpet
+                  : u.carpet;
+                const currentSize = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].size
+                  ? u.subtabs[activeSub].size
+                  : u.size;
+                const currentFloors = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].floors
+                  ? u.subtabs[activeSub].floors
+                  : u.floors;
+                const currentTower = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].tower
+                  ? u.subtabs[activeSub].tower
+                  : u.tower;
+
+                const stats = [
+                  ['Carpet Area', currentCarpet ? `${currentCarpet} ${u.unit}` : '—'],
+                  ['Super Built-up Area', `${currentSize} ${u.unit}`],
+                  ['Location', currentFloors],
+                  ['Tower', currentTower || '—'],
+                ];
+
+                return (
+                  <div className="homes-stats-grid" style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: 3,
+                    marginBottom: 28
+                  }}>
+                    {stats.map(([k, v], i) => (
+                      <div key={i} style={{
+                        background: 'rgba(245,240,232,0.05)',
+                        padding: '14px 16px',
+                        borderLeft: '2px solid rgba(201,169,110,0.3)',
+                        minHeight: 58,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                        <p style={{
+                          fontFamily: 'DM Sans',
+                          fontSize: 8,
+                          letterSpacing: '0.16em',
+                          textTransform: 'uppercase',
+                          color: 'rgba(245,240,232,0.4)',
+                          marginBottom: 5
+                        }}>{k}</p>
+                        <p style={{
+                          fontFamily: k === 'Tower' ? 'DM Sans, sans-serif' : 'Cormorant Garamond, serif',
+                          fontSize: 16,
+                          fontWeight: k === 'Tower' ? 400 : 300,
+                          color: '#f5f0e8',
+                          lineHeight: 1.3
+                        }}>{k === 'Tower' && typeof v === 'string' ? v.replace('T', 'T ') : v}</p>
                       </div>
                     ))}
                   </div>
-                </div>
+                );
+              })()}
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <CTAButton label={`Enquire — ${u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub].name : u.label}`} variant="gold" interest={u.interest} />
-                  <CTAButton label="Download Brochure" variant="outline" interest={u.interest} />
-                </div>
+              {/* Highlights */}
+              <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.4)', marginBottom: 12 }}>Highlights</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 28 }}>
+                {(u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].hl
+                  ? u.subtabs[activeSub].hl
+                  : u.hl
+                ).map((h, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '9px 0', borderBottom: '1px solid rgba(245,240,232,0.06)', fontFamily: 'DM Sans', fontSize: 14, fontWeight: 300, color: 'rgba(245,240,232,0.78)', }}>
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#c9a96e', flexShrink: 0 }} />{h}
+                  </div>
+                ))}
               </div>
             </div>
 
-
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <CTAButton label={`Enquire — ${u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub].name : u.label}`} variant="gold" interest={u.interest} />
+              <CTAButton label="Download Brochure" variant="outline" interest={u.interest} />
+            </div>
           </div>
-        </section>
-      );
-    }
+        </div>
+
+      </div>
+    </section>
+  );
+}
     // ─── WALKTHROUGH VIDEO ────────────────────────────────────────────────────────
     function WalkthroughVideo() {
       const [ref, vis] = useReveal(0.1);
