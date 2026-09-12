@@ -1,0 +1,1558 @@
+import React, { useState, useEffect, useRef, useCallback, useContext, createContext } from "react";
+
+    // ─── MODAL CONTEXT ────────────────────────────────────────────────────────────
+    const ModalCtx = createContext(null);
+
+    // ─── TWEAKS ───────────────────────────────────────────────────────────────────
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{ "heroOverlay": 20, "accentColor": "#c9a96e", "darkForm": false }/*EDITMODE-END*/;
+
+    function useTweaks(defaults) {
+      const [values, setValues] = useState(defaults);
+      const setTweak = useCallback((k, v) => {
+        const edits = typeof k === 'object' ? k : { [k]: v };
+        setValues(p => ({ ...p, ...edits }));
+        window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+      }, []);
+      return { tweaks: values, setTweak };
+    }
+
+    const TWEAKS_CSS = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:9999;width:260px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;background:rgba(250,249,247,.92);color:#29261b;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:.5px solid rgba(255,255,255,.6);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.22);font:11.5px/1.4 ui-sans-serif,system-ui,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 8px 10px 14px;cursor:move;user-select:none;border-bottom:.5px solid rgba(0,0,0,.07)}
+  .twk-hd b{font-size:12px;font-weight:600}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.5);width:22px;height:22px;border-radius:6px;cursor:pointer;font-size:14px;line-height:22px;text-align:center}
+  .twk-x:hover{background:rgba(0,0,0,.07)}
+  .twk-body{padding:10px 14px 14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;min-height:0}
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(41,38,27,.4);padding:6px 0 0}
+  .twk-row{display:flex;flex-direction:column;gap:4px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between}
+  .twk-lbl{font-size:11px;font-weight:500;color:rgba(41,38,27,.7);display:flex;justify-content:space-between}
+  .twk-val{color:rgba(41,38,27,.45);font-variant-numeric:tabular-nums}
+  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;border-radius:4px;background:rgba(0,0,0,.12);outline:none}
+  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;border:.5px solid rgba(0,0,0,.15);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:pointer}
+  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;background:rgba(0,0,0,.15);transition:background .15s;cursor:pointer;padding:0;flex-shrink:0}
+  .twk-toggle[data-on="1"]{background:#34c759}
+  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s;display:block}
+  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+  .twk-swatch{appearance:none;-webkit-appearance:none;width:48px;height:22px;border:.5px solid rgba(0,0,0,.12);border-radius:6px;padding:0;cursor:pointer;background:transparent;flex-shrink:0}
+  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5px}
+`;
+
+    function TweaksPanel({ title, children }) {
+      const [open, setOpen] = useState(false); const ref = useRef(null);
+      useEffect(() => {
+        const h = e => { if (e.data?.type === '__activate_edit_mode') setOpen(true); if (e.data?.type === '__deactivate_edit_mode') setOpen(false); };
+        window.addEventListener('message', h); window.parent.postMessage({ type: '__edit_mode_available' }, '*'); return () => window.removeEventListener('message', h);
+      }, []);
+      const dismiss = () => { setOpen(false); window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*'); };
+      if (!open) return null;
+      return (<><style>{TWEAKS_CSS}</style><div ref={ref} className="twk-panel"><div className="twk-hd"><b>{title || 'Tweaks'}</b><button className="twk-x" onClick={dismiss}>✕</button></div><div className="twk-body">{children}</div></div></>);
+    }
+    function TweakSection({ label }) { return <div className="twk-sect">{label}</div>; }
+    function TweakSlider({ label, tweakKey, min, max, step, tweaks, setTweak }) { const val = tweaks[tweakKey]; return (<div className="twk-row"><div className="twk-lbl"><span>{label}</span><span className="twk-val">{val}</span></div><input type="range" className="twk-slider" min={min} max={max} step={step || 1} value={val} onChange={e => setTweak(tweakKey, Number(e.target.value))} /></div>); }
+    function TweakColor({ label, tweakKey, tweaks, setTweak }) { const val = tweaks[tweakKey]; return (<div className="twk-row twk-row-h"><div className="twk-lbl"><span>{label}</span></div><input type="color" className="twk-swatch" value={val} onChange={e => setTweak(tweakKey, e.target.value)} /></div>); }
+
+    // ─── useReveal ────────────────────────────────────────────────────────────────
+    function useReveal(threshold = 0.1) {
+      const ref = useRef(null);
+      const [vis, setVis] = useState(true);
+      useEffect(() => {
+        const el = ref.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        if (rect.top > window.innerHeight) {
+          setVis(false);
+          const obs = new IntersectionObserver(([e]) => {
+            if (e.isIntersecting) {
+              setVis(true);
+              obs.disconnect();
+            }
+          }, { threshold });
+          obs.observe(el);
+          return () => obs.disconnect();
+        }
+      }, [threshold]);
+      return [ref, vis];
+    }
+
+    // ─── useParallax ──────────────────────────────────────────────────────────────
+    function useParallax(speed = 0.15) {
+      const ref = useRef(null);
+      useEffect(() => {
+        const el = ref.current; if (!el) return;
+        const fn = () => {
+          const rect = el.getBoundingClientRect();
+          const vh = window.innerHeight;
+          const progress = (vh - rect.top) / (vh + rect.height);
+          const inner = el.querySelector('.parallax-inner');
+          if (inner) inner.style.transform = `translateY(${(progress - 0.5) * speed * 120}px)`;
+        };
+        window.addEventListener('scroll', fn, { passive: true }); fn();
+        return () => window.removeEventListener('scroll', fn);
+      }, [speed]);
+      return ref;
+    }
+
+    // ─── ATOMS ────────────────────────────────────────────────────────────────────
+    function GoldDivider({ style }) {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, ...style }}>
+          <div style={{ height: 1, flex: 1, background: 'linear-gradient(to right, transparent, #c9a96e)' }} />
+          <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#c9a96e', flexShrink: 0 }} />
+          <div style={{ height: 1, flex: 1, background: 'linear-gradient(to left, transparent, #c9a96e)' }} />
+        </div>
+      );
+    }
+
+    function TreeLine({ opacity = 0.07, dark = '#0a1a0a' }) {
+      const trees = [[0, 200], [80, 250], [160, 180], [260, 255], [370, 195], [480, 240], [600, 170], [710, 230], [830, 210], [950, 255], [1070, 180], [1190, 220], [1310, 200], [1400, 240]];
+      return (
+        <svg style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '40%', pointerEvents: 'none' }} viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax meet">
+          {trees.map(([x, h], i) => { const w = h * 0.48; return (<g key={i} opacity={opacity}><polygon points={`${x},260 ${x + w / 2},${260 - h} ${x + w},260`} fill={dark} /><rect x={x + w / 2 - 4} y={255 - 20} width={8} height={24} fill={dark} /></g>); })}
+        </svg>
+      );
+    }
+
+    // ─── CTA BUTTON ───────────────────────────────────────────────────────────────
+    function CTAButton({ label, variant = 'gold', style: extra, onClick, type = 'button', interest }) {
+      const openModal = useContext(ModalCtx);
+      const [hov, setHov] = useState(false);
+      const base = { display: 'inline-block', textDecoration: 'none', cursor: 'pointer', fontFamily: 'DM Sans', fontSize: 11, fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', transition: 'all 0.3s', padding: '14px 36px', border: 'none', ...extra };
+      const v = {
+        gold: { background: hov ? '#dfc28e' : '#c9a96e', color: '#1a2e1a', transform: hov ? 'translateY(-2px)' : 'translateY(0)' },
+        dark: { background: hov ? '#c9a96e' : '#1a2e1a', color: hov ? '#1a2e1a' : '#c9a96e' },
+        outline: { background: 'transparent', color: hov ? '#c9a96e' : '#f5f0e8', border: `1px solid ${hov ? '#c9a96e' : 'rgba(245,240,232,0.35)'}` },
+        outlineDark: { background: hov ? '#1a2e1a' : 'transparent', color: hov ? '#c9a96e' : '#1a2e1a', border: '1px solid #1a2e1a' },
+      };
+      const handleClick = (e) => {
+        e.preventDefault();
+        if (onClick) onClick();
+        else openModal(interest || '');
+      };
+      return <button type={type} style={{ ...base, ...v[variant] }} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} onClick={handleClick}>{label}</button>;
+    }
+
+    // ─── POPUP FORM MODAL ─────────────────────────────────────────────────────────
+    function PopupModal({ isOpen, onClose, defaultInterest }) {
+      const [form, setForm] = useState({ name: '', phone: '', email: '', interest: defaultInterest || '', message: '' });
+      const [errors, setErrors] = useState({});
+      const [done, setDone] = useState(false);
+
+      useEffect(() => {
+        setForm(f => ({ ...f, interest: defaultInterest || '' }));
+        setDone(false); setErrors({});
+      }, [defaultInterest, isOpen]);
+
+      useEffect(() => {
+        const fn = e => { if (e.key === 'Escape') onClose(); };
+        if (isOpen) window.addEventListener('keydown', fn);
+        return () => window.removeEventListener('keydown', fn);
+      }, [isOpen, onClose]);
+
+      useEffect(() => {
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+        return () => { document.body.style.overflow = ''; };
+      }, [isOpen]);
+
+      const validate = () => {
+        const e = {};
+        if (!form.name.trim()) e.name = true;
+        if (!form.phone.trim() || !/^\+?[\d\s\-]{7,}$/.test(form.phone)) e.phone = true;
+        if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) e.email = true;
+        return e;
+      };
+      const submit = ev => {
+        ev.preventDefault();
+        const e = validate();
+        if (Object.keys(e).length) { setErrors(e); return; }
+        setErrors({});
+        setDone(true);
+        const pdfUrl = 'uploads/Aranya%20brochure.pdf';
+        try {
+          const win = window.open(pdfUrl, '_blank');
+          if (!win || win.closed || typeof win.closed === 'undefined') {
+            const a = document.createElement('a');
+            a.href = pdfUrl;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          }
+        } catch (err) {
+          const a = document.createElement('a');
+          a.href = pdfUrl;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+      };
+      const inp = (err) => ({ width: '100%', background: '#fff', border: `1px solid ${err ? '#e07a5f' : 'rgba(26,46,26,0.18)'}`, padding: '12px 16px', outline: 'none', fontFamily: 'DM Sans', fontSize: 13, fontWeight: 300, color: '#1a2e1a', transition: 'border-color 0.3s', borderRadius: 0 });
+
+      if (!isOpen) return null;
+      return (
+        <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+          <div className="modal-box">
+            {/* Header */}
+            <div style={{ padding: '32px 36px 28px', borderBottom: '1px solid rgba(26,46,26,0.1)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20, background: '#1a2e1a' }}>
+              <div>
+                <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.28em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 8 }}>Begin Your Journey</p>
+                <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(22px,2.5vw,30px)', fontWeight: 300, color: '#f5f0e8', lineHeight: 1.2 }}>
+                  Your forest home<br /><em style={{ color: '#c9a96e' }}>awaits a conversation.</em>
+                </h3>
+              </div>
+              <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(245,240,232,0.55)', fontSize: 22, cursor: 'pointer', lineHeight: 1, flexShrink: 0, padding: '4px' }}>✕</button>
+            </div>
+
+            <div style={{ padding: '28px 36px 36px' }}>
+              {done ? (
+                <div style={{ textAlign: 'center', padding: '36px 20px' }}>
+                  <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 48, color: '#c9a96e', marginBottom: 16, animation: 'float 3s ease-in-out infinite' }}>✦</div>
+                  <h4 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 26, fontWeight: 300, color: '#1a2e1a', marginBottom: 12 }}>Thank you, {form.name.split(' ')[0]}.</h4>
+                  <p style={{ fontFamily: 'DM Sans', fontSize: 13, fontWeight: 300, color: 'rgba(26,46,26,0.6)', lineHeight: 1.85, marginBottom: 24 }}>Our team will reach out within 24 hours to schedule your private visit to Aranya.</p>
+                  <a
+                    href="uploads/Aranya brochure.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      background: '#1a2e1a',
+                      color: '#c9a96e',
+                      textDecoration: 'none',
+                      padding: '14px 32px',
+                      fontFamily: 'DM Sans',
+                      fontSize: 11,
+                      fontWeight: 500,
+                      letterSpacing: '0.15em',
+                      textTransform: 'uppercase',
+                      transition: 'all 0.3s'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#c9a96e'; e.currentTarget.style.color = '#1a2e1a'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = '#1a2e1a'; e.currentTarget.style.color = '#c9a96e'; }}
+                  >
+                    <span>View Brochure (PDF)</span>
+                    <span style={{ fontSize: 13 }}>↗</span>
+                  </a>
+                </div>
+              ) : (
+                <form onSubmit={submit} noValidate>
+                  <div className="modal-form-grid" style={{ gap: 10, marginBottom: 10 }}>
+                    <div>
+                      <label style={{ display: 'block', fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(26,46,26,0.5)', marginBottom: 7 }}>Full Name *</label>
+                      <input type="text" value={form.name} placeholder="Your name" style={inp(errors.name)} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onFocus={e => e.target.style.borderColor = '#c9a96e'} onBlur={e => e.target.style.borderColor = errors.name ? '#e07a5f' : 'rgba(26,46,26,0.2)'} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(26,46,26,0.5)', marginBottom: 7 }}>Phone *</label>
+                      <input type="tel" value={form.phone} placeholder="+91 ———" style={inp(errors.phone)} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} onFocus={e => e.target.style.borderColor = '#c9a96e'} onBlur={e => e.target.style.borderColor = errors.phone ? '#e07a5f' : 'rgba(26,46,26,0.2)'} />
+                    </div>
+                  </div>
+                  <div className="modal-form-grid" style={{ gap: 10, marginBottom: 10 }}>
+                    <div>
+                      <label style={{ display: 'block', fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(26,46,26,0.5)', marginBottom: 7 }}>Email *</label>
+                      <input type="email" value={form.email} placeholder="your@email.com" style={inp(errors.email)} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} onFocus={e => e.target.style.borderColor = '#c9a96e'} onBlur={e => e.target.style.borderColor = errors.email ? '#e07a5f' : 'rgba(26,46,26,0.2)'} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(26,46,26,0.5)', marginBottom: 7 }}>Apartment Type</label>
+                      <select value={form.interest} style={{ ...inp(false), cursor: 'pointer' }} onChange={e => setForm(f => ({ ...f, interest: e.target.value }))}>
+                        <option value="">Select type</option>
+                        <option value="3bhk">3 BHK — Celestial</option>
+                        <option value="3bhk-t">3 BHK + Terrace — Garden Home</option>
+                        <option value="4bhk">4 BHK — Prestige</option>
+                        <option value="4bhk-t">4 BHK + Terrace — Signature</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: 20 }}>
+                    <label style={{ display: 'block', fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(26,46,26,0.5)', marginBottom: 7 }}>Message (Optional)</label>
+                    <textarea value={form.message} placeholder="Any questions or preferences..." rows={3} style={{ ...inp(false), resize: 'vertical' }} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} onFocus={e => e.target.style.borderColor = '#c9a96e'} onBlur={e => e.target.style.borderColor = 'rgba(26,46,26,0.2)'} />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                    <p style={{ fontFamily: 'DM Sans', fontSize: 10, fontWeight: 300, color: 'rgba(26,46,26,0.38)', flex: 1, minWidth: 180, lineHeight: 1.6 }}>Held in strict confidence.</p>
+                    <button type="submit" style={{ background: '#1a2e1a', color: '#c9a96e', border: 'none', cursor: 'pointer', padding: '14px 36px', fontFamily: 'DM Sans', fontSize: 11, fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', transition: 'all 0.3s', flexShrink: 0 }}
+                      onMouseEnter={e => { e.currentTarget.style.background = '#c9a96e'; e.currentTarget.style.color = '#1a2e1a'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = '#1a2e1a'; e.currentTarget.style.color = '#c9a96e'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+                      DOWNLOAD BROCHURE
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+
+            {/* Contact strip */}
+            {!done && (
+              <div style={{ borderTop: '1px solid rgba(26,46,26,0.1)', padding: '16px 36px', display: 'flex', gap: 28, flexWrap: 'wrap', background: 'rgba(26,46,26,0.04)' }}>
+                {[['📞', '1800 12012 5555 / 9311852020'], ['✉', 'info@indogroup.in'], ['📍', '4JM6+R77, Azara, Guwahati, Assam 781017']].map(([ico, txt], i) => (
+                  <span key={i} style={{ fontFamily: 'DM Sans', fontSize: 11, fontWeight: 300, color: 'rgba(26,46,26,0.5)', display: 'flex', alignItems: 'center', gap: 7 }}><span style={{ fontSize: 13 }}>{ico}</span>{txt}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ─── NAV ──────────────────────────────────────────────────────────────────────
+    function Nav() {
+      const [scrolled, setScrolled] = useState(false);
+      const [menuOpen, setMenuOpen] = useState(false);
+      const openModal = useContext(ModalCtx);
+      useEffect(() => {
+        const fn = () => setScrolled(window.scrollY > 80);
+        fn(); window.addEventListener('scroll', fn, { passive: true }); return () => window.removeEventListener('scroll', fn);
+      }, []);
+      const links = [['#manifesto', 'Vision'], ['#wellness', 'Life at Aranya'], ['#club', 'Club'], ['#homes', 'Homes'], ['#gallery', 'Gallery'], ['#location', 'Location']];
+      
+      const toggleMenu = () => setMenuOpen(!menuOpen);
+
+      return (
+        <>
+          <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 500, height: 80, padding: '0 clamp(20px,5vw,72px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: scrolled || menuOpen ? 'rgba(10,19,10,0.98)' : 'rgba(10,19,10,0.75)', backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)', borderBottom: `1px solid rgba(201,169,110,${scrolled || menuOpen ? '0.3' : '0.12'})`, transition: 'background 0.4s ease, border-color 0.4s ease' }}>
+            <a href="#hero" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', zIndex: 510 }} onClick={() => setMenuOpen(false)}>
+              <img src="uploads/asset 1@3x.webp" alt="Aranya by Rang Homes" style={{ height: 56, width: 'auto', objectFit: 'contain', filter: 'brightness(0) saturate(100%) invert(72%) sepia(42%) saturate(480%) hue-rotate(2deg) brightness(98%) contrast(90%)' }} />
+            </a>
+            
+            {/* Desktop Links */}
+            <div className="nav-links-desktop">
+              {links.map(([href, label]) => (
+                <a key={href} href={href} className="gold-line" style={{ color: 'rgba(245,240,232,0.75)', textDecoration: 'none', fontFamily: 'DM Sans', fontSize: 11, fontWeight: 400, letterSpacing: '0.08em', textTransform: 'uppercase', transition: 'color 0.3s', paddingBottom: 4 }}
+                  onMouseEnter={e => { e.currentTarget.style.color = '#c9a96e'; }} onMouseLeave={e => { e.currentTarget.style.color = 'rgba(245,240,232,0.75)'; }}
+                >{label}</a>
+              ))}
+              <button onClick={() => openModal('')} style={{ color: '#c9a96e', border: '1px solid #c9a96e', padding: '9px 22px', background: 'transparent', fontFamily: 'DM Sans', fontSize: 11, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'all 0.3s', cursor: 'pointer' }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#c9a96e'; e.currentTarget.style.color = '#1a2e1a'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#c9a96e'; }}>
+                Enquire
+              </button>
+            </div>
+
+            {/* Hamburger Toggle */}
+            <button className="nav-hamburger" onClick={toggleMenu} style={{ background: 'none', border: 'none', color: '#c9a96e', fontSize: 24, padding: 8, cursor: 'pointer', zIndex: 510 }}>
+              {menuOpen ? '✕' : '☰'}
+            </button>
+          </nav>
+
+          {/* Mobile Menu Drawer */}
+          <div className={`nav-drawer ${menuOpen ? 'open' : ''}`}>
+            {links.map(([href, label]) => (
+              <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>
+            ))}
+            <button onClick={() => { setMenuOpen(false); openModal(''); }} style={{ color: '#1a2e1a', background: '#c9a96e', border: 'none', padding: '12px 32px', fontFamily: 'DM Sans', fontSize: 12, fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', transition: 'all 0.3s', cursor: 'pointer', marginTop: 12 }}>
+              Enquire Now
+            </button>
+          </div>
+        </>
+      );
+    }
+
+    // ─── HERO ─────────────────────────────────────────────────────────────────────
+    function Hero({ tweaks }) {
+      const [ready, setReady] = useState(false);
+      const [scrollY, setScrollY] = useState(0);
+      useEffect(() => { const t = setTimeout(() => setReady(true), 80); return () => clearTimeout(t); }, []);
+      useEffect(() => { const fn = () => setScrollY(window.scrollY); window.addEventListener('scroll', fn, { passive: true }); return () => window.removeEventListener('scroll', fn); }, []);
+      const ov = tweaks.heroOverlay / 100;
+      return (
+        <section id="hero" style={{ position: 'relative', width: '100%', height: '100vh', minHeight: 680, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: `url('uploads/shot_07_5kshot_07_5k.webp')`, backgroundSize: 'cover', backgroundPosition: 'center 40%', transform: `translateY(${scrollY * 0.35}px)`, willChange: 'transform' }} />
+          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, rgba(8,18,8,0.6) 0%, rgba(8,18,8,0.32) 50%, rgba(8,18,8,0.75) 100%)` }} />
+          <div style={{ position: 'absolute', inset: 0, background: `rgba(5,12,5,${ov})` }} />
+
+          <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', padding: '0 clamp(20px,5vw,60px)', maxWidth: 980, opacity: ready ? 1 : 0, transition: 'opacity 1.1s ease' }}>
+            <p style={{ fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 28, animation: ready ? 'fadeUp 1.2s ease 0.1s both' : 'none' }}>
+              RANG HOMES AEROCITY, DHARAPUR, GUWAHATI, ASSAM
+            </p>
+            <h1 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(40px,5.5vw,80px)', fontWeight: 300, lineHeight: 1.12, color: '#f5f0e8', letterSpacing: '-0.01em', marginBottom: 28, opacity: ready ? 1 : 0, transform: ready ? 'translateY(0)' : 'translateY(28px)', transition: 'opacity 1.1s ease 0.2s, transform 1.1s ease 0.2s' }}>
+              Your Sanctuary<br /><em style={{ color: '#c9a96e', fontStyle: 'italic' }}>of Senses.</em>
+            </h1>
+            <p style={{ fontFamily: 'DM Sans', fontSize: 15, fontWeight: 300, color: 'rgba(245,240,232,0.7)', letterSpacing: '0.06em', lineHeight: 2, maxWidth: 440, margin: '0 auto 52px', animation: ready ? 'fadeUp 1.1s ease 0.45s both' : 'none' }}>
+              Spacious 2,3 &amp; 4 BHK Apartments
+            </p>
+            <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', animation: ready ? 'fadeUp 1.1s ease 0.6s both' : 'none' }}>
+              <CTAButton label="Schedule a Visit" variant="gold" interest="" />
+              <CTAButton label="View Gallery" variant="outline" onClick={() => { const el = document.getElementById('gallery'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} />
+            </div>
+          </div>
+
+          <div style={{ position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, opacity: ready ? 0.5 : 0, transition: 'opacity 2s ease 1.2s' }}>
+            <span style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.28em', color: '#f5f0e8', textTransform: 'uppercase' }}>Scroll</span>
+            <div style={{ width: 1, height: 44, background: 'linear-gradient(to bottom, #c9a96e, transparent)', animation: 'scrollPulse 2s ease-in-out infinite' }} />
+          </div>
+        </section>
+      );
+    }
+
+    // ─── STATS BAR ────────────────────────────────────────────────────────────────
+    function StatsBar() {
+      const [ref, vis] = useReveal(0.3);
+      const stats = [{ n: '257', l: 'Curated Residences' }, { n: '70%', l: 'Green Open Space' }, { n: '16,000+', l: 'Sq Ft Clubhouse' }, { n: 'Oasis', l: 'Swimming Pool' }, { n: '2031', l: 'Possession' }];
+      return (
+        <div ref={ref} className="stats-grid" style={{ background: '#1a2e1a', padding: 'clamp(36px,5vw,64px) clamp(20px,5vw,80px)' }}>
+          {stats.map((s, i) => (
+            <div key={i} className="stats-item hover-lift" style={{ textAlign: 'center', padding: '12px 16px', opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(18px)', transition: `opacity 0.7s ease ${i * 0.08}s, transform 0.7s ease ${i * 0.08}s`, cursor: 'default' }}>
+              <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,3.5vw,46px)', fontWeight: 300, color: '#c9a96e', lineHeight: 1 }}>{s.n}</div>
+              <div style={{ fontFamily: 'DM Sans', fontSize: 10, fontWeight: 400, color: 'rgba(245,240,232,0.5)', letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: 10 }}>{s.l}</div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // ─── MANIFESTO ────────────────────────────────────────────────────────────────
+    function Manifesto() {
+      const [ref, vis] = useReveal(0.12);
+      const pRef = useParallax(0.18);
+      return (
+        <section id="manifesto" style={{ padding: 'clamp(72px,9vw,130px) clamp(20px,8vw,130px)', background: '#f5f0e8', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', right: '-2%', top: '45%', transform: 'translateY(-50%)', fontFamily: 'Cormorant Garamond, serif', fontSize: 'min(260px,22vw)', fontWeight: 300, color: 'rgba(26,46,26,0.04)', lineHeight: 1, userSelect: 'none', pointerEvents: 'none', letterSpacing: '-0.02em' }}>Aranya</div>
+
+          <div ref={ref} style={{ maxWidth: 1140, margin: '0 auto' }}>
+            <div className="manifesto-grid" style={{ gap: 'clamp(40px,6vw,96px)', alignItems: 'center', marginBottom: 'clamp(48px,6vw,80px)' }}>
+              <div style={{ opacity: vis ? 1 : 0, transform: vis ? 'translateX(0)' : 'translateX(-28px)', transition: 'opacity 0.9s ease, transform 0.9s ease' }}>
+                <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.3em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 20 }}>The Vision</p>
+                <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,3.8vw,52px)', fontWeight: 300, lineHeight: 1.18, color: '#1a2e1a', marginBottom: 28 }}>
+                  Where the forest<br /><em>breathes you in.</em>
+                </h2>
+                <GoldDivider style={{ maxWidth: 220, marginBottom: 24 }} />
+                <p style={{ fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 32 }}>RANG HOMES AEROCITY, DHARAPUR, GUWAHATI</p>
+                <CTAButton label="Book a Site Visit" variant="outlineDark" interest="" />
+              </div>
+              <div style={{ opacity: vis ? 1 : 0, transform: vis ? 'translateX(0)' : 'translateX(28px)', transition: 'opacity 0.9s ease 0.18s, transform 0.9s ease 0.18s' }}>
+                <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(18px,2vw,24px)', fontWeight: 300, fontStyle: 'italic', lineHeight: 1.8, color: '#2a3a2a', marginBottom: 28 }}>
+                  "A home that quietens the mind. Sunlit rooms, open corridors, and a community woven through greenery — every element of Aranya is designed to restore what urban life slowly takes away."
+                </p>
+                <p style={{ fontFamily: 'DM Sans', fontSize: 14, fontWeight: 300, lineHeight: 1.95, color: '#4a5a4a', marginBottom: 22 }}>
+                  Nestled within RH Aerocity's emerging residential landscape, Aranya rises from 70% open green land. Two towers. 257 homes. A single quiet conviction — that living well means living close to nature.
+                </p>
+                <p style={{ fontFamily: 'DM Sans', fontSize: 14, fontWeight: 300, lineHeight: 1.95, color: '#4a5a4a' }}>
+                  Here, you don't escape to nature on weekends. <em style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 18, color: '#1a2e1a' }}>You wake up inside it.</em>
+                </p>
+              </div>
+            </div>
+
+            {/* Image strip with parallax */}
+            <div ref={pRef} className="img-zoom" style={{ overflow: 'hidden', opacity: vis ? 1 : 0, transition: 'opacity 0.9s ease 0.35s', position: 'relative' }}>
+              <div style={{ height: 400, overflow: 'hidden', position: 'relative' }}>
+                <div className="parallax-inner" style={{ position: 'absolute', inset: '-15% 0', backgroundImage: `url('uploads/entrance cam_rang homes.webp')`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                <div style={{ position: 'absolute', bottom: 16, left: 16, background: 'rgba(10,20,10,0.65)', border: '1px solid rgba(245,240,232,0.2)', padding: '5px 12px', zIndex: 3 }}>
+                  <p style={{ fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#f5f0e8', fontWeight: 400 }}>Artist's Impression</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // ─── SUSTAINABLE ATMOS ────────────────────────────────────────────────────────
+    function SustainableAtmos() {
+      const [ref, vis] = useReveal(0.1);
+      const tags = ['Butterfly Garden', 'Bamboo Garden', 'Hedge Garden', 'Flower Garden', 'Aroma Garden', 'Ginger Garden', 'Mound Garden', 'Floating Cabana', 'Palm Court', 'Sculpture Garden', 'Pavilion Garden', 'Rolling Ground'];
+      return (
+        <section id="wellness" style={{ background: '#1a2e1a', padding: 'clamp(72px,9vw,130px) clamp(20px,8vw,120px)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 0, right: 0, width: '45%', height: '65%', background: 'radial-gradient(ellipse at top right, rgba(122,158,126,0.11) 0%, transparent 70%)', pointerEvents: 'none' }} />
+          <TreeLine opacity={0.06} dark="#060e06" />
+
+          <div ref={ref} style={{ maxWidth: 1180, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+            <div style={{ textAlign: 'center', marginBottom: 68, opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(22px)', transition: 'opacity 0.8s ease, transform 0.8s ease' }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 20 }}>Sustainable Atmos</p>
+              <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,4vw,56px)', fontWeight: 300, color: '#f5f0e8', lineHeight: 1.15 }}>
+                A pathway to tranquility,<br /><em style={{ color: '#c9a96e' }}>surrounded by nature's embrace.</em>
+              </h2>
+            </div>
+
+            <div className="sustainable-grid" style={{ gap: 3, marginBottom: 3 }}>
+              {[
+                { img: 'uploads/pool cam.webp', title: 'The Urban Oasis', sub: 'Cool & Immersive', desc: 'Tree-lined pathways and layered gardens create a cooler microclimate. The pool sits at the heart of it all — your daily refresh.' },
+                { img: 'uploads/kids cam_rang homes.webp', title: 'The Urban Boulevard', sub: 'Shared Green Spine', desc: 'The central stretch of curated greenery shared by both towers — a living corridor where light and shadow play through the day.' },
+              ].map((z, i) => (
+                <div key={i} className="img-zoom" style={{ position: 'relative', height: 420, overflow: 'hidden', opacity: vis ? 1 : 0, transition: `opacity 0.75s ease ${0.2 + i * 0.12}s`, cursor: 'pointer' }} onClick={() => { }}>
+                  <div style={{ position: 'absolute', inset: 0, backgroundImage: `url('${z.img}')`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(5,15,5,0.9) 0%, rgba(5,15,5,0.1) 55%)' }} />
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 'clamp(28px,3vw,40px)' }}>
+                    <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.24em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 10 }}>{z.sub}</p>
+                    <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 28, fontWeight: 400, color: '#f5f0e8', marginBottom: 12 }}>{z.title}</h3>
+                    <p style={{ fontFamily: 'DM Sans', fontSize: 13, fontWeight: 300, color: 'rgba(245,240,232,0.72)', lineHeight: 1.75 }}>{z.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ textAlign: 'center', padding: '48px 0 0', opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.5s' }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.38)', marginBottom: 22 }}>Landscape Highlights</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginBottom: 40 }}>
+                {tags.map((t, i) => (
+                  <span key={i} style={{ fontFamily: 'DM Sans', fontSize: 12, fontWeight: 300, color: 'rgba(245,240,232,0.65)', padding: '8px 18px', border: '1px solid rgba(201,169,110,0.18)', transition: 'all 0.3s', cursor: 'default' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#c9a96e'; e.currentTarget.style.color = '#c9a96e'; e.currentTarget.style.background = 'rgba(201,169,110,0.06)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(201,169,110,0.18)'; e.currentTarget.style.color = 'rgba(245,240,232,0.65)'; e.currentTarget.style.background = 'transparent'; }}
+                  >{t}</span>
+                ))}
+              </div>
+              <CTAButton label="Explore Life at Aranya" variant="outline" interest="" />
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // ─── WELLNESS ─────────────────────────────────────────────────────────────────
+    function WellnessSection() {
+      const [ref, vis] = useReveal(0.1);
+      const groups = [
+        { cat: 'Physical Wellness', items: ['Swimming Pool', 'Jogging Track', 'Multipurpose Court', 'Active @Aranya Gym'] },
+        { cat: 'Emotional & Mental', items: ['Butterfly Garden', 'Bamboo Garden', 'Hedge Garden', 'Flower Garden', 'Landscape Lawn'] },
+        { cat: 'Social & Community', items: ['Club Aranya — 16,000 sq ft', 'Rooftop Social Lounge', 'Double-Height Banquet Hall', 'Open Café & Restaurant', 'Mini Theatre'] },
+        { cat: 'For Families', items: ['EIEIO Play Studio', 'Outdoor Kids\' Play Area', 'Floating Cabana', 'Stargazing Deck', 'Senior Seating Grove'] },
+      ];
+      return (
+        <section style={{ background: '#f5f0e8', padding: 'clamp(72px,9vw,130px) clamp(20px,8vw,120px)', position: 'relative', overflow: 'hidden' }}>
+          <div ref={ref} style={{ maxWidth: 1180, margin: '0 auto' }}>
+            <div className="wellness-main-grid" style={{ gap: 'clamp(40px,5vw,80px)', alignItems: 'start' }}>
+              <div style={{ position: 'sticky', top: 100, opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(22px)', transition: 'opacity 0.8s ease, transform 0.8s ease' }}>
+                <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.3em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 20 }}>Holistic Wellness</p>
+                <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px,3.2vw,46px)', fontWeight: 300, lineHeight: 1.2, color: '#1a2e1a', marginBottom: 24 }}>
+                  Step into serenity.<br /><em>Every day.</em>
+                </h2>
+                <GoldDivider style={{ maxWidth: 180, marginBottom: 22 }} />
+                <p style={{ fontFamily: 'DM Sans', fontSize: 14, fontWeight: 300, color: '#4a5a4a', lineHeight: 1.9, marginBottom: 32 }}>Whether a morning swim, an evening walk through the butterfly garden, or a quiet hour at the café — every moment at Aranya feels unhurried.</p>
+                <CTAButton label="Explore Club Aranya" variant="outlineDark" onClick={() => { const el = document.getElementById('club'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} />
+              </div>
+              <div className="wellness-cards-grid" style={{ gap: 3 }}>
+                {groups.map((g, i) => (
+                  <div key={i} className="hover-lift" style={{ background: i % 2 === 0 ? '#ede7d9' : '#e6dfd1', padding: 'clamp(24px,3vw,36px) clamp(20px,2.5vw,32px)', opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(22px)', transition: `opacity 0.7s ease ${0.1 + i * 0.1}s, transform 0.7s ease ${0.1 + i * 0.1}s` }}>
+                    <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 16 }}>{g.cat}</p>
+                    <ul style={{ listStyle: 'none' }}>
+                      {g.items.map((item, j) => (
+                        <li key={j} style={{ fontFamily: 'DM Sans', fontSize: 13, fontWeight: 300, color: '#2a3a2a', padding: '7px 0', display: 'flex', alignItems: 'center', gap: 10, borderBottom: j < g.items.length - 1 ? '1px solid rgba(26,46,26,0.07)' : 'none' }}>
+                          <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#c9a96e', flexShrink: 0 }} />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // ─── CLUB ARANYA ──────────────────────────────────────────────────────────────
+    function ClubAranya() {
+      const [ref, vis] = useReveal(0.1);
+      const [active, setActive] = useState(0);
+      const spaces = [
+        { name: 'CLUB LOBBY', tag: 'Ground Level', desc: 'The grand entrance to Club Aranya — a space that sets the tone with its warm materiality and curated art.', img: 'uploads/club lobby (00120)_6k.webp' },
+        { name: 'BANQUET HALL', tag: 'Ground Level', desc: 'A column-free double-height space designed for celebrations to shine. Versatile. Impeccable.', img: 'uploads/banquet (00000)_6k.webp' },
+        { name: 'ACTIVE@ARANYA', tag: 'Ground Level', desc: 'A premium gymnasium where strength meets form. Designed for those who treat fitness as a philosophy, not a routine.', img: 'uploads/gym (00000)_6k.webp' },
+        { name: 'GAMEON@ARANYA', tag: 'Ground Level', desc: 'Billiards, table tennis, arcade machines — a space where friendly competition thrives.', img: 'uploads/gaming room (00000)_6k.webp' },
+        { name: 'EIEIO PLAY STUDIO', tag: 'Ground Level', desc: "A toddlers' world where little feet make big memories. Safe, imaginative, and delightful in every corner.", img: 'uploads/kids_play (00000)_5k.webp' }
+      ];
+      return (
+        <section id="club" style={{ background: '#243a24', padding: 'clamp(72px,9vw,130px) clamp(20px,8vw,120px)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: '70%', height: '55%', background: 'radial-gradient(ellipse, rgba(201,169,110,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
+          <div ref={ref} style={{ maxWidth: 1180, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+            <div style={{ textAlign: 'center', marginBottom: 56, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease' }}>
+              <img src="uploads/logo design.webp" alt="Club Aranya Logo" style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 20, border: '1px solid rgba(201,169,110,0.3)', padding: '4px', background: 'rgba(255,255,255,0.05)', boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)' }} />
+              <p style={{ fontFamily: 'DM Sans', fontSize: 22, fontWeight: 500, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 20 }}>Club Aranya</p>
+              <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,4vw,56px)', fontWeight: 300, color: '#f5f0e8', lineHeight: 1.15, marginBottom: 18 }}>
+                Double-tiered social spaces<br /><em style={{ color: '#c9a96e' }}>spread over 16,000+ sq ft.</em>
+              </h2>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 14, fontWeight: 300, color: 'rgba(245,240,232,0.55)', maxWidth: 520, margin: '0 auto', lineHeight: 1.85 }}>
+                Social, inclusive, rooted in warmth — this is where unwinding hours feel special.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: 3, marginBottom: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
+              {spaces.map((s, i) => (
+                <button key={i} onClick={() => setActive(i)} style={{ fontFamily: 'DM Sans', fontSize: 11, fontWeight: 400, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '11px 18px', border: 'none', cursor: 'pointer', background: active === i ? '#c9a96e' : 'rgba(245,240,232,0.07)', color: active === i ? '#1a2e1a' : 'rgba(245,240,232,0.55)', transition: 'all 0.25s ease', flex: '0 0 auto' }}>{s.name}</button>
+              ))}
+            </div>
+
+            <div className="club-grid" style={{ gap: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.7s ease 0.25s' }}>
+              <div style={{ background: 'rgba(245,240,232,0.04)', border: '1px solid rgba(201,169,110,0.15)', padding: 'clamp(32px,4vw,56px) clamp(28px,4vw,52px)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 16 }}>{spaces[active].tag}</p>
+                <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,3.5vw,46px)', fontWeight: 300, color: '#f5f0e8', marginBottom: 22, lineHeight: 1.15 }}>{spaces[active].name}</h3>
+                <p style={{ fontFamily: 'DM Sans', fontSize: 14, fontWeight: 300, color: 'rgba(245,240,232,0.68)', lineHeight: 1.9 }}>{spaces[active].desc}</p>
+              </div>
+              <div className="img-zoom" style={{ height: 380, overflow: 'hidden', position: 'relative' }}>
+                <div style={{ position: 'absolute', inset: 0, backgroundImage: `url('${spaces[active].img}')`, backgroundSize: 'cover', backgroundPosition: 'center', transition: 'background-image 0.2s' }} />
+              </div>
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: 36, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.5s' }}>
+              <CTAButton label="View Full Gallery" variant="outline" onClick={() => { const el = document.getElementById('gallery'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} />
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+// ─── HOMES / FLOOR PLANS ──────────────────────────────────────────────────────
+function HomesSection() {
+  const [ref, vis] = useReveal(0.1);
+  const [active, setActive] = useState(0);
+  const [activeSub, setActiveSub] = useState(0);
+  const [isPlanZoomed, setIsPlanZoomed] = useState(false);
+  const [planZoomOrigin, setPlanZoomOrigin] = useState('50% 50%');
+
+  useEffect(() => {
+    setActiveSub(0);
+    setIsPlanZoomed(false);
+    setPlanZoomOrigin('50% 50%');
+  }, [active]);
+
+  useEffect(() => {
+    setIsPlanZoomed(false);
+    setPlanZoomOrigin('50% 50%');
+  }, [activeSub]);
+
+  const handlePlanZoom = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setPlanZoomOrigin(`${x}% ${y}%`);
+    setIsPlanZoomed(prev => !prev);
+  };
+
+  useEffect(() => {
+    const preloadImages = () => {
+      units.forEach(u => {
+        if (u.planImg) {
+          const img = new Image();
+          img.src = u.planImg;
+        }
+        if (u.subtabs) {
+          u.subtabs.forEach(sub => {
+            if (sub.planImg) {
+              const img = new Image();
+              img.src = sub.planImg;
+            }
+          });
+        }
+      });
+    };
+    if (window.requestIdleCallback) {
+      window.requestIdleCallback(preloadImages);
+    } else {
+      setTimeout(preloadImages, 1000);
+    }
+  }, []);
+
+  const units = [
+    {
+      type: '2 BHK + 2T', label: 'Aura', size: '924', carpet: '644', unit: 'sq ft',
+      floors: 'Ground to 9th Floor', tag: 'Boutique Collection', price: '',
+      planImg: 'uploads/unit-d-2bhk.webp',
+      hl: ['Efficient 2 BHK layout', 'Optimized room planning', 'Clear circulation flow', 'Comfort-focused apartment design'],
+      interest: '2bhk',
+      tower: 'T2',
+    },
+    {
+      type: '3 BHK + 2T', label: 'Celestial', size: '1,379', carpet: '906', unit: 'sq ft',
+      floors: 'Ground to 9th Floor', tag: 'Most Popular', price: '₹5,000 – ₹6,000 /sq ft',
+      planImg: 'uploads/unit-a.webp',
+      hl: ['East-West cross ventilation', 'Utility balcony with kitchen', 'Jumbo vitrified tile flooring', 'Smart digital main-door lock'],
+      interest: '3bhk',
+      tower: 'T2',
+    },
+    {
+      type: '3BHK+3T', label: 'Grande', size: '1,326 – 1,687', unit: 'sq ft',
+      floors: 'Ground to 10th Floor', tag: 'Executive Choice', price: '₹5,200 – ₹6,200 /sq ft',
+      planImg: 'uploads/unit-a.webp',
+      hl: ['Spacious 3 BHK + 3 Toilet layout', 'East-West cross ventilation', 'Jumbo vitrified tile flooring', 'Smart digital main-door lock'],
+      interest: '3bhk-3t',
+      tower: 'T1',
+      subtabs: [
+        { name: '3 BHK + 3T (1221 sq ft)', size: '1221', carpet: '952', planImg: 'uploads/unit-b1c.webp', floors: 'Ground Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1321 sq ft)', size: '1321', carpet: '952', planImg: 'uploads/UNIT-B3.webp', floors: '1st to 10th Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1348 sq ft)', size: '1348', carpet: '952', planImg: 'uploads/UNIT-B1.webp', floors: '1st to 10th Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1361 sq ft)', size: '1361', carpet: '956', planImg: 'uploads/UNIT-B4.webp', floors: '1st to 10th Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1442 sq ft)', size: '1442', carpet: '952', planImg: 'uploads/UNIT-B3B.webp', floors: 'Ground Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1446 sq ft)', size: '1446', carpet: '1023', planImg: 'uploads/UNIT-B2.webp', floors: '1st to 10th Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1479 sq ft)', size: '1479', carpet: '952', planImg: 'uploads/UNIT-B1B.webp', floors: 'Ground Floor', tower: 'T1' },
+        { name: '3 BHK + 3T (1631 sq ft)', size: '1631', carpet: '1090', planImg: 'uploads/UNIT-B6.webp', floors: 'Ground to 9th Floor', tower: 'T2' }
+      ]
+    },
+    {
+      type: '3 BHK + 3T + Terrace', label: 'Garden Homes', size: '2,280 – 2,687', unit: 'sq ft',
+      floors: '1st & 2nd Floor', tag: 'Limited Edition', price: '₹5,500 – ₹6,500 /sq ft',
+      planImg: 'uploads/unit-b1c.webp',
+      hl: ['Private terrace up to 1,326 sq ft', 'Garden-level seclusion', 'Exclusive green views', 'Personal outdoor retreat'],
+      interest: '3bhk-t',
+      tower: 'T1',
+      subtabs: [
+        {
+          name: '3 BHK + 3T + TERRACE (2280 sq ft)',
+          size: '2,280',
+          carpet: '952',
+          planImg: 'uploads/UNIT-B3A.webp',
+          floors: '2nd Floor',
+          tower: 'T1',
+          hl: ['Private terrace up to 959 sq ft', 'Garden-level seclusion', 'Exclusive green views', 'Personal outdoor retreat']
+        },
+        { name: '3 BHK + 3T + TERRACE (2,687 sq ft)', size: '2,687', carpet: '956', planImg: 'uploads/UNIT-B4A.webp', floors: '2nd Floor', tower: 'T1' }
+      ]
+    },
+    {
+      type: '4 BHK', label: 'Prestige', size: '1,623 – 1,895', unit: 'sq ft',
+      floors: '1st Floor onwards', tag: 'Select Floors', price: '₹5,500 – ₹6,500 /sq ft',
+      planImg: 'uploads/unit-a.webp',
+      hl: ['Dedicated staff room', 'Puja room option', 'Expansive corner balconies', 'Premium finishes throughout'],
+      interest: '4bhk',
+      tower: 'T1',
+      subtabs: [
+        {
+          name: '4 BHK (1867 sq ft)',
+          size: '1,867',
+          carpet: '1,343',
+          planImg: 'uploads/UNIT-C2.webp',
+          floors: '3rd to 10th Floor',
+          tower: 'T1',
+          hl: ['Dedicated Puja/Store Room', 'Expansive balconies', 'Premium finishes throughout']
+        },
+        {
+          name: '4 BHK (1895 sq ft)',
+          size: '1,895',
+          carpet: '1,332',
+          planImg: 'uploads/UNIT-C1.webp',
+          floors: '1st Floor',
+          tower: 'T1',
+          hl: ['Staff Room Option', 'Expansive corner balconies', 'Premium finishes throughout']
+        }
+      ]
+    },
+    {
+      type: '4 BHK + Terrace', label: 'Signature', size: '2,532 – 3,044', unit: 'sq ft',
+      floors: '1st–2nd Floor', tag: 'Ultra Premium', price: '₹6,000 – ₹7,000 /sq ft',
+      planImg: 'uploads/unit-b1c.webp',
+      hl: ['Terrace up to 1,177 sq ft', 'Puja + staff rooms', 'Full-perimeter views', 'Legacy-grade specification'],
+      interest: '4bhk-t',
+      tower: 'T1',
+      subtabs: [
+        {
+          name: '4 BHK + TERRACE (2236 sq ft)',
+          size: '2,236',
+          carpet: '1,332',
+          planImg: 'uploads/UNIT-C1A.webp',
+          floors: '1st Floor',
+          tower: 'T1',
+          hl: ['Terrace up to 341 sq ft', 'Staff Room', 'Full-perimeter views', 'Legacy-grade specification']
+        },
+        {
+          name: '4 BHK + TERRACE (2532 sq ft)',
+          size: '2,532',
+          carpet: '1,332',
+          planImg: 'uploads/UNIT-C1B.webp',
+          floors: '2nd Floor',
+          tower: 'T1',
+          hl: ['Terrace up to 637 sq ft', 'Staff Room', 'Full-perimeter views', 'Legacy-grade specification']
+        },
+        {
+          name: '4 BHK + TERRACE (3044 sq ft)',
+          size: '3,044',
+          carpet: '1,343',
+          planImg: 'uploads/UNIT-C2A.webp',
+          floors: '2nd Floor',
+          tower: 'T1',
+          hl: ['Terrace up to 1,177 sq ft', 'Dedicated Puja/Store Room', 'Full-perimeter views', 'Legacy-grade specification']
+        }
+      ]
+    },
+  ];
+
+  const u = units[active];
+  const currentPlanImg = u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub].planImg : u.planImg;
+
+  return (
+    <section id="homes" style={{ background: '#f5f0e8', padding: 'clamp(72px,9vw,120px) clamp(20px,8vw,120px)', position: 'relative', overflow: 'hidden' }}>
+
+      <div ref={ref} style={{ maxWidth: 1280, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 52, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease' }}>
+          <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 16 }}>Celestial Apartments</p>
+          <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,4vw,52px)', fontWeight: 300, color: '#1a2e1a', lineHeight: 1.15 }}>
+            Curated, comfortable,<br /><em>consciously designed.</em>
+          </h2>
+        </div>
+
+        {/* Unit type tab selector */}
+        <div className="homes-tabs" style={{ marginBottom: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.1s' }}>
+          {units.map((u, i) => (
+            <button key={i} onClick={() => setActive(i)} style={{ padding: '16px 12px', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'all 0.3s', background: active === i ? '#1a2e1a' : '#ede7d9', borderBottom: active === i ? '2px solid #c9a96e' : '2px solid transparent' }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 12, letterSpacing: '0.16em', textTransform: 'uppercase', color: active === i ? '#c9a96e' : '#7a9e7e', marginBottom: 5 }}>{u.type}</p>
+              <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 24, fontWeight: 400, color: active === i ? '#f5f0e8' : '#1a2e1a', lineHeight: 1.2 }}>{u.label}</p>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#c9a96e', marginTop: 6 }}>{u.tag}</p>
+            </button>
+          ))}
+        </div>
+
+        {/* Subtabs Selector */}
+        {u.subtabs && u.subtabs.length > 0 && (
+          <div
+            className="homes-subtabs-fit"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: `repeat(${u.subtabs.length}, minmax(0, 1fr))`,
+              gap: 3,
+              marginBottom: 3,
+              opacity: vis ? 1 : 0,
+              transition: 'opacity 0.8s ease 0.15s',
+              width: '100%',
+              overflow: 'hidden'
+            }}
+          >
+            {u.subtabs.map((sub, idx) => (
+              <button key={idx} onClick={() => setActiveSub(idx)} style={{
+                padding: '10px 6px',
+                border: 'none',
+                cursor: 'pointer',
+                textAlign: 'center',
+                fontFamily: 'DM Sans',
+                fontSize: 12,
+                fontWeight: 500,
+                letterSpacing: '0.045em',
+                textTransform: 'uppercase',
+                transition: 'all 0.3s',
+                background: activeSub === idx ? '#1a2e1a' : '#ede7d9',
+                color: activeSub === idx ? '#c9a96e' : '#1a2e1a',
+                borderBottom: activeSub === idx ? '2px solid #c9a96e' : '2px solid transparent',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                minWidth: 0
+              }}>
+                {(() => {
+                  const name = sub.name;
+                  const idxOpen = name.indexOf('(');
+                  if (idxOpen !== -1) {
+                    const base = name.substring(0, idxOpen).trim();
+                    const sizePart = name.substring(idxOpen + 1).replace(')', '').trim();
+                    return (
+                      <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {base}{' '}
+                        <span style={{ 
+                          fontSize: '10px', 
+                          fontWeight: 400, 
+                          opacity: 0.85, 
+                          textTransform: 'none',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          ({sizePart})
+                        </span>
+                      </span>
+                    );
+                  }
+                  return name;
+                })()}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Main content: floor plan left, specs right */}
+        <div key={active + '-' + activeSub} className="homes-main-grid" style={{ gap: 3, animation: 'fadeIn 0.4s ease', opacity: vis ? 1 : 0, transition: 'opacity 0.6s ease 0.2s' }}>
+
+          {/* Floor Plan Image — large, clean, prominent */}
+          <div
+            style={{
+              background: '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 'clamp(24px,4vw,52px)',
+              position: 'relative',
+              minHeight: 500,
+              overflow: 'hidden'
+            }}
+          >
+            {/* Subtle watermark bg */}
+            <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(122,158,126,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(122,158,126,0.04) 1px,transparent 1px)', backgroundSize: '24px 24px', pointerEvents: 'none' }} />
+            <img
+              src={currentPlanImg}
+              alt={`${u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub].name : u.label} Floor Plan`}
+              title={isPlanZoomed ? 'Click to reset zoom' : 'Click to zoom floor plan'}
+              onClick={handlePlanZoom}
+              style={{
+                width: '100%',
+                maxWidth: 620,
+                height: 'auto',
+                aspectRatio: '1.5',
+                objectFit: 'contain',
+                position: 'relative',
+                zIndex: 1,
+                transition: 'opacity 0.4s ease, transform 0.35s ease',
+                transform: isPlanZoomed ? 'scale(2.45)' : 'scale(1)',
+                transformOrigin: planZoomOrigin,
+                cursor: isPlanZoomed ? 'zoom-out' : 'zoom-in'
+              }}
+              loading="lazy"
+              onError={(e)=>{
+                if (e.target.src.endsWith('.webp')) {
+                  e.target.src = e.target.src.replace('.webp', '.jpg');
+                } else {
+                  e.target.onerror = null;
+                  e.target.src = 'uploads/unit-a.webp';
+                }
+              }}
+            />
+            {/* Plan label badge */}
+            <div style={{ position: 'absolute', top: 16, left: 16, background: '#1a2e1a', padding: '6px 14px' }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#c9a96e' }}>
+                {u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub].name : `${u.type} · ${u.label}`}
+              </p>
+            </div>
+
+            <p style={{ position: 'absolute', bottom: 12, right: 14, fontFamily: 'DM Sans', fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(26,46,26,0.3)' }}>Indicative Floor Plan — Not to Scale</p>
+          </div>
+
+          {/* Specs panel */}
+          <div style={{ background: '#1a2e1a', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: 'clamp(28px,3.5vw,48px) clamp(24px,3vw,40px)' }}>
+            <div>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 12, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 8 }}>{u.type}</p>
+              <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px,3vw,40px)', fontWeight: 300, color: '#f5f0e8', marginBottom: 6, lineHeight: 1.1 }}>
+                {u.subtabs && u.subtabs[activeSub]
+                  ? `${u.label === 'Garden Home' ? 'Garden Homes' : u.label}_ ${u.subtabs[activeSub].name}`
+                  : u.label}
+              </h3>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.35)', marginBottom: 28 }}>{u.tag}</p>
+
+              {/* Key stats */}
+              {(() => {
+                const currentCarpet = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].carpet
+                  ? u.subtabs[activeSub].carpet
+                  : u.carpet;
+                const currentSize = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].size
+                  ? u.subtabs[activeSub].size
+                  : u.size;
+                const currentFloors = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].floors
+                  ? u.subtabs[activeSub].floors
+                  : u.floors;
+                const currentTower = u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].tower
+                  ? u.subtabs[activeSub].tower
+                  : u.tower;
+
+                const stats = [
+                  ['Carpet Area', currentCarpet ? `${currentCarpet} ${u.unit}` : '—'],
+                  ['Super Built-up Area', `${currentSize} ${u.unit}`],
+                  ['Location', currentFloors],
+                  ['Tower', currentTower || '—'],
+                ];
+
+                return (
+                  <div className="homes-stats-grid" style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: 3,
+                    marginBottom: 28
+                  }}>
+                    {stats.map(([k, v], i) => (
+                      <div key={i} style={{
+                        background: 'rgba(245,240,232,0.05)',
+                        padding: '14px 16px',
+                        borderLeft: '2px solid rgba(201,169,110,0.3)',
+                        minHeight: 58,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                        <p style={{
+                          fontFamily: 'DM Sans',
+                          fontSize: 8,
+                          letterSpacing: '0.16em',
+                          textTransform: 'uppercase',
+                          color: 'rgba(245,240,232,0.4)',
+                          marginBottom: 5
+                        }}>{k}</p>
+                        <p style={{
+                          fontFamily: k === 'Tower' ? 'DM Sans, sans-serif' : 'Cormorant Garamond, serif',
+                          fontSize: 16,
+                          fontWeight: k === 'Tower' ? 400 : 300,
+                          color: '#f5f0e8',
+                          lineHeight: 1.3
+                        }}>{k === 'Tower' && typeof v === 'string' ? v.replace('T', 'T ') : v}</p>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              {/* Highlights */}
+              <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.4)', marginBottom: 12 }}>Highlights</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 28 }}>
+                {(u.subtabs && u.subtabs[activeSub] && u.subtabs[activeSub].hl
+                  ? u.subtabs[activeSub].hl
+                  : u.hl
+                ).map((h, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '9px 0', borderBottom: '1px solid rgba(245,240,232,0.06)', fontFamily: 'DM Sans', fontSize: 14, fontWeight: 300, color: 'rgba(245,240,232,0.78)', }}>
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#c9a96e', flexShrink: 0 }} />{h}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <CTAButton label={`Enquire — ${u.subtabs && u.subtabs[activeSub] ? u.subtabs[activeSub].name : u.label}`} variant="gold" interest={u.interest} />
+              <CTAButton label="Download Brochure" variant="outline" interest={u.interest} />
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  );
+}
+    // ─── WALKTHROUGH VIDEO ────────────────────────────────────────────────────────
+    function WalkthroughVideo() {
+      const [ref, vis] = useReveal(0.1);
+      const [playing, setPlaying] = useState(false);
+      return (
+        <section id="walkthrough" style={{ background: '#1a2e1a', padding: 'clamp(72px,9vw,130px) clamp(20px,8vw,120px)', position: 'relative', overflow: 'hidden' }}>
+          <TreeLine opacity={0.05} dark="#060e06" />
+          <div ref={ref} style={{ maxWidth: 1000, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+            <div style={{ textAlign: 'center', marginBottom: 52, opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(22px)', transition: 'opacity 0.8s ease, transform 0.8s ease' }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 20 }}>Virtual Walkthrough</p>
+              <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,4vw,52px)', fontWeight: 300, color: '#f5f0e8', lineHeight: 1.15 }}>
+                Experience Aranya<br /><em style={{ color: '#c9a96e' }}>before you walk in.</em>
+              </h2>
+            </div>
+
+            <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(201,169,110,0.2)', opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.25s' }}>
+              {playing ? (
+                <iframe style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }} src="https://www.youtube.com/embed/0xOfYiOB6iM?autoplay=1" title="Aranya Walkthrough" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+              ) : (
+                <div style={{ position: 'absolute', inset: 0, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20 }} onClick={() => setPlaying(true)}>
+                  <div style={{ position: 'absolute', inset: 0, backgroundImage: `url('uploads/club cam_rang homes_rev.webp')`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(5,15,5,0.58)' }} />
+                  <div style={{ position: 'relative', zIndex: 1, width: 80, height: 80, borderRadius: '50%', background: 'rgba(201,169,110,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'pulse 2.5s ease-in-out infinite', transition: 'transform 0.3s' }}
+                    onMouseEnter={e => { e.currentTarget.style.animation = 'none'; e.currentTarget.style.transform = 'scale(1.12)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.animation = 'pulse 2.5s ease-in-out infinite'; e.currentTarget.style.transform = 'scale(1)'; }}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="#1a2e1a"><path d="M8 5v14l11-7z" /></svg>
+                  </div>
+                  <p style={{ position: 'relative', zIndex: 1, fontFamily: 'DM Sans', fontSize: 12, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.75)' }}>Play Walkthrough Video</p>
+                </div>
+              )}
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: 40, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.5s' }}>
+              <CTAButton label="Schedule an In-Person Tour" variant="gold" interest="" />
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // ─── GALLERY ──────────────────────────────────────────────────────────────────
+    function GallerySection() {
+      const [ref, vis] = useReveal(0.06);
+      const [current, setCurrent] = useState(0);
+      const [filter, setFilter] = useState('All');
+      const [lightbox, setLightbox] = useState(null);
+      const [transitioning, setTransitioning] = useState(false);
+      const thumbsRef = useRef(null);
+
+      const images = [
+        { src: 'uploads/entrance cam_rang homes.webp', label: '', cat: 'Exterior' },
+        { src: 'uploads/shot 15_v2.webp', label: 'Terrace View', cat: 'Exterior' },
+        { src: 'uploads/cam-02_revised.webp', label: 'Street View', cat: 'Exterior' },
+        { src: 'uploads/club cam_rang homes_rev.webp', label: 'Club Exterior', cat: ['Exterior', 'Club'] },
+        { src: 'uploads/pool cam.webp', label: 'Swimming Pool', cat: 'Amenities' },
+        { src: 'uploads/kids cam_rang homes.webp', label: 'Kids\' Outdoor Play Area', cat: 'Amenities' },
+        { src: 'uploads/club lobby (00120)_6k.webp', label: 'Club Lobby', cat: 'Club' },
+        { src: 'uploads/gym (00000)_6k.webp', label: 'Active @Aranya', cat: 'Club' },
+        { src: 'uploads/gaming room (00000)_6k.webp', label: 'Game ON @ Aranya', cat: 'Club' },
+        { src: 'uploads/kids_play (00000)_5k.webp', label: "Kids' Play Studio", cat: 'Club' },
+        { src: 'uploads/banquet (00000)_6k.webp', label: 'Banquet Hall', cat: 'Club' },
+        { src: 'uploads/tower lobby_001 (00000)_6k.webp', label: 'Tower Lobby', cat: 'Interior' },
+        { src: 'uploads/living dining (00000)_6k.webp', label: 'Living & Dining', cat: 'Interior' },
+        { src: 'uploads/master bedroom_0015k.webp', label: 'Master Bedroom', cat: 'Interior' },
+      ];
+
+      const cats = ['All', 'Exterior', 'Club', 'Amenities', 'Interior'];
+      const filtered = filter === 'All' ? images : images.filter(i => Array.isArray(i.cat) ? i.cat.includes(filter) : i.cat === filter);
+
+      const goTo = useCallback((idx) => {
+        if (transitioning) return;
+        const next = typeof idx === 'function' ? idx(current) : idx;
+        setTransitioning(true);
+        setCurrent(next);
+        setTimeout(() => setTransitioning(false), 400);
+        if (thumbsRef.current) {
+          const thumb = thumbsRef.current.children[next];
+          if (thumb) {
+            const container = thumbsRef.current;
+            const thumbLeft = thumb.offsetLeft;
+            const thumbWidth = thumb.offsetWidth;
+            const containerWidth = container.offsetWidth;
+            container.scrollLeft = thumbLeft - (containerWidth / 2) + (thumbWidth / 2);
+          }
+        }
+      }, [transitioning, current]);
+
+      useEffect(() => { setCurrent(0); }, [filter]);
+
+      const handleKey = useCallback(e => {
+        if (lightbox !== null) {
+          if (e.key === 'Escape') setLightbox(null);
+          if (e.key === 'ArrowRight') setLightbox(l => (l + 1) % filtered.length);
+          if (e.key === 'ArrowLeft') setLightbox(l => (l - 1 + filtered.length) % filtered.length);
+        } else {
+          if (e.key === 'ArrowRight') goTo(c => (c + 1) % filtered.length);
+          if (e.key === 'ArrowLeft') goTo(c => (c - 1 + filtered.length) % filtered.length);
+        }
+      }, [lightbox, filtered.length, goTo]);
+
+      useEffect(() => { window.addEventListener('keydown', handleKey); return () => window.removeEventListener('keydown', handleKey); }, [handleKey]);
+
+      useEffect(() => {
+        if (lightbox !== null) return;
+        const t = setInterval(() => {
+          setCurrent(c => (c + 1) % filtered.length);
+        }, 5000);
+        return () => clearInterval(t);
+      }, [filtered.length, lightbox]);
+
+      const img = filtered[Math.min(current, filtered.length - 1)] || filtered[0];
+
+      return (
+        <section id="gallery" style={{ background: '#f5f0e8', padding: 'clamp(64px,8vw,100px) clamp(20px,8vw,120px)' }}>
+          <div ref={ref} style={{ maxWidth: 1180, margin: '0 auto' }}>
+
+            {/* Header */}
+            <div style={{ textAlign: 'center', marginBottom: 40, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease' }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 14 }}>Gallery</p>
+              <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,4vw,52px)', fontWeight: 300, color: '#1a2e1a', lineHeight: 1.15, marginBottom: 28 }}>
+                See it. Feel it.<br /><em style={{ color: '#c9a96e' }}>Believe it.</em>
+              </h2>
+              <div style={{ display: 'flex', gap: 3, justifyContent: 'center', flexWrap: 'wrap' }}>
+                {cats.map(c => (
+                  <button key={c} onClick={() => setFilter(c)} style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '8px 20px', border: 'none', cursor: 'pointer', background: filter === c ? '#1a2e1a' : 'rgba(26,46,26,0.08)', color: filter === c ? '#c9a96e' : 'rgba(26,46,26,0.55)', transition: 'all 0.25s' }}>{c}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Main stage */}
+            <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', overflow: 'hidden', cursor: 'pointer', opacity: vis ? 1 : 0, transition: 'opacity 0.9s ease 0.2s', border: '1px solid rgba(201,169,110,0.1)' }}
+              onClick={() => setLightbox(Math.min(current, filtered.length - 1))}>
+              {filtered.map((im, i) => (
+                <div key={im.src} style={{ position: 'absolute', inset: 0, backgroundImage: `url('${im.src}')`, backgroundSize: 'cover', backgroundPosition: 'center', opacity: i === current ? 1 : 0, transition: 'opacity 0.6s ease' }} />
+              ))}
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(8,18,8,0.8) 0%, transparent 45%, rgba(8,18,8,0.1) 100%)', pointerEvents: 'none' }} />
+
+              {/* Label + counter */}
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 'clamp(20px,3vw,36px) clamp(20px,3vw,36px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', pointerEvents: 'none' }}>
+                <div>
+                  <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 5 }}>{img.cat}</p>
+                  <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(20px,2.5vw,32px)', fontWeight: 300, color: '#f5f0e8', lineHeight: 1.2 }}>{img.label}</h3>
+                </div>
+                <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(22px,3vw,42px)', fontWeight: 300, color: 'rgba(201,169,110,0.5)', lineHeight: 1 }}>
+                  {String(current + 1).padStart(2, '0')}<span style={{ fontSize: '0.45em', color: 'rgba(245,240,232,0.25)', margin: '0 5px' }}>/</span>{String(filtered.length).padStart(2, '0')}
+                </span>
+              </div>
+
+              {/* Zoom hint */}
+              <div style={{ position: 'absolute', top: 20, right: 20, background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(201,169,110,0.25)', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 7, pointerEvents: 'none' }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
+                <span style={{ fontFamily: 'DM Sans', fontSize: 8, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.55)' }}>Expand</span>
+              </div>
+
+              {/* Arrows */}
+              {[['←', () => goTo(c => (c - 1 + filtered.length) % filtered.length), 'left:16px'], ['→', () => goTo(c => (c + 1) % filtered.length), 'right:16px']].map(([a, fn, pos], idx) => (
+                <button key={idx} onClick={e => { e.stopPropagation(); fn(); }} style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', [pos.split(':')[0]]: pos.split(':')[1], width: 44, height: 44, background: 'rgba(201,169,110,0.15)', border: '1px solid rgba(201,169,110,0.3)', color: '#c9a96e', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.25s', zIndex: 2 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(201,169,110,0.35)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(201,169,110,0.15)'}>{a}</button>
+              ))}
+
+              {/* Progress bar */}
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 2, background: 'rgba(201,169,110,0.15)' }}>
+                <div style={{ height: '100%', background: '#c9a96e', width: `${((current + 1) / filtered.length) * 100}%`, transition: 'width 0.4s ease' }} />
+              </div>
+            </div>
+
+            {/* Thumbnails */}
+            <div ref={thumbsRef} style={{ display: 'flex', gap: 3, overflowX: 'auto', padding: '3px 0', scrollbarWidth: 'none', opacity: vis ? 1 : 0, transition: 'opacity 0.9s ease 0.35s' }}>
+              {filtered.map((im, i) => (
+                <div key={im.src} onClick={() => goTo(i)} style={{ flexShrink: 0, width: 100, height: 64, backgroundImage: `url('${im.src}')`, backgroundSize: 'cover', backgroundPosition: 'center', cursor: 'pointer', opacity: i === current ? 1 : 0.42, border: i === current ? '2px solid #c9a96e' : '2px solid transparent', transition: 'all 0.3s' }} />
+              ))}
+            </div>
+
+            {/* CTA */}
+            <div style={{ textAlign: 'center', marginTop: 36, opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.5s' }}>
+              <CTAButton label="Request Full Brochure" variant="dark" interest="" />
+            </div>
+          </div>
+
+          {/* Lightbox */}
+          {lightbox !== null && (
+            <div style={{ position: 'fixed', inset: 0, zIndex: 9000, background: 'rgba(5,12,5,0.97)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={e => { if (e.target === e.currentTarget) setLightbox(null); }}>
+              <div style={{ position: 'relative', maxWidth: '92vw', maxHeight: '90vh', animation: 'lightboxIn 0.28s ease' }}>
+                <img src={filtered[lightbox].src} alt={filtered[lightbox].label} style={{ maxWidth: '92vw', maxHeight: '84vh', objectFit: 'contain', display: 'block' }} />
+                <p style={{ textAlign: 'center', fontFamily: 'DM Sans', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.5)', marginTop: 14 }}>
+                  {filtered[lightbox].label} &nbsp;·&nbsp; {lightbox + 1} / {filtered.length}
+                </p>
+              </div>
+              <button onClick={() => setLightbox(l => (l - 1 + filtered.length) % filtered.length)} style={{ position: 'fixed', top: '50%', left: 24, transform: 'translateY(-50%)', background: 'rgba(201,169,110,0.15)', border: '1px solid rgba(201,169,110,0.3)', color: '#c9a96e', width: 48, height: 48, fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(201,169,110,0.3)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(201,169,110,0.15)'}>←</button>
+              <button onClick={() => setLightbox(l => (l + 1) % filtered.length)} style={{ position: 'fixed', top: '50%', right: 24, transform: 'translateY(-50%)', background: 'rgba(201,169,110,0.15)', border: '1px solid rgba(201,169,110,0.3)', color: '#c9a96e', width: 48, height: 48, fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(201,169,110,0.3)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(201,169,110,0.15)'}>→</button>
+              <button onClick={() => setLightbox(null)} style={{ position: 'fixed', top: 20, right: 24, background: 'none', border: 'none', color: 'rgba(245,240,232,0.6)', fontSize: 28, cursor: 'pointer', lineHeight: 1 }}>✕</button>
+            </div>
+          )}
+        </section>
+      );
+    }
+
+    // ─── LOCATION — REDESIGNED WITH GOOGLE MAPS ───────────────────────────────────
+    function LocationSection() {
+      const [ref, vis] = useReveal(0.08);
+      const googleMapsUrl = "https://maps.app.goo.gl/NpVxBNaDy3ejKS8UA";
+
+      const categories = [
+        {
+          cat: 'Education', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" strokeWidth="1.8"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" /></svg>, color: '#a8c5ab', items: [
+            { n: 'Dharapur Higher Secondary', d: '2.2 km' },
+            { n: 'Kinderjoy Montessori and Playschool', d: '2.8 km' },
+            { n: 'Radha Bora High School', d: '3.6 km' },
+            { n: 'Chandraprava Bora High School, Azara', d: '3.7 km' },
+            { n: 'St. Joseph\'s School', d: '5.1 km' },
+          ]
+        },
+        {
+          cat: 'Healthcare', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d4a5a0" strokeWidth="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>, color: '#d4a5a0', items: [
+            { n: 'Garal PHC', d: '950 m' }, { n: 'Azara PHC', d: '3.8 km' },
+            { n: 'Guwahati University Hospital', d: '10.7 km' }, { n: 'Apollo Excelcare Hospital', d: '13.2 km' },
+          ]
+        },
+        {
+          cat: 'Connectivity', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" strokeWidth="1.8"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3" /><rect x="9" y="11" width="14" height="10" rx="2" /><circle cx="12" cy="16" r="1" /></svg>, color: '#c9a96e', items: [
+            { n: 'International Airport', d: '4.7 km' }, { n: 'Dharapur Chariali', d: '2.2 km' },
+            { n: 'Jalukbari Flyover', d: '10 km' }, { n: 'BCPL Fuel Station', d: '650 m' },
+          ]
+        },
+        {
+          cat: 'Universities', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a8c5ab" strokeWidth="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>, color: '#a8c5ab', items: [
+            { n: 'Girijananda Chowdhury University', d: '2.9 km' }, { n: 'Assam Don Bosco University', d: '3.2 km' },
+            { n: 'Guwahati University', d: '5.4 km' }, { n: 'Cotton University', d: '12 km' },
+          ]
+        },
+        {
+          cat: 'Lifestyle', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a9e7e" strokeWidth="1.8"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>, color: '#7a9e7e', items: [
+            { n: 'University Shopping Complex', d: '6.6 km' }, { n: 'Decathlon Azara', d: '6.7 km' },
+            { n: 'NCS Square Mall', d: '9.0 km' }, { n: 'Kiranshree Grand Hotel', d: '3.7 km' },
+          ]
+        },
+        {
+          cat: 'Recreation', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9b8a8" strokeWidth="1.8"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" /></svg>, color: '#c9b8a8', items: [
+            { n: 'Brahmaputra River Banks', d: '8.2 km' }, { n: 'Srimanta Sankardev Kalakshetra', d: '9.4 km' },
+            { n: 'Nehru Park', d: '10.1 km' }, { n: 'Umananda Island', d: '11.6 km' },
+          ]
+        },
+      ];
+
+      return (
+        <section id="location" style={{ background: '#1a2e1a', padding: 'clamp(72px,9vw,120px) clamp(20px,8vw,120px)', position: 'relative', overflow: 'hidden' }}>
+          <TreeLine opacity={0.04} dark="#0b1a0b" />
+
+          <div ref={ref} style={{ maxWidth: 1180, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+
+            {/* Header */}
+            <div className="location-header-grid" style={{ gap: 'clamp(32px,5vw,72px)', alignItems: 'end', marginBottom: 56, opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(22px)', transition: 'opacity 0.8s ease, transform 0.8s ease' }}>
+              <div>
+                <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 16 }}>Location</p>
+                <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(32px,4vw,52px)', fontWeight: 300, color: '#f5f0e8', lineHeight: 1.15 }}>
+                  At the heart of<br /><em style={{ color: '#c9a96e' }}>everything that matters.</em>
+                </h2>
+              </div>
+              <div>
+                <p style={{ fontFamily: 'DM Sans', fontSize: 13, fontWeight: 300, color: 'rgba(245,240,232,0.55)', lineHeight: 1.9, marginBottom: 24 }}>
+                   Located in Aerocity's rapidly developing residential belt on Dharapur- Palashbari Road, the perfect confluence of urban conveniences and an escape into nature.
+                </p>
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                  <CTAButton label="Get Directions" variant="outline" onClick={() => { window.location.href = googleMapsUrl; }} />
+
+                </div>
+              </div>
+            </div>
+
+            {/* Map + quick stats */}
+            <div className="location-map-grid" style={{ gap: 3, marginBottom: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.85s ease 0.2s' }}>
+              {/* Google Maps embed */}
+              <div style={{ position: 'relative', minHeight: 320, overflow: 'hidden' }}>
+                <iframe
+                  src="https://maps.google.com/maps?q=ARANYA%20BY%20RANG%20HOMES%20PHASE%201%2C%204JM6%2BR77%2C%20Azara%2C%20Guwahati%2C%20Assam%20781017&t=m&z=17&output=embed"
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none', filter: 'invert(90%) hue-rotate(180deg) saturate(0.8) brightness(0.9) contrast(1.05)' }}
+                  allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Aranya Location"
+                />
+                {/* Transparent click capture overlay */}
+                <div style={{ position: 'absolute', inset: 0, zIndex: 2, cursor: 'pointer' }} onClick={() => { window.location.href = googleMapsUrl; }} />
+                {/* Red Pin overlay */}
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -100%)', pointerEvents: 'none', zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff0000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" fill="#ff0000" />
+                    <circle cx="12" cy="10" r="3" fill="#faf8f3" />
+                  </svg>
+                  <div style={{ position: 'absolute', bottom: 34, left: '50%', transform: 'translateX(-50%)', background: 'rgba(10,20,10,0.92)', border: '1px solid rgba(201,169,110,0.35)', padding: '6px 10px', whiteSpace: 'nowrap' }}>
+                    <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#c9a96e' }}>Aranya by Rang Homes Phase-1</p>
+                  </div>
+                </div>
+                {/* Address tag */}
+                <div style={{ position: 'absolute', bottom: 16, left: 16, background: 'rgba(10,20,10,0.92)', border: '1px solid rgba(201,169,110,0.35)', padding: '10px 16px', zIndex: 2 }}>
+                  <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 3 }}>ARANYA BY RANG HOMES PHASE 1</p>
+                  <p style={{ fontFamily: 'DM Sans', fontSize: 11, fontWeight: 300, color: 'rgba(245,240,232,0.65)' }}>4JM6+R77, Azara, Guwahati, Assam 781017</p>
+                </div>
+              </div>
+
+              {/* Quick stats */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
+                {[
+                  { v: '4.7 KM', l: 'Airport', c: '#c9a96e' },
+                  { v: '2.2 km', l: 'Nearest School', c: '#a8c5ab' },
+                  { v: '950 m', l: 'PHC', c: '#d4a5a0' },
+                  { v: '70%', l: 'Green Cover', c: '#7a9e7e' },
+                ].map((s, i) => (
+                  <div key={i} style={{ background: 'rgba(245,240,232,0.04)', border: '1px solid rgba(201,169,110,0.12)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px 16px', textAlign: 'center' }}>
+                    <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px,3vw,38px)', fontWeight: 300, color: s.c, lineHeight: 1, marginBottom: 8 }}>{s.v}</div>
+                    <div style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.38)' }}>{s.l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Category grid — 3 cols, inspired by reference */}
+            <div className="location-cats-grid" style={{ gap: 3, opacity: vis ? 1 : 0, transition: 'opacity 0.85s ease 0.35s' }}>
+              {categories.map((cat, ci) => (
+                <div key={ci} style={{ background: 'rgba(245,240,232,0.03)', border: '1px solid rgba(201,169,110,0.1)', padding: '28px 28px 24px', transition: 'background 0.3s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,240,232,0.05)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(245,240,232,0.03)'}>
+                  {/* Category header */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid rgba(201,169,110,0.12)' }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(245,240,232,0.06)', border: `1.5px solid ${cat.color}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {cat.icon}
+                    </div>
+                    <h4 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 22, fontWeight: 400, fontStyle: 'italic', color: '#f5f0e8', lineHeight: 1 }}>{cat.cat}</h4>
+                  </div>
+                  {/* Items */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                    {cat.items.map((p, pi) => (
+                      <div key={pi} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: pi < cat.items.length - 1 ? '1px solid rgba(245,240,232,0.05)' : 'none' }}>
+                        <span style={{ fontFamily: 'DM Sans', fontSize: 12, fontWeight: 300, color: 'rgba(245,240,232,0.7)', lineHeight: 1.4, flex: 1, paddingRight: 12 }}>{p.n}</span>
+                        <span style={{ fontFamily: 'DM Sans', fontSize: 10, fontWeight: 500, color: cat.color, background: `rgba(${cat.color === '#c9a96e' ? '201,169,110' : '122,158,126'},0.12)`, padding: '3px 9px', letterSpacing: '0.06em', flexShrink: 0, whiteSpace: 'nowrap' }}>{p.d}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+
+          </div>
+        </section>
+      );
+    }
+
+    // ─── DEVELOPER ────────────────────────────────────────────────────────────────
+    function DeveloperSection() {
+      const [ref, vis] = useReveal(0.1);
+      const projects = [{ name: 'Rang Homes Phase 1', loc: 'Dharapur, Guwahati' }, { name: 'Rang Homes Phase 2', loc: 'Dharapur, Guwahati' }, { name: 'Rang Homes Punjabi Bagh', loc: 'New Delhi' }];
+      return (
+        <section style={{ background: '#ede7d9', padding: 'clamp(72px,9vw,130px) clamp(20px,8vw,120px)', position: 'relative', overflow: 'hidden' }}>
+          <div ref={ref} className="developer-grid" style={{ maxWidth: 1180, margin: '0 auto', gap: 'clamp(40px,5vw,80px)', alignItems: 'center' }}>
+            <div style={{ opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(22px)', transition: 'opacity 0.8s ease, transform 0.8s ease' }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.3em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 20 }}>About the Developer</p>
+              <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px,3.5vw,48px)', fontWeight: 300, color: '#1a2e1a', lineHeight: 1.2, marginBottom: 26 }}>Built on integrity.<br /><em>Delivered with precision.</em></h2>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 14, fontWeight: 300, color: '#4a5a4a', lineHeight: 1.9, marginBottom: 18 }}>Indotech Infracon Private Limited — the force behind Aranya by Rang Homes Phase 1 - has shaped the residential landscape of Guwahati over the years, delivering 600+ homes that stand as long-term assets for their residents.</p>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 14, fontWeight: 300, color: '#4a5a4a', lineHeight: 1.9, marginBottom: 36 }}>Every project reflects a quiet conviction: quality must be consistent, details deliberate, and every home must honour the trust placed in it.</p>
+              <div style={{ display: 'flex', gap: 36, flexWrap: 'wrap', marginBottom: 36 }}>
+                {[['600+', 'Homes Delivered'], ['8+', 'Years of Trust']].map(([v, l], i) => (
+                  <div key={i}>
+                    <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 40, fontWeight: 300, color: '#1a2e1a', lineHeight: 1 }}>{v}</div>
+                    <div style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a9e7e', marginTop: 6 }}>{l}</div>
+                  </div>
+                ))}
+              </div>
+              <CTAButton label="Speak to the Team" variant="dark" interest="" />
+            </div>
+            <div style={{ opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(22px)', transition: 'opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s' }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#7a9e7e', marginBottom: 20 }}>Delivered Projects</p>
+              {projects.map((p, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 0', borderBottom: i < projects.length - 1 ? '1px solid rgba(26,46,26,0.1)' : 'none' }}>
+                  <div>
+                    <div style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 22, fontWeight: 400, color: '#1a2e1a' }}>{p.name}</div>
+                    <div style={{ fontFamily: 'DM Sans', fontSize: 11, fontWeight: 300, color: '#6b6b6b', marginTop: 3 }}>{p.loc}</div>
+                  </div>
+                  <div style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7a9e7e', border: '1px solid #7a9e7e', padding: '6px 12px', flexShrink: 0 }}>Delivered</div>
+                </div>
+              ))}
+              <div style={{ marginTop: 36, padding: '24px 28px', background: '#1a2e1a' }}>
+                <p style={{ fontFamily: 'DM Sans', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 14 }}>Design Team</p>
+                {[['Principal Architect', 'Confluence Consultancy Services, Delhi'], ['Landscape', 'S.P Consultants, Delhi'], ['MEP', 'AEPL, Delhi'], ['Structural', 'Swati Structure Solutions Pvt. Ltd, Delhi'], ['Local Architect', 'Banka & Associates, Guwahati']].map(([r, f], i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: i < 4 ? '1px solid rgba(245,240,232,0.06)' : 'none' }}>
+                    <span style={{ fontFamily: 'DM Sans', fontSize: 12, fontWeight: 300, color: 'rgba(245,240,232,0.45)' }}>{r}</span>
+                    <span style={{ fontFamily: 'DM Sans', fontSize: 12, fontWeight: 400, color: 'rgba(245,240,232,0.82)' }}>{f}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // ─── FAQ — 2-COLUMN COMPACT ───────────────────────────────────────────────────
+    function FAQSection() {
+      const [ref, vis] = useReveal(0.08);
+      const [open, setOpen] = useState(null);
+
+      const faqs = [
+        { q: 'Where is Aranya located?', a: 'Rang Homes Aerocity, Dharapur, Guwahati, Assam' },
+        { q: 'What apartment types are available?', a: '2 BHK, 3 BHK, 3 BHK + Terrace, 4 BHK, and 4 BHK + Terrace. Sizes range from 825 to 3,044 sq ft.' },
+        { q: 'When is possession?', a: 'Expected possession is 2031' },
+        { q: 'What are the key amenities?', a: 'Club Aranya spans 16,000+ sq ft including a swimming pool, gym, gaming room, EIEIO kids\' studio, banquet hall, rooftop lounge, café, mini theatre, and multiple themed gardens.' },
+        { q: 'Is the project RERA registered?', a: 'RERA registration is under process. All transactions will be fully compliant with applicable real estate regulations.' },
+        { q: 'How green is the development?', a: '70% of total land is open green space — butterfly garden, bamboo grove, aroma garden, floating cabana, and more. Native flora throughout.' },
+        { q: 'Can NRIs purchase here?', a: 'Yes. Full NRI purchase support is available including documentation, RBI compliance, and remote transaction processes.' },
+      ];
+
+      const half = Math.ceil(faqs.length / 2);
+      const col1 = faqs.slice(0, half);
+      const col2 = faqs.slice(half);
+
+      const FaqItem = ({ faq, i, globalIdx }) => (
+        <div style={{ borderBottom: '1px solid rgba(201,169,110,0.12)' }}>
+          <button onClick={() => setOpen(open === globalIdx ? null : globalIdx)} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '18px 0', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, textAlign: 'left' }}>
+            <span style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(15px,1.6vw,18px)', fontWeight: 400, color: open === globalIdx ? '#c9a96e' : '#f5f0e8', transition: 'color 0.3s', lineHeight: 1.35, flex: 1 }}>{faq.q}</span>
+            <span style={{ color: '#c9a96e', fontSize: 18, flexShrink: 0, transition: 'transform 0.3s', transform: open === globalIdx ? 'rotate(45deg)' : 'rotate(0deg)', display: 'block', lineHeight: 1, marginTop: 2 }}>+</span>
+          </button>
+          <div style={{ maxHeight: open === globalIdx ? '200px' : '0', overflow: 'hidden', transition: 'max-height 0.4s ease' }}>
+            <p style={{ fontFamily: 'DM Sans', fontSize: 13, fontWeight: 300, color: 'rgba(245,240,232,0.6)', lineHeight: 1.85, paddingBottom: 18, paddingRight: 28 }}>{faq.a}</p>
+          </div>
+        </div>
+      );
+
+      return (
+        <section id="faq" style={{ background: '#1a2e1a', padding: 'clamp(72px,9vw,130px) clamp(20px,8vw,120px)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 55% 70% at 50% 50%, rgba(201,169,110,0.05) 0%, transparent 70%)', pointerEvents: 'none' }} />
+          <TreeLine opacity={0.045} dark="#070f07" />
+
+          <div ref={ref} style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+            <div className="faq-main-grid" style={{ gap: 'clamp(40px,5vw,80px)', alignItems: 'start', opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease' }}>
+              {/* Left heading */}
+              <div style={{ position: 'sticky', top: 100 }}>
+                <p style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.32em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 16 }}>FAQ</p>
+                <h2 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(28px,3.2vw,42px)', fontWeight: 300, color: '#f5f0e8', lineHeight: 1.2, marginBottom: 22 }}>
+                  Questions<br /><em style={{ color: '#c9a96e' }}>answered.</em>
+                </h2>
+                <GoldDivider style={{ maxWidth: 160, marginBottom: 24 }} />
+                <p style={{ fontFamily: 'DM Sans', fontSize: 13, fontWeight: 300, color: 'rgba(245,240,232,0.5)', lineHeight: 1.85, marginBottom: 28 }}>Can't find what you're looking for? Our team is happy to help.</p>
+                <CTAButton label="Ask Us Anything" variant="outline" interest="" />
+              </div>
+
+              {/* 2-column FAQ grid */}
+              <div className="faq-cols-grid" style={{ gap: '0 40px', opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.2s' }}>
+                <div>
+                  {col1.map((faq, i) => <FaqItem key={i} faq={faq} i={i} globalIdx={i} />)}
+                </div>
+                <div>
+                  {col2.map((faq, i) => <FaqItem key={i} faq={faq} i={i} globalIdx={i + half} />)}
+                </div>
+              </div>
+            </div>
+
+            {/* CTA strip */}
+            <div style={{ marginTop: 56, padding: '40px 44px', background: 'rgba(201,169,110,0.07)', border: '1px solid rgba(201,169,110,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap', opacity: vis ? 1 : 0, transition: 'opacity 0.8s ease 0.4s' }}>
+              <div>
+                <h3 style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 'clamp(20px,2.5vw,28px)', fontWeight: 300, color: '#f5f0e8', marginBottom: 6 }}>Still have questions?</h3>
+                <p style={{ fontFamily: 'DM Sans', fontSize: 13, fontWeight: 300, color: 'rgba(245,240,232,0.5)' }}>Our team is happy to walk you through anything.</p>
+              </div>
+              <CTAButton label="Speak to Our Team" variant="gold" onClick={() => window.open('https://wa.me/919311852020', '_blank')} />
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // ─── FOOTER ───────────────────────────────────────────────────────────────────
+
+    
+  
+
+    function Footer() {
+      const openModal = useContext(ModalCtx);
+      return (
+        <footer style={{ background: '#0b160b', padding: '36px clamp(20px,8vw,120px)' }}>
+          <div style={{ maxWidth: 1180, margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 24, marginBottom: 32 }}>
+              <img src="uploads/asset 1@3x.webp" alt="Aranya by Rang Homes" style={{ height: 52, objectFit: 'contain', filter: 'brightness(0) saturate(100%) invert(72%) sepia(42%) saturate(480%) hue-rotate(2deg) brightness(98%) contrast(90%)' }} />
+              <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+                {[['#manifesto', 'Vision'], ['#wellness', 'Life'], ['#club', 'Club'], ['#homes', 'Homes'], ['#gallery', 'Gallery'], ['#location', 'Location'], ['#faq', 'FAQ']].map(([h, l]) => (
+                  <a key={h} href={h} style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.38)', textDecoration: 'none', transition: 'color 0.3s' }}
+                    onMouseEnter={e => e.currentTarget.style.color = '#c9a96e'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(245,240,232,0.38)'}>{l}</a>
+                ))}
+                <button onClick={() => openModal('')} style={{ fontFamily: 'DM Sans', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#c9a96e', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Enquire</button>
+              </div>
+            </div>
+            <GoldDivider style={{ marginBottom: 24 }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, alignItems: 'flex-start' }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 10, fontWeight: 300, color: 'rgba(245,240,232,0.22)', lineHeight: 1.7, maxWidth: 660 }}>
+                RERA Registration: Under Process. Possession: 2031. Views are artist's impressions only. Information is indicative and subject to change without notice. This does not constitute an offer. Indotech Infracon Pvt. Ltd. © 2026.
+              </p>
+              <p style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: 16, fontStyle: 'italic', color: 'rgba(201,169,110,0.32)', flexShrink: 0 }}>"The whistling winds are getting greener."</p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, borderTop: '1px solid rgba(245,240,232,0.06)', paddingTop: 16, marginTop: 16 }}>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 9, fontWeight: 300, color: 'rgba(245,240,232,0.18)', lineHeight: 1.6 }}>
+                <strong>Disclaimer:</strong> The floor plans are as per the approved plans and specifications as of date. These plans may vary by +/- 3% and are subject to changes. The furniture, accessories, etc. shown in the plans does not form a part of the offering. Customers are requested to visit the site office and apprise themselves of all the necessary details prior to making any purchase decisions. Any decorative item and furniture shown in any unit/private terrace/private area are not a part of our offering. This is just to give an idea of how the unit can be utilized in the best possible way.
+              </p>
+              <p style={{ fontFamily: 'DM Sans', fontSize: 9, fontWeight: 300, color: 'rgba(245,240,232,0.18)', lineHeight: 1.6 }}>
+                Views & photographs used in this brochure are artist’s impression for illustration purpose only. The information, features, offerings and other details herein are only indicative and the developer/owner reserves its right to change any or all of these in its discretion subject to grant of approval from relevant authorities. This printed material does not constitute an offer, an invitation to an offer and/or commitment of any nature between the developer/owner and recipients. The developer’s/owner’s website(s) and other advertising and publicity material include artist’s impression indicating the anticipated appearance of completed development. No warranty is given that the completed development will comply in any degree with such artist’s impression. Costs, designs, facilities and/or specifications may be subject to change without notice.
+              </p>
+            </div>
+          </div>
+        </footer>
+      );
+    }
+
+    // ─── APP ──────────────────────────────────────────────────────────────────────
+    function App() {
+      const { tweaks, setTweak } = useTweaks(TWEAK_DEFAULTS);
+      const [modalOpen, setModalOpen] = useState(false);
+      const [modalInterest, setModalInterest] = useState('');
+
+      const openModal = useCallback((interest = '') => {
+        setModalInterest(interest || '');
+        setModalOpen(true);
+      }, []);
+
+      return (
+        <ModalCtx.Provider value={openModal}>
+          <TweaksPanel title="Aranya Tweaks">
+            <TweakSection label="Hero" />
+            <TweakSlider label="Overlay Darkness" tweakKey="heroOverlay" min={0} max={60} step={5} tweaks={tweaks} setTweak={setTweak} />
+            <TweakSection label="Brand" />
+            <TweakColor label="Accent (Gold)" tweakKey="accentColor" tweaks={tweaks} setTweak={setTweak} />
+          </TweaksPanel>
+
+          <PopupModal isOpen={modalOpen} onClose={() => setModalOpen(false)} defaultInterest={modalInterest} />
+
+          <Nav />
+          <Hero tweaks={tweaks} />
+          <StatsBar />
+          <Manifesto />
+          <SustainableAtmos />
+          <WellnessSection />
+          <ClubAranya />
+          <HomesSection />
+          <WalkthroughVideo />
+          <GallerySection />
+          <LocationSection />
+          <DeveloperSection />
+          <FAQSection />
+                    <Footer />
+        </ModalCtx.Provider>
+      );
+    }
+export default App;
+export { App };
