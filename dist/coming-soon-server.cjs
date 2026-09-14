@@ -12131,801 +12131,208 @@ var import_server = __toESM(require_server_node());
 
 // src/ComingSoonApp.jsx
 var import_react = __toESM(require_react());
-function GoldDivider({ style }) {
-  return /* @__PURE__ */ import_react.default.createElement("div", { style: { display: "flex", alignItems: "center", gap: 14, ...style } }, /* @__PURE__ */ import_react.default.createElement("div", { style: { height: 1, flex: 1, background: "linear-gradient(to right, transparent, #c9a96e)" } }), /* @__PURE__ */ import_react.default.createElement("div", { style: { width: 6, height: 6, borderRadius: "50%", background: "#c9a96e", flexShrink: 0 } }), /* @__PURE__ */ import_react.default.createElement("div", { style: { height: 1, flex: 1, background: "linear-gradient(to left, transparent, #c9a96e)" } }));
-}
-function useReveal(threshold = 0.1) {
-  const ref = (0, import_react.useRef)(null);
-  const [vis, setVis] = (0, import_react.useState)(true);
-  (0, import_react.useEffect)(() => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    if (rect.top > window.innerHeight) {
-      setVis(false);
-      const obs = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting) {
-          setVis(true);
-          obs.disconnect();
-        }
-      }, { threshold });
-      obs.observe(el);
-      return () => obs.disconnect();
-    }
-  }, [threshold]);
-  return [ref, vis];
-}
+var LOGO_HEADER = "/uploads/indo-group-logo.png";
+var LOGO_DARK = "/uploads/indo-group-logo-transparent.png";
+var Arrow = ({ down = false }) => /* @__PURE__ */ import_react.default.createElement("svg", { "aria-hidden": "true", className: down ? "icon icon--down" : "icon", viewBox: "0 0 24 24", fill: "none" }, /* @__PURE__ */ import_react.default.createElement("path", { d: "M5 12h14M14 7l5 5-5 5", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round" }));
 function ComingSoonApp() {
-  const [lead, setLead] = (0, import_react.useState)({ name: "", phone: "", email: "", config: "3 BHK Celestial (1,379 sq ft)" });
-  const [submitted, setSubmitted] = (0, import_react.useState)(false);
+  const [scrolled, setScrolled] = (0, import_react.useState)(false);
+  const [lead, setLead] = (0, import_react.useState)({ name: "", email: "", phone: "", pincode: "" });
+  const [utm, setUtm] = (0, import_react.useState)({ utm_source: "", utm_medium: "", utm_campaign: "", utm_term: "", utm_content: "", source_url: "" });
   const [loading, setLoading] = (0, import_react.useState)(false);
+  const [submitted, setSubmitted] = (0, import_react.useState)(false);
   const [error, setError] = (0, import_react.useState)("");
-  const [heroRef, heroVis] = useReveal(0.05);
-  const [proofRef, proofVis] = useReveal(0.08);
-  const [formRef, formVis] = useReveal(0.08);
-  const scrollToForm = () => {
-    const el = document.getElementById("early-access");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+  const nameInputRef = (0, import_react.useRef)(null);
+  (0, import_react.useEffect)(() => {
+    if (typeof window === "undefined") return void 0;
+    const params = new URLSearchParams(window.location.search);
+    setUtm({
+      utm_source: params.get("utm_source") || "",
+      utm_medium: params.get("utm_medium") || "",
+      utm_campaign: params.get("utm_campaign") || "",
+      utm_term: params.get("utm_term") || "",
+      utm_content: params.get("utm_content") || "",
+      source_url: window.location.href
+    });
+    const onScroll = () => setScrolled(window.scrollY > 28);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  const scrollTo = (id, focus = false) => {
+    if (typeof document === "undefined") return;
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (focus) window.setTimeout(() => nameInputRef.current?.focus(), 650);
   };
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!lead.name.trim()) {
-      setError("Please enter your full name.");
-      return;
-    }
-    const clean = lead.phone.replace(/\D/g, "");
-    if (clean.length < 10) {
-      setError("Please enter a valid 10-digit phone number.");
-      return;
-    }
+  const updateLead = (field) => (event) => {
+    setLead((current) => ({ ...current, [field]: event.target.value }));
+    if (error) setError("");
+  };
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (!lead.name.trim()) return setError("Please enter your full name.");
+    if (lead.phone.replace(/\D/g, "").length < 10) return setError("Please enter a valid 10-digit mobile number.");
+    if (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email.trim())) return setError("Please enter a valid email address.");
+    if (lead.pincode && lead.pincode.replace(/\D/g, "").length !== 6) return setError("Please enter a valid 6-digit pincode.");
     setError("");
     setLoading(true);
-    setTimeout(() => {
+    const payload = { ...lead, ...utm, submitted_at: (/* @__PURE__ */ new Date()).toISOString() };
+    try {
+      const saved = JSON.parse(window.localStorage.getItem("prelaunch_access_leads") || "[]");
+      window.localStorage.setItem("prelaunch_access_leads", JSON.stringify([...saved, payload]));
+    } catch (storageError) {
+      console.warn("Unable to save lead locally:", storageError);
+    }
+    window.setTimeout(() => {
       setLoading(false);
       setSubmitted(true);
-    }, 500);
+    }, 650);
+    return void 0;
   };
-  return /* @__PURE__ */ import_react.default.createElement("div", { style: {
-    background: "#fcfbfa",
-    color: "#1a2e1a",
-    fontFamily: "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    minHeight: "100vh",
-    overflowX: "hidden"
-  } }, /* @__PURE__ */ import_react.default.createElement("nav", { style: {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 1e3,
-    height: 76,
-    padding: "0 clamp(20px, 5vw, 64px)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    background: "rgba(255, 255, 255, 0.94)",
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
-    borderBottom: "1px solid rgba(201, 169, 110, 0.22)",
-    boxShadow: "0 4px 24px rgba(0, 0, 0, 0.04)",
-    transition: "background 0.3s ease"
-  } }, /* @__PURE__ */ import_react.default.createElement("a", { href: "#hero", style: { textDecoration: "none", display: "flex", alignItems: "center", gap: 14 } }, /* @__PURE__ */ import_react.default.createElement(
-    "img",
-    {
-      src: "uploads/logo design.webp",
-      alt: "Aranya Logo",
-      style: { height: 42, width: "auto", objectFit: "contain" }
-    }
-  ), /* @__PURE__ */ import_react.default.createElement("div", null, /* @__PURE__ */ import_react.default.createElement("span", { style: {
-    fontFamily: "'Cormorant Garamond', Georgia, serif",
-    fontSize: 22,
-    letterSpacing: "0.18em",
-    color: "#1a2e1a",
-    fontWeight: 600,
-    display: "block",
-    lineHeight: 1
-  } }, "ARANYA"), /* @__PURE__ */ import_react.default.createElement("span", { style: {
-    display: "block",
-    fontSize: 9.5,
-    letterSpacing: "0.24em",
-    color: "#a07d3b",
-    textTransform: "uppercase",
-    marginTop: 3,
-    fontWeight: 500
-  } }, "BY RANG HOMES"))), /* @__PURE__ */ import_react.default.createElement("div", { style: { display: "flex", alignItems: "center", gap: 16 } }, /* @__PURE__ */ import_react.default.createElement("div", { style: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    padding: "7px 16px",
-    borderRadius: 20,
-    background: "#faf7f0",
-    border: "1px solid rgba(201, 169, 110, 0.4)"
-  } }, /* @__PURE__ */ import_react.default.createElement("span", { style: { width: 8, height: 8, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e" } }), /* @__PURE__ */ import_react.default.createElement("span", { style: { fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "#8c6b2d", fontWeight: 600 } }, "PRE-LAUNCH")), /* @__PURE__ */ import_react.default.createElement(
-    "button",
-    {
-      onClick: scrollToForm,
-      style: {
-        background: "linear-gradient(135deg, #c9a96e 0%, #b89355 100%)",
-        color: "#ffffff",
-        border: "none",
-        padding: "11px 24px",
-        fontFamily: "'DM Sans', sans-serif",
-        fontSize: 12,
-        fontWeight: 600,
-        letterSpacing: "0.12em",
-        textTransform: "uppercase",
-        borderRadius: 4,
-        cursor: "pointer",
-        boxShadow: "0 6px 18px rgba(184, 147, 85, 0.35)",
-        transition: "all 0.25s ease"
-      },
-      onMouseEnter: (e) => {
-        e.currentTarget.style.transform = "translateY(-1px)";
-      },
-      onMouseLeave: (e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-      }
-    },
-    "Early Access"
-  ))), /* @__PURE__ */ import_react.default.createElement("section", { id: "hero", style: {
-    position: "relative",
-    minHeight: "100vh",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "130px clamp(20px, 6vw, 80px) 80px",
-    textAlign: "center",
-    background: "linear-gradient(180deg, #fcfbfa 0%, #f7f3eb 50%, #f4eee4 100%)",
-    overflow: "hidden"
-  } }, /* @__PURE__ */ import_react.default.createElement("div", { style: {
-    position: "absolute",
-    inset: 0,
-    zIndex: 0,
-    backgroundImage: 'url("uploads/cam-02_revised.webp")',
-    backgroundSize: "cover",
-    backgroundPosition: "center 35%",
-    opacity: 0.14,
-    filter: "saturate(1.2)"
-  } }), /* @__PURE__ */ import_react.default.createElement("div", { style: {
-    position: "absolute",
-    top: "40%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 900,
-    height: 900,
-    background: "radial-gradient(circle, rgba(201,169,110,0.12) 0%, rgba(252,251,250,0) 70%)",
-    pointerEvents: "none"
-  } }), /* @__PURE__ */ import_react.default.createElement("div", { ref: heroRef, style: {
-    position: "relative",
-    zIndex: 2,
-    maxWidth: 940,
-    margin: "0 auto",
-    opacity: heroVis ? 1 : 0,
-    transform: heroVis ? "translateY(0)" : "translateY(20px)",
-    transition: "opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1)"
-  } }, /* @__PURE__ */ import_react.default.createElement("div", { style: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 10,
-    padding: "7px 20px",
-    borderRadius: 30,
-    background: "#ffffff",
-    border: "1px solid rgba(201, 169, 110, 0.4)",
-    boxShadow: "0 4px 16px rgba(160, 125, 59, 0.1)",
-    marginBottom: 26
-  } }, /* @__PURE__ */ import_react.default.createElement("span", { style: { width: 7, height: 7, borderRadius: "50%", background: "#c9a96e" } }), /* @__PURE__ */ import_react.default.createElement("span", { style: { fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "#8c6b2d", fontWeight: 600 } }, "COMING SOON \u2022 PRE-LAUNCH EXCLUSIVE")), /* @__PURE__ */ import_react.default.createElement("h1", { style: {
-    fontFamily: "'Cormorant Garamond', Georgia, serif",
-    fontSize: "clamp(48px, 7.8vw, 96px)",
-    fontWeight: 300,
-    lineHeight: 1.02,
-    letterSpacing: "0.03em",
-    color: "#1a2e1a",
-    marginBottom: 16
-  } }, "ARANYA", /* @__PURE__ */ import_react.default.createElement("span", { style: {
-    display: "block",
-    fontFamily: "'DM Sans', sans-serif",
-    fontSize: "clamp(14px, 2.2vw, 22px)",
-    fontWeight: 400,
-    letterSpacing: "0.28em",
-    textTransform: "uppercase",
-    color: "#a07d3b",
-    marginTop: 10
-  } }, "BY RANG HOMES")), /* @__PURE__ */ import_react.default.createElement(GoldDivider, { style: { maxWidth: 240, margin: "0 auto 24px" } }), /* @__PURE__ */ import_react.default.createElement("p", { style: {
-    fontFamily: "'Cormorant Garamond', Georgia, serif",
-    fontSize: "clamp(26px, 4vw, 44px)",
-    fontWeight: 300,
-    fontStyle: "italic",
-    color: "#1a2e1a",
-    lineHeight: 1.25,
-    marginBottom: 12
-  } }, '"A different way to live in Guwahati."'), /* @__PURE__ */ import_react.default.createElement("p", { style: {
-    fontFamily: "'DM Sans', sans-serif",
-    fontSize: "clamp(13.5px, 1.8vw, 17px)",
-    fontWeight: 400,
-    letterSpacing: "0.16em",
-    textTransform: "uppercase",
-    color: "#4d634d",
-    marginBottom: 38
-  } }, "Premium nature-led living in Dharapur"), /* @__PURE__ */ import_react.default.createElement("div", { style: { display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" } }, /* @__PURE__ */ import_react.default.createElement(
-    "button",
-    {
-      onClick: scrollToForm,
-      style: {
-        background: "linear-gradient(135deg, #c9a96e 0%, #b89355 100%)",
-        color: "#ffffff",
-        border: "none",
-        padding: "16px 38px",
-        fontFamily: "'DM Sans', sans-serif",
-        fontSize: 13,
-        fontWeight: 600,
-        letterSpacing: "0.14em",
-        textTransform: "uppercase",
-        borderRadius: 4,
-        cursor: "pointer",
-        boxShadow: "0 8px 24px rgba(184, 147, 85, 0.4)",
-        transition: "transform 0.25s, box-shadow 0.25s"
-      },
-      onMouseEnter: (e) => {
-        e.currentTarget.style.transform = "translateY(-2px)";
-      },
-      onMouseLeave: (e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-      }
-    },
-    "Get Early Access \u2192"
-  ), /* @__PURE__ */ import_react.default.createElement(
-    "a",
-    {
-      href: "uploads/Aranya brochure.pdf",
-      target: "_blank",
-      rel: "noopener noreferrer",
-      style: {
-        background: "#ffffff",
-        color: "#1a2e1a",
-        border: "1px solid rgba(201, 169, 110, 0.45)",
-        padding: "16px 34px",
-        fontFamily: "'DM Sans', sans-serif",
-        fontSize: 13,
-        fontWeight: 500,
-        letterSpacing: "0.14em",
-        textTransform: "uppercase",
-        borderRadius: 4,
-        textDecoration: "none",
-        boxShadow: "0 4px 16px rgba(0, 0, 0, 0.04)",
-        cursor: "pointer",
-        transition: "all 0.25s"
-      },
-      onMouseEnter: (e) => {
-        e.currentTarget.style.borderColor = "#b89355";
-        e.currentTarget.style.transform = "translateY(-2px)";
-      },
-      onMouseLeave: (e) => {
-        e.currentTarget.style.borderColor = "rgba(201, 169, 110, 0.45)";
-        e.currentTarget.style.transform = "translateY(0)";
-      }
-    },
-    "Download Preview PDF"
-  )), /* @__PURE__ */ import_react.default.createElement("div", { style: {
-    marginTop: 54,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: "clamp(18px, 3.5vw, 44px)",
-    flexWrap: "wrap",
-    padding: "22px clamp(20px, 4vw, 44px)",
-    background: "#ffffff",
-    borderRadius: 8,
-    boxShadow: "0 12px 36px rgba(30, 45, 30, 0.06)",
-    border: "1px solid rgba(201, 169, 110, 0.3)"
-  } }, /* @__PURE__ */ import_react.default.createElement("div", null, /* @__PURE__ */ import_react.default.createElement("div", { style: { fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 30, fontWeight: 500, color: "#a07d3b", lineHeight: 1 } }, "257"), /* @__PURE__ */ import_react.default.createElement("div", { style: { fontSize: 10.5, letterSpacing: "0.16em", textTransform: "uppercase", color: "#5b705b", marginTop: 5, fontWeight: 500 } }, "Residences")), /* @__PURE__ */ import_react.default.createElement("div", { style: { width: 1, height: 30, background: "rgba(201, 169, 110, 0.3)" } }), /* @__PURE__ */ import_react.default.createElement("div", null, /* @__PURE__ */ import_react.default.createElement("div", { style: { fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 30, fontWeight: 500, color: "#a07d3b", lineHeight: 1 } }, "2 & 3 BHK"), /* @__PURE__ */ import_react.default.createElement("div", { style: { fontSize: 10.5, letterSpacing: "0.16em", textTransform: "uppercase", color: "#5b705b", marginTop: 5, fontWeight: 500 } }, "Sanctuary Units")), /* @__PURE__ */ import_react.default.createElement("div", { style: { width: 1, height: 30, background: "rgba(201, 169, 110, 0.3)" } }), /* @__PURE__ */ import_react.default.createElement("div", null, /* @__PURE__ */ import_react.default.createElement("div", { style: { fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 30, fontWeight: 500, color: "#a07d3b", lineHeight: 1 } }, "70%"), /* @__PURE__ */ import_react.default.createElement("div", { style: { fontSize: 10.5, letterSpacing: "0.16em", textTransform: "uppercase", color: "#5b705b", marginTop: 5, fontWeight: 500 } }, "Open Greens")), /* @__PURE__ */ import_react.default.createElement("div", { style: { width: 1, height: 30, background: "rgba(201, 169, 110, 0.3)" } }), /* @__PURE__ */ import_react.default.createElement("div", null, /* @__PURE__ */ import_react.default.createElement("div", { style: { fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 30, fontWeight: 500, color: "#a07d3b", lineHeight: 1 } }, "2031"), /* @__PURE__ */ import_react.default.createElement("div", { style: { fontSize: 10.5, letterSpacing: "0.16em", textTransform: "uppercase", color: "#5b705b", marginTop: 5, fontWeight: 500 } }, "Possession"))))), /* @__PURE__ */ import_react.default.createElement("section", { id: "proof-points", style: {
-    padding: "clamp(90px, 10vw, 140px) clamp(20px, 6vw, 96px)",
-    background: "#f5f0e8",
-    position: "relative"
-  } }, /* @__PURE__ */ import_react.default.createElement("div", { ref: proofRef, style: {
-    maxWidth: 1240,
-    margin: "0 auto",
-    opacity: proofVis ? 1 : 0,
-    transform: proofVis ? "translateY(0)" : "translateY(24px)",
-    transition: "opacity 0.9s ease, transform 0.9s ease"
-  } }, /* @__PURE__ */ import_react.default.createElement("div", { style: { textAlign: "center", marginBottom: "clamp(48px, 6vw, 76px)" } }, /* @__PURE__ */ import_react.default.createElement("p", { style: {
-    fontFamily: "'DM Sans', sans-serif",
-    fontSize: 11.5,
-    letterSpacing: "0.3em",
-    textTransform: "uppercase",
-    color: "#8c6b2d",
-    fontWeight: 600,
-    marginBottom: 12
-  } }, "THE THREE PROOF BLOCKS"), /* @__PURE__ */ import_react.default.createElement("h2", { style: {
-    fontFamily: "'Cormorant Garamond', Georgia, serif",
-    fontSize: "clamp(38px, 4.8vw, 64px)",
-    fontWeight: 300,
-    lineHeight: 1.12,
-    color: "#1a2e1a",
-    letterSpacing: "-0.01em"
-  } }, "Sanctuary By Design"), /* @__PURE__ */ import_react.default.createElement(GoldDivider, { style: { maxWidth: 220, margin: "18px auto 14px" } }), /* @__PURE__ */ import_react.default.createElement("p", { style: {
-    fontSize: "clamp(14px, 1.8vw, 17px)",
-    fontWeight: 300,
-    color: "#4d634d",
-    maxWidth: 640,
-    margin: "0 auto",
-    lineHeight: 1.7
-  } }, "Three definitive proof blocks engineered to bring peace, breathing room, and timeless luxury back to daily life in Guwahati.")), /* @__PURE__ */ import_react.default.createElement("div", { style: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-    gap: "clamp(24px, 3vw, 36px)"
-  } }, /* @__PURE__ */ import_react.default.createElement(
-    "div",
-    {
-      style: {
-        background: "#ffffff",
-        borderRadius: 8,
-        overflow: "hidden",
-        boxShadow: "0 16px 44px rgba(30, 45, 30, 0.07)",
-        border: "1px solid rgba(201, 169, 110, 0.3)",
-        display: "flex",
-        flexDirection: "column",
-        transition: "transform 0.35s ease, box-shadow 0.35s ease"
-      },
-      onMouseEnter: (e) => {
-        e.currentTarget.style.transform = "translateY(-6px)";
-        e.currentTarget.style.boxShadow = "0 24px 56px rgba(30, 45, 30, 0.12)";
-      },
-      onMouseLeave: (e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.boxShadow = "0 16px 44px rgba(30, 45, 30, 0.07)";
-      }
-    },
-    /* @__PURE__ */ import_react.default.createElement("div", { style: { position: "relative", height: 260, overflow: "hidden" } }, /* @__PURE__ */ import_react.default.createElement(
-      "img",
-      {
-        src: "uploads/cam-02_revised.webp",
-        alt: "70% Green Open Space at Aranya",
-        style: { width: "100%", height: "100%", objectFit: "cover" }
-      }
-    ), /* @__PURE__ */ import_react.default.createElement("div", { style: { position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(16,32,16,0.55) 0%, transparent 50%)" } }), /* @__PURE__ */ import_react.default.createElement("div", { style: {
-      position: "absolute",
-      top: 16,
-      left: 18,
-      background: "#ffffff",
-      padding: "6px 14px",
-      borderRadius: 20,
-      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-      border: "1px solid rgba(201,169,110,0.4)"
-    } }, /* @__PURE__ */ import_react.default.createElement("span", { style: { fontSize: 10, letterSpacing: "0.2em", color: "#8c6b2d", textTransform: "uppercase", fontWeight: 600 } }, "PROOF 01 \u2022 GREEN"))),
-    /* @__PURE__ */ import_react.default.createElement("div", { style: { padding: "34px 30px 36px", flex: 1, display: "flex", flexDirection: "column" } }, /* @__PURE__ */ import_react.default.createElement("div", { style: {
-      fontFamily: "'Cormorant Garamond', Georgia, serif",
-      fontSize: "clamp(46px, 4vw, 56px)",
-      fontWeight: 300,
-      color: "#a07d3b",
-      lineHeight: 1,
-      marginBottom: 6
-    } }, "70%"), /* @__PURE__ */ import_react.default.createElement("h3", { style: {
-      fontFamily: "'Cormorant Garamond', Georgia, serif",
-      fontSize: 26,
-      fontWeight: 400,
-      color: "#1a2e1a",
-      marginBottom: 14
-    } }, "Green Open Space*"), /* @__PURE__ */ import_react.default.createElement("p", { style: { fontSize: 14, fontWeight: 300, color: "#3d523d", lineHeight: 1.85, marginBottom: 22, flex: 1 } }, "A vast natural landscape with native botanical canopies, aroma gardens, butterfly habitats, and quiet shaded groves. ", /* @__PURE__ */ import_react.default.createElement("strong", null, "Zero vehicular movement at surface level"), " ensures clean, safe, oxygen-rich environments for children and seniors."), /* @__PURE__ */ import_react.default.createElement("div", { style: {
-      borderTop: "1px solid rgba(201, 169, 110, 0.2)",
-      paddingTop: 16,
-      fontSize: 11.5,
-      letterSpacing: "0.1em",
-      color: "#2b5f2e",
-      fontWeight: 600,
-      textTransform: "uppercase"
-    } }, "\u2713 0 Surface Traffic \u2022 Pure Air Canopies \u2022 Themed Gardens"))
-  ), /* @__PURE__ */ import_react.default.createElement(
-    "div",
-    {
-      style: {
-        background: "#ffffff",
-        borderRadius: 8,
-        overflow: "hidden",
-        boxShadow: "0 16px 44px rgba(30, 45, 30, 0.07)",
-        border: "1px solid rgba(201, 169, 110, 0.3)",
-        display: "flex",
-        flexDirection: "column",
-        transition: "transform 0.35s ease, box-shadow 0.35s ease"
-      },
-      onMouseEnter: (e) => {
-        e.currentTarget.style.transform = "translateY(-6px)";
-        e.currentTarget.style.boxShadow = "0 24px 56px rgba(30, 45, 30, 0.12)";
-      },
-      onMouseLeave: (e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.boxShadow = "0 16px 44px rgba(30, 45, 30, 0.07)";
-      }
-    },
-    /* @__PURE__ */ import_react.default.createElement("div", { style: { position: "relative", height: 260, overflow: "hidden" } }, /* @__PURE__ */ import_react.default.createElement(
-      "img",
-      {
-        src: "uploads/pool cam.webp",
-        alt: "Holistic Wellness at Aranya",
-        style: { width: "100%", height: "100%", objectFit: "cover" }
-      }
-    ), /* @__PURE__ */ import_react.default.createElement("div", { style: { position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(16,32,16,0.55) 0%, transparent 50%)" } }), /* @__PURE__ */ import_react.default.createElement("div", { style: {
-      position: "absolute",
-      top: 16,
-      left: 18,
-      background: "#ffffff",
-      padding: "6px 14px",
-      borderRadius: 20,
-      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-      border: "1px solid rgba(201,169,110,0.4)"
-    } }, /* @__PURE__ */ import_react.default.createElement("span", { style: { fontSize: 10, letterSpacing: "0.2em", color: "#8c6b2d", textTransform: "uppercase", fontWeight: 600 } }, "PROOF 02 \u2022 WELLNESS"))),
-    /* @__PURE__ */ import_react.default.createElement("div", { style: { padding: "34px 30px 36px", flex: 1, display: "flex", flexDirection: "column" } }, /* @__PURE__ */ import_react.default.createElement("div", { style: {
-      fontFamily: "'Cormorant Garamond', Georgia, serif",
-      fontSize: "clamp(46px, 4vw, 56px)",
-      fontWeight: 300,
-      color: "#a07d3b",
-      lineHeight: 1,
-      marginBottom: 6
-    } }, "Holistic"), /* @__PURE__ */ import_react.default.createElement("h3", { style: {
-      fontFamily: "'Cormorant Garamond', Georgia, serif",
-      fontSize: 26,
-      fontWeight: 400,
-      color: "#1a2e1a",
-      marginBottom: 14
-    } }, "Holistic Wellness"), /* @__PURE__ */ import_react.default.createElement("p", { style: { fontSize: 14, fontWeight: 300, color: "#3d523d", lineHeight: 1.85, marginBottom: 22, flex: 1 } }, "Homes harmonized with circadian sunlight and valley winds. Morning yoga lawns, reflexology footpaths, sensory water bodies, and expansive private balconies created to decompress the mind and revitalize the body daily."), /* @__PURE__ */ import_react.default.createElement("div", { style: {
-      borderTop: "1px solid rgba(201, 169, 110, 0.2)",
-      paddingTop: 16,
-      fontSize: 11.5,
-      letterSpacing: "0.1em",
-      color: "#2b5f2e",
-      fontWeight: 600,
-      textTransform: "uppercase"
-    } }, "\u2713 Swimming Pool Oasis \u2022 Yoga Lawn \u2022 Sensory Water Deck"))
-  ), /* @__PURE__ */ import_react.default.createElement(
-    "div",
-    {
-      style: {
-        background: "#ffffff",
-        borderRadius: 8,
-        overflow: "hidden",
-        boxShadow: "0 16px 44px rgba(30, 45, 30, 0.07)",
-        border: "1px solid rgba(201, 169, 110, 0.3)",
-        display: "flex",
-        flexDirection: "column",
-        transition: "transform 0.35s ease, box-shadow 0.35s ease"
-      },
-      onMouseEnter: (e) => {
-        e.currentTarget.style.transform = "translateY(-6px)";
-        e.currentTarget.style.boxShadow = "0 24px 56px rgba(30, 45, 30, 0.12)";
-      },
-      onMouseLeave: (e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.boxShadow = "0 16px 44px rgba(30, 45, 30, 0.07)";
-      }
-    },
-    /* @__PURE__ */ import_react.default.createElement("div", { style: { position: "relative", height: 260, overflow: "hidden" } }, /* @__PURE__ */ import_react.default.createElement(
-      "img",
-      {
-        src: "uploads/club cam_rang homes_rev.webp",
-        alt: "Club Aranya 16,000+ sq. ft.",
-        style: { width: "100%", height: "100%", objectFit: "cover" }
-      }
-    ), /* @__PURE__ */ import_react.default.createElement("div", { style: { position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(16,32,16,0.55) 0%, transparent 50%)" } }), /* @__PURE__ */ import_react.default.createElement("div", { style: {
-      position: "absolute",
-      top: 16,
-      left: 18,
-      background: "#ffffff",
-      padding: "6px 14px",
-      borderRadius: 20,
-      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-      border: "1px solid rgba(201,169,110,0.4)"
-    } }, /* @__PURE__ */ import_react.default.createElement("span", { style: { fontSize: 10, letterSpacing: "0.2em", color: "#8c6b2d", textTransform: "uppercase", fontWeight: 600 } }, "PROOF 03 \u2022 CLUB"))),
-    /* @__PURE__ */ import_react.default.createElement("div", { style: { padding: "34px 30px 36px", flex: 1, display: "flex", flexDirection: "column" } }, /* @__PURE__ */ import_react.default.createElement("div", { style: {
-      fontFamily: "'Cormorant Garamond', Georgia, serif",
-      fontSize: "clamp(46px, 4vw, 56px)",
-      fontWeight: 300,
-      color: "#a07d3b",
-      lineHeight: 1,
-      marginBottom: 6
-    } }, "16,000+"), /* @__PURE__ */ import_react.default.createElement("h3", { style: {
-      fontFamily: "'Cormorant Garamond', Georgia, serif",
-      fontSize: 26,
-      fontWeight: 400,
-      color: "#1a2e1a",
-      marginBottom: 14
-    } }, "Club Aranya, Sq. Ft.*"), /* @__PURE__ */ import_react.default.createElement("p", { style: { fontSize: 14, fontWeight: 300, color: "#3d523d", lineHeight: 1.85, marginBottom: 22, flex: 1 } }, "The crown jewel of community living in Guwahati. A sprawling multi-level club with a semi-Olympic pool, high-tech fitness centre, squash and badminton court, gaming arcade, kids' creative studio, and elegant private banquet hall."), /* @__PURE__ */ import_react.default.createElement("div", { style: {
-      borderTop: "1px solid rgba(201, 169, 110, 0.2)",
-      paddingTop: 16,
-      fontSize: 11.5,
-      letterSpacing: "0.1em",
-      color: "#2b5f2e",
-      fontWeight: 600,
-      textTransform: "uppercase"
-    } }, "\u2713 Gymnasium \u2022 Banquet Hall \u2022 Squash & Badminton \u2022 Rooftop"))
-  )))), /* @__PURE__ */ import_react.default.createElement("section", { id: "early-access", style: {
-    padding: "clamp(90px, 10vw, 140px) clamp(20px, 6vw, 96px)",
-    background: "linear-gradient(180deg, #f5f0e8 0%, #fcfbfa 100%)",
-    position: "relative",
-    overflow: "hidden"
-  } }, /* @__PURE__ */ import_react.default.createElement("div", { style: {
-    position: "absolute",
-    top: "35%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 800,
-    height: 800,
-    background: "radial-gradient(circle, rgba(201,169,110,0.1) 0%, rgba(252,251,250,0) 70%)",
-    pointerEvents: "none"
-  } }), /* @__PURE__ */ import_react.default.createElement("div", { ref: formRef, style: {
-    maxWidth: 720,
-    margin: "0 auto",
-    position: "relative",
-    zIndex: 2,
-    opacity: formVis ? 1 : 0,
-    transform: formVis ? "translateY(0)" : "translateY(24px)",
-    transition: "opacity 0.9s ease, transform 0.9s ease"
-  } }, /* @__PURE__ */ import_react.default.createElement("div", { style: {
-    background: "#ffffff",
-    borderRadius: 12,
-    padding: "clamp(36px, 6vw, 56px) clamp(24px, 5vw, 48px)",
-    boxShadow: "0 24px 70px rgba(30, 45, 30, 0.08)",
-    border: "1px solid rgba(201, 169, 110, 0.35)"
-  } }, !submitted ? /* @__PURE__ */ import_react.default.createElement(import_react.default.Fragment, null, /* @__PURE__ */ import_react.default.createElement("div", { style: { textAlign: "center", marginBottom: 36 } }, /* @__PURE__ */ import_react.default.createElement("div", { style: {
-    display: "inline-block",
-    padding: "6px 18px",
-    borderRadius: 20,
-    background: "#faf7f0",
-    border: "1px solid rgba(201, 169, 110, 0.4)",
-    marginBottom: 16
-  } }, /* @__PURE__ */ import_react.default.createElement("span", { style: { fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "#8c6b2d", fontWeight: 600 } }, "PRIORITY INVITATION")), /* @__PURE__ */ import_react.default.createElement("h2", { style: {
-    fontFamily: "'Cormorant Garamond', Georgia, serif",
-    fontSize: "clamp(36px, 4.5vw, 52px)",
-    fontWeight: 300,
-    lineHeight: 1.12,
-    color: "#1a2e1a",
-    marginBottom: 16
-  } }, "Be First in Line"), /* @__PURE__ */ import_react.default.createElement("p", { style: {
-    fontSize: "clamp(14px, 1.8vw, 16.5px)",
-    fontWeight: 300,
-    color: "#4d634d",
-    lineHeight: 1.75,
-    maxWidth: 580,
-    margin: "0 auto"
-  } }, "Register for Early Access to receive launch updates, configuration details and first access to project information before the wider launch communication.")), error && /* @__PURE__ */ import_react.default.createElement("div", { style: {
-    background: "#fef2f2",
-    border: "1px solid #fca5a5",
-    color: "#b91c1c",
-    padding: "12px 16px",
-    borderRadius: 4,
-    fontSize: 13.5,
-    marginBottom: 20,
-    textAlign: "center"
-  } }, error), /* @__PURE__ */ import_react.default.createElement("form", { onSubmit: handleSubmit, style: { display: "flex", flexDirection: "column", gap: 18 } }, /* @__PURE__ */ import_react.default.createElement("div", null, /* @__PURE__ */ import_react.default.createElement("label", { style: { display: "block", fontSize: 11.5, letterSpacing: "0.12em", textTransform: "uppercase", color: "#1a2e1a", fontWeight: 600, marginBottom: 7 } }, "Full Name *"), /* @__PURE__ */ import_react.default.createElement(
-    "input",
-    {
-      type: "text",
-      required: true,
-      placeholder: "e.g. Rahul Sharma",
-      value: lead.name,
-      onChange: (e) => setLead({ ...lead, name: e.target.value }),
-      style: {
-        width: "100%",
-        padding: "14px 16px",
-        background: "#faf8f5",
-        border: "1px solid rgba(26, 46, 26, 0.18)",
-        borderRadius: 4,
-        color: "#1a2e1a",
-        fontFamily: "'DM Sans', sans-serif",
-        fontSize: 15,
-        outline: "none",
-        boxSizing: "border-box",
-        transition: "border-color 0.2s"
-      },
-      onFocus: (e) => {
-        e.currentTarget.style.borderColor = "#b89355";
-      },
-      onBlur: (e) => {
-        e.currentTarget.style.borderColor = "rgba(26, 46, 26, 0.18)";
-      }
-    }
-  )), /* @__PURE__ */ import_react.default.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 18 } }, /* @__PURE__ */ import_react.default.createElement("div", null, /* @__PURE__ */ import_react.default.createElement("label", { style: { display: "block", fontSize: 11.5, letterSpacing: "0.12em", textTransform: "uppercase", color: "#1a2e1a", fontWeight: 600, marginBottom: 7 } }, "Mobile Number *"), /* @__PURE__ */ import_react.default.createElement(
-    "input",
-    {
-      type: "tel",
-      required: true,
-      placeholder: "+91 98765 43210",
-      value: lead.phone,
-      onChange: (e) => setLead({ ...lead, phone: e.target.value }),
-      style: {
-        width: "100%",
-        padding: "14px 16px",
-        background: "#faf8f5",
-        border: "1px solid rgba(26, 46, 26, 0.18)",
-        borderRadius: 4,
-        color: "#1a2e1a",
-        fontFamily: "'DM Sans', sans-serif",
-        fontSize: 15,
-        outline: "none",
-        boxSizing: "border-box"
-      },
-      onFocus: (e) => {
-        e.currentTarget.style.borderColor = "#b89355";
-      },
-      onBlur: (e) => {
-        e.currentTarget.style.borderColor = "rgba(26, 46, 26, 0.18)";
-      }
-    }
-  )), /* @__PURE__ */ import_react.default.createElement("div", null, /* @__PURE__ */ import_react.default.createElement("label", { style: { display: "block", fontSize: 11.5, letterSpacing: "0.12em", textTransform: "uppercase", color: "#1a2e1a", fontWeight: 600, marginBottom: 7 } }, "Email Address"), /* @__PURE__ */ import_react.default.createElement(
-    "input",
-    {
-      type: "email",
-      placeholder: "rahul@example.com",
-      value: lead.email,
-      onChange: (e) => setLead({ ...lead, email: e.target.value }),
-      style: {
-        width: "100%",
-        padding: "14px 16px",
-        background: "#faf8f5",
-        border: "1px solid rgba(26, 46, 26, 0.18)",
-        borderRadius: 4,
-        color: "#1a2e1a",
-        fontFamily: "'DM Sans', sans-serif",
-        fontSize: 15,
-        outline: "none",
-        boxSizing: "border-box"
-      },
-      onFocus: (e) => {
-        e.currentTarget.style.borderColor = "#b89355";
-      },
-      onBlur: (e) => {
-        e.currentTarget.style.borderColor = "rgba(26, 46, 26, 0.18)";
-      }
-    }
-  ))), /* @__PURE__ */ import_react.default.createElement("div", null, /* @__PURE__ */ import_react.default.createElement("label", { style: { display: "block", fontSize: 11.5, letterSpacing: "0.12em", textTransform: "uppercase", color: "#1a2e1a", fontWeight: 600, marginBottom: 7 } }, "Configuration of Interest"), /* @__PURE__ */ import_react.default.createElement(
-    "select",
-    {
-      value: lead.config,
-      onChange: (e) => setLead({ ...lead, config: e.target.value }),
-      style: {
-        width: "100%",
-        padding: "14px 16px",
-        background: "#faf8f5",
-        border: "1px solid rgba(26, 46, 26, 0.18)",
-        borderRadius: 4,
-        color: "#1a2e1a",
-        fontFamily: "'DM Sans', sans-serif",
-        fontSize: 15,
-        outline: "none",
-        boxSizing: "border-box"
-      }
-    },
-    /* @__PURE__ */ import_react.default.createElement("option", { value: "2 BHK Aura (924 sq ft)" }, "2 BHK Aura (924 sq ft)"),
-    /* @__PURE__ */ import_react.default.createElement("option", { value: "3 BHK Celestial (1,379 sq ft)" }, "3 BHK Celestial (1,379 sq ft)"),
-    /* @__PURE__ */ import_react.default.createElement("option", { value: "3 BHK + Private Terrace" }, "3 BHK + Private Terrace"),
-    /* @__PURE__ */ import_react.default.createElement("option", { value: "4 BHK Signature Sanctuary" }, "4 BHK Signature Sanctuary"),
-    /* @__PURE__ */ import_react.default.createElement("option", { value: "All Configurations" }, "Open to All Configurations")
-  )), /* @__PURE__ */ import_react.default.createElement(
-    "button",
-    {
-      type: "submit",
-      disabled: loading,
-      style: {
-        marginTop: 10,
-        background: "linear-gradient(135deg, #c9a96e 0%, #b89355 100%)",
-        color: "#ffffff",
-        border: "none",
-        padding: "17px 28px",
-        fontFamily: "'DM Sans', sans-serif",
-        fontSize: 13.5,
-        fontWeight: 600,
-        letterSpacing: "0.14em",
-        textTransform: "uppercase",
-        borderRadius: 4,
-        cursor: loading ? "wait" : "pointer",
-        boxShadow: "0 8px 24px rgba(184, 147, 85, 0.35)",
-        transition: "transform 0.2s, box-shadow 0.2s"
-      },
-      onMouseEnter: (e) => {
-        e.currentTarget.style.transform = "translateY(-2px)";
-      },
-      onMouseLeave: (e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-      }
-    },
-    loading ? "Confirming Priority..." : "Get Early Access \u2192"
-  ), /* @__PURE__ */ import_react.default.createElement("div", { style: {
-    display: "flex",
-    justifyContent: "center",
-    gap: 18,
-    marginTop: 12,
-    color: "#6e856e",
-    fontSize: 11.5
-  } }, /* @__PURE__ */ import_react.default.createElement("span", null, "\u{1F512} 100% Confidential"), /* @__PURE__ */ import_react.default.createElement("span", null, "\u2022"), /* @__PURE__ */ import_react.default.createElement("span", null, "Direct Developer Priority"), /* @__PURE__ */ import_react.default.createElement("span", null, "\u2022"), /* @__PURE__ */ import_react.default.createElement("span", null, "Zero Spam")))) : /* @__PURE__ */ import_react.default.createElement("div", { style: { textAlign: "center", padding: "24px 10px" } }, /* @__PURE__ */ import_react.default.createElement("div", { style: {
-    width: 68,
-    height: 68,
-    borderRadius: "50%",
-    background: "#faf7f0",
-    border: "2px solid #a07d3b",
-    color: "#a07d3b",
-    fontSize: 32,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    margin: "0 auto 20px",
-    fontWeight: "bold"
-  } }, "\u2713"), /* @__PURE__ */ import_react.default.createElement("h3", { style: { fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 38, color: "#1a2e1a", fontWeight: 400, marginBottom: 12 } }, "Priority Access Confirmed"), /* @__PURE__ */ import_react.default.createElement("p", { style: { fontSize: 15.5, color: "#3d523d", lineHeight: 1.7, marginBottom: 28, maxWidth: 520, margin: "0 auto 28px" } }, "Thank you, ", /* @__PURE__ */ import_react.default.createElement("strong", null, lead.name), ". Your early access request has been registered. You will receive first-tier floor plans and priority allocation before public announcement."), /* @__PURE__ */ import_react.default.createElement("div", { style: { display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" } }, /* @__PURE__ */ import_react.default.createElement(
-    "a",
-    {
-      href: "uploads/Aranya brochure.pdf",
-      download: true,
-      style: {
-        background: "linear-gradient(135deg, #c9a96e 0%, #b89355 100%)",
-        color: "#ffffff",
-        padding: "14px 28px",
-        borderRadius: 4,
-        textDecoration: "none",
-        fontSize: 13,
-        fontWeight: 600,
-        letterSpacing: "0.1em",
-        textTransform: "uppercase",
-        boxShadow: "0 6px 18px rgba(184, 147, 85, 0.3)"
-      }
-    },
-    "Download Project Preview (PDF)"
-  ), /* @__PURE__ */ import_react.default.createElement(
-    "a",
-    {
-      href: `https://wa.me/919311852020?text=Hi%20Aranya%20Team%2C%20I%20registered%20for%20Early%20Access%20as%20${encodeURIComponent(lead.name)}.`,
-      target: "_blank",
-      rel: "noopener noreferrer",
-      style: {
-        background: "#25D366",
-        color: "#ffffff",
-        border: "none",
-        padding: "14px 26px",
-        borderRadius: 4,
-        textDecoration: "none",
-        fontSize: 13,
-        fontWeight: 600,
-        letterSpacing: "0.08em",
-        textTransform: "uppercase"
-      }
-    },
-    "WhatsApp Advisory Desk"
-  )))))), /* @__PURE__ */ import_react.default.createElement("footer", { style: {
-    background: "#f2ede4",
-    color: "#4d634d",
-    padding: "56px clamp(20px, 6vw, 96px) 38px",
-    borderTop: "1px solid rgba(201, 169, 110, 0.25)"
-  } }, /* @__PURE__ */ import_react.default.createElement("div", { style: { maxWidth: 1240, margin: "0 auto" } }, /* @__PURE__ */ import_react.default.createElement("div", { style: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    flexWrap: "wrap",
-    gap: 32,
-    marginBottom: 36
-  } }, /* @__PURE__ */ import_react.default.createElement("div", null, /* @__PURE__ */ import_react.default.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, marginBottom: 12 } }, /* @__PURE__ */ import_react.default.createElement(
-    "img",
-    {
-      src: "uploads/logo design.webp",
-      alt: "Aranya Logo",
-      style: { height: 38, width: "auto" }
-    }
-  ), /* @__PURE__ */ import_react.default.createElement("span", { style: {
-    fontFamily: "'Cormorant Garamond', Georgia, serif",
-    fontSize: 22,
-    letterSpacing: "0.18em",
-    color: "#1a2e1a",
-    fontWeight: 600
-  } }, "ARANYA")), /* @__PURE__ */ import_react.default.createElement("p", { style: { fontSize: 13.5, color: "#4d634d", lineHeight: 1.65, maxWidth: 420 } }, "Rang Homes Aerocity, Dharapur, Guwahati, Assam 781017.", /* @__PURE__ */ import_react.default.createElement("br", null), "Conveniently located 10 minutes from Lokpriya Gopinath Bordoloi International Airport.")), /* @__PURE__ */ import_react.default.createElement("div", { style: { textAlign: "right" } }, /* @__PURE__ */ import_react.default.createElement("p", { style: {
-    fontFamily: "'Cormorant Garamond', Georgia, serif",
-    fontSize: 20,
-    fontStyle: "italic",
-    color: "#8c6b2d",
-    marginBottom: 6
-  } }, '"The whistling winds are getting greener."'), /* @__PURE__ */ import_react.default.createElement("p", { style: { fontSize: 13, color: "#4d634d" } }, "VIP Desk: ", /* @__PURE__ */ import_react.default.createElement("a", { href: "tel:+919311852020", style: { color: "#8c6b2d", textDecoration: "none", fontWeight: 600 } }, "+91 93118 52020")))), /* @__PURE__ */ import_react.default.createElement(GoldDivider, { style: { marginBottom: 24 } }), /* @__PURE__ */ import_react.default.createElement("div", { style: {
-    display: "flex",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-    gap: 16,
-    fontSize: 11,
-    lineHeight: 1.7,
-    color: "#6e856e"
-  } }, /* @__PURE__ */ import_react.default.createElement("p", { style: { maxWidth: 780 } }, "*RERA Registration: Under Process. Expected Possession: 2031. 70% open green space & 16,000+ sq ft clubhouse are part of the proposed master plan. Information is indicative and subject to change without prior notice. Indotech Infracon Pvt. Ltd. \xA9 2026."), /* @__PURE__ */ import_react.default.createElement("p", null, /* @__PURE__ */ import_react.default.createElement("a", { href: "/", style: { color: "#8c6b2d", textDecoration: "none", marginRight: 18, fontWeight: 500 } }, "View Full Website"), /* @__PURE__ */ import_react.default.createElement("a", { href: "https://wa.me/919311852020", target: "_blank", rel: "noopener noreferrer", style: { color: "#8c6b2d", textDecoration: "none", fontWeight: 500 } }, "WhatsApp Advisory"))))));
+  return /* @__PURE__ */ import_react.default.createElement("main", { className: "coming-soon" }, /* @__PURE__ */ import_react.default.createElement("style", null, `
+        :root { --ink:#10241b; --ink-deep:#091711; --paper:#f1f0e7; --paper-soft:#f8f7f1; --lime:#c9a96e; --moss:#55715f; --line:rgba(16,36,27,.16); }
+        .coming-soon { min-height:100vh; overflow:hidden; background:var(--paper); color:var(--ink); font-family:'DM Sans',system-ui,sans-serif; }
+
+        .site-header { position:fixed; z-index:50; inset:0 0 auto; padding:20px clamp(20px,4vw,64px); transition:background .3s,border-color .3s,padding .3s; border-bottom:1px solid transparent; }
+        .site-header.is-scrolled { padding-top:13px; padding-bottom:13px; background:rgba(9,23,17,.88); border-color:rgba(255,255,255,.1); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+        .header-inner { max-width:1440px; margin:auto; display:flex; align-items:center; justify-content:space-between; gap:24px; }
+        .brand { display:inline-flex; align-items:center; }
+        .brand img { width:auto; height:clamp(32px,3vw,42px); display:block; }
+        .header-actions { display:flex; align-items:center; gap:clamp(18px,3vw,42px); }
+        .text-link { border:0; padding:0; background:transparent; color:rgba(255,255,255,.7); font:500 11px/1 'DM Sans',sans-serif; letter-spacing:.16em; text-transform:uppercase; cursor:pointer; }
+        .text-link:hover { color:#fff; }
+        .header-cta,.primary-cta { border:0; display:inline-flex; align-items:center; justify-content:center; gap:14px; cursor:pointer; font:600 11px/1 'DM Sans',sans-serif; letter-spacing:.12em; text-transform:uppercase; transition:transform .25s,background .25s; }
+        .header-cta { min-height:43px; padding:0 22px; border-radius:0; background:#c9a96e; color:#1a2e1a; }
+        .header-cta:hover,.primary-cta:hover { transform:translateY(-2px); background:#dfc28e; }
+        .icon { width:21px; height:21px; flex:0 0 auto; }
+        .icon--down { transform:rotate(90deg); }
+
+        .hero { position:relative; min-height:100svh; display:grid; grid-template-columns:minmax(0,.82fr) minmax(500px,1.18fr); background:var(--ink-deep); color:#fff; }
+        .hero-copy { position:relative; z-index:2; display:flex; flex-direction:column; justify-content:flex-end; padding:clamp(130px,17vh,190px) clamp(28px,5vw,76px) clamp(48px,8vh,88px); }
+        .eyebrow { display:flex; align-items:center; gap:12px; margin:0 0 24px; color:rgba(255,255,255,.62); font-size:10px; font-weight:600; letter-spacing:.22em; text-transform:uppercase; }
+        .eyebrow::before { content:''; width:34px; height:1px; background:var(--lime); }
+        .hero h1 { max-width:680px; margin:0; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(4.4rem,8.4vw,9rem); font-weight:300; line-height:.78; letter-spacing:-.055em; }
+        .hero h1 span { display:block; margin-left:clamp(18px,5vw,82px); color:var(--lime); font-style:italic; }
+        .hero-intro { display:grid; grid-template-columns:1fr auto; align-items:end; gap:30px; margin-top:clamp(44px,8vh,86px); padding-top:24px; border-top:1px solid rgba(255,255,255,.16); }
+        .hero-intro p { max-width:420px; margin:0; color:rgba(255,255,255,.68); font-size:clamp(.9rem,1.1vw,1.05rem); line-height:1.7; }
+        .round-button { width:56px; height:56px; padding:0; display:grid; place-items:center; border:1px solid rgba(255,255,255,.35); border-radius:50%; background:transparent; color:#fff; cursor:pointer; transition:background .25s,color .25s,transform .25s; }
+        .round-button:hover { color:var(--ink); background:var(--lime); border-color:var(--lime); transform:translateY(3px); }
+        .hero-visual { position:relative; min-height:100svh; overflow:hidden; }
+        .hero-visual::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,rgba(9,23,17,.42),transparent 35%),linear-gradient(0deg,rgba(9,23,17,.35),transparent 45%); pointer-events:none; }
+        .hero-visual img { width:100%; height:100%; object-fit:cover; object-position:52% center; display:block; transform:scale(1.015); }
+        .hero-form-card { position:absolute; z-index:5; top:50%; right:clamp(24px,4vw,58px); width:min(410px,35vw); padding:clamp(26px,3vw,38px); color:#fff; background:rgba(7,22,15,.72); border:1px solid rgba(255,255,255,.2); border-radius:24px; box-shadow:0 30px 80px rgba(0,0,0,.32); backdrop-filter:blur(22px) saturate(1.15); -webkit-backdrop-filter:blur(22px) saturate(1.15); transform:translateY(-43%); }
+        .hero-form-card::before { content:''; position:absolute; inset:0; z-index:-1; border-radius:inherit; background:linear-gradient(145deg,rgba(255,255,255,.1),transparent 45%); pointer-events:none; }
+        .hero-form-card>.eyebrow { margin-bottom:15px; color:rgba(255,255,255,.68); }
+        .hero-form-card h2 { margin:0 0 10px; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(2rem,2.8vw,3rem); font-weight:400; line-height:1; }
+        .hero-form-card .form-intro { margin:0 0 25px; color:rgba(255,255,255,.62); font-size:.82rem; line-height:1.6; }
+        .hero-form-card .field label { color:rgba(255,255,255,.58); }
+        .hero-form-card .field input { height:45px; color:#fff; border-color:rgba(255,255,255,.28); }
+        .hero-form-card .field input:focus { border-color:var(--lime); }
+        .hero-form-card .field input::placeholder { color:rgba(255,255,255,.38); }
+        .hero-form-card .primary-cta { min-height:52px; margin-top:3px; border-radius:0; background:#c9a96e; color:#1a2e1a; }
+        .hero-form-card .privacy { color:rgba(255,255,255,.48); }
+        .hero-form-card .form-error { color:#ffd1c9; }
+
+        .marquee { overflow:hidden; border-bottom:1px solid var(--line); background:var(--lime); color:var(--ink); white-space:nowrap; }
+        .marquee-track { width:max-content; padding:15px 0; animation:marquee 28s linear infinite; }
+        .marquee-track span { display:inline-flex; align-items:center; gap:42px; padding-right:42px; font-size:10px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; }
+        .marquee-track span::after { content:'\u2726'; font-size:9px; }
+        @keyframes marquee { to { transform:translateX(-50%); } }
+
+        .story { padding:clamp(86px,12vw,170px) clamp(20px,5vw,72px); background:var(--paper); }
+        .story-inner { max-width:1380px; margin:auto; }
+        .section-heading { display:grid; grid-template-columns:.72fr 1.28fr; gap:clamp(40px,7vw,110px); align-items:start; margin-bottom:clamp(56px,8vw,108px); }
+        .section-kicker { margin:12px 0 0; color:var(--moss); font-size:10px; font-weight:600; letter-spacing:.21em; text-transform:uppercase; }
+        .section-heading h2 { max-width:890px; margin:0; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(3rem,6.3vw,6.8rem); font-weight:300; line-height:.93; letter-spacing:-.04em; }
+        .story-grid { display:grid; grid-template-columns:1.26fr .74fr; gap:clamp(20px,3vw,40px); }
+        .story-image { min-height:660px; margin:0; border-radius:28px; overflow:hidden; }
+        .story-image img { width:100%; height:100%; display:block; object-fit:cover; }
+        .story-stack { display:grid; grid-template-rows:auto 1fr; gap:clamp(20px,3vw,40px); }
+        .story-note { padding:clamp(30px,4vw,54px); border-radius:28px; background:var(--ink); color:#fff; }
+        .story-note .index { display:inline-grid; place-items:center; width:34px; height:34px; border:1px solid rgba(255,255,255,.24); border-radius:50%; color:var(--lime); font-size:10px; }
+        .story-note h3 { max-width:450px; margin:60px 0 22px; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(2rem,3.5vw,3.7rem); font-weight:300; line-height:1; }
+        .story-note p { max-width:430px; margin:0; color:rgba(255,255,255,.62); font-size:.9rem; line-height:1.75; }
+        .metrics { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--line); border-radius:28px; background:var(--paper-soft); overflow:hidden; }
+        .metric { min-height:190px; padding:28px 24px; display:flex; flex-direction:column; justify-content:space-between; border-right:1px solid var(--line); }
+        .metric:last-child { border-right:0; }
+        .metric strong { font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(2.7rem,4vw,4.5rem); font-weight:300; line-height:1; }
+        .metric span { max-width:110px; color:var(--moss); font-size:9px; font-weight:600; line-height:1.5; letter-spacing:.15em; text-transform:uppercase; }
+
+        .lead-form { display:grid; grid-template-columns:1fr 1fr; gap:22px 18px; }
+        .field--wide { grid-column:1/-1; }
+        .field label { display:block; margin:0 0 9px; color:var(--moss); font-size:9px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; }
+        .field input { width:100%; height:52px; padding:0 2px; border:0; border-bottom:1px solid rgba(16,36,27,.28); border-radius:0; outline:none; background:transparent; color:var(--ink); font:400 1rem/1 'DM Sans',sans-serif; transition:border-color .2s; }
+        .field input:focus { border-color:var(--ink); }
+        .field input::placeholder { color:rgba(16,36,27,.35); }
+        .form-error { grid-column:1/-1; margin:-6px 0 0; color:#a34235; font-size:12px; }
+        .primary-cta { grid-column:1/-1; min-height:58px; margin-top:8px; padding:0 28px; border-radius:0; background:#c9a96e; color:#1a2e1a; }
+        .primary-cta:disabled { cursor:wait; opacity:.65; }
+        .privacy { grid-column:1/-1; display:flex; align-items:center; justify-content:center; gap:8px; margin:0; color:rgba(16,36,27,.5); font-size:10px; line-height:1.5; text-align:center; }
+        .success { min-height:390px; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; }
+        .success-mark { width:62px; height:62px; display:grid; place-items:center; margin-bottom:34px; border-radius:50%; background:var(--lime); color:var(--ink); font-size:24px; }
+        .success h2 { margin-bottom:14px; }
+        .success p:last-child { max-width:440px; margin:0; color:rgba(255,255,255,.62); line-height:1.7; }
+
+        .closing { position:relative; min-height:760px; display:flex; align-items:flex-end; padding:clamp(70px,8vw,120px) clamp(24px,6vw,90px); overflow:hidden; color:#fff; background-image:linear-gradient(90deg,rgba(6,18,12,.88),rgba(6,18,12,.28) 62%,rgba(6,18,12,.18)),linear-gradient(0deg,rgba(6,18,12,.68),transparent 60%),url('/uploads/club%20cam_rang%20homes_rev.webp'); background-size:cover; background-position:center; }
+        .closing-content { position:relative; z-index:1; width:min(100%,1380px); margin:0 auto; display:grid; grid-template-columns:1fr auto; gap:40px; align-items:end; }
+        .closing h2 { max-width:820px; margin:0; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(4rem,8vw,8rem); font-weight:300; line-height:.82; letter-spacing:-.05em; }
+        .closing h2 em { display:block; color:var(--lime); font-weight:300; }
+        .closing-action { padding-bottom:8px; text-align:right; }
+        .closing-action p { max-width:320px; margin:0 0 22px; color:rgba(255,255,255,.7); font-size:.9rem; line-height:1.65; }
+        .closing-action .header-cta { min-height:54px; padding:0 28px; }
+
+        .footer { padding:28px clamp(20px,5vw,72px); background:var(--paper); border-top:1px solid var(--line); }
+        .footer-inner { max-width:1380px; margin:auto; display:grid; grid-template-columns:1fr auto 1fr; gap:24px; align-items:center; }
+        .footer img { width:auto; height:30px; }
+        .footer p,.footer button { margin:0; color:rgba(16,36,27,.55); font-size:9px; line-height:1.5; letter-spacing:.12em; text-transform:uppercase; }
+        .footer button { justify-self:end; border:0; background:transparent; cursor:pointer; }
+
+        @media (max-width:1050px) {
+          .hero { display:block; padding-bottom:54px; }
+          .hero-copy { min-height:780px; padding-right:clamp(28px,8vw,82px); background:linear-gradient(90deg,rgba(9,23,17,.96),rgba(9,23,17,.8) 55%,rgba(9,23,17,.38)); }
+          .hero-visual { position:absolute; inset:0; min-height:100%; }
+          .hero-visual::after { background:linear-gradient(0deg,rgba(9,23,17,.65),transparent 50%); }
+          .hero h1 { font-size:clamp(5rem,13vw,8.5rem); }
+          .hero-form-card { position:relative; top:auto; right:auto; width:min(640px,calc(100% - 80px)); margin:-92px auto 0; transform:none; }
+          .story-grid { grid-template-columns:1fr; }
+          .story-image { min-height:540px; }
+          .story-stack { grid-template-columns:1fr; grid-template-rows:auto auto; }
+          .closing-content { grid-template-columns:1fr; }
+          .closing-action { text-align:left; }
+        }
+
+        @media (max-width:700px) {
+          .site-header { padding:15px 18px; }
+          .text-link { display:none; }
+          .header-cta { min-height:39px; padding:0 17px; font-size:9px; }
+          .brand img { height:30px; }
+          .hero { padding-bottom:28px; }
+          .hero-copy { min-height:690px; padding:118px 20px 70px; background:linear-gradient(90deg,rgba(9,23,17,.9),rgba(9,23,17,.42)),linear-gradient(0deg,rgba(9,23,17,.8),transparent 55%); }
+          .hero h1 { font-size:clamp(4.2rem,22vw,6.3rem); line-height:.82; }
+          .hero h1 span { margin-left:10px; }
+          .hero-intro { margin-top:auto; padding-top:20px; gap:20px; }
+          .hero-intro p { font-size:.86rem; line-height:1.6; }
+          .round-button { width:48px; height:48px; }
+          .hero-form-card { width:calc(100% - 36px); margin:-42px auto 0; padding:26px 20px; border-radius:20px; }
+          .hero-form-card h2 { font-size:2.45rem; }
+          .story { padding:74px 18px; }
+          .section-heading { grid-template-columns:1fr; gap:26px; margin-bottom:44px; }
+          .section-heading h2 { font-size:clamp(3rem,15vw,4.6rem); }
+          .story-image { min-height:420px; border-radius:20px; }
+          .story-note { border-radius:20px; }
+          .story-note h3 { margin-top:46px; }
+          .metrics { grid-template-columns:1fr; border-radius:20px; }
+          .metric { min-height:130px; border-right:0; border-bottom:1px solid var(--line); }
+          .metric:last-child { border-bottom:0; }
+          .lead-form { grid-template-columns:1fr; }
+          .field--wide,.form-error,.primary-cta,.privacy { grid-column:auto; }
+          .closing { min-height:650px; padding:70px 20px 52px; background-position:58% center; }
+          .closing h2 { font-size:clamp(4rem,20vw,6rem); }
+          .footer-inner { grid-template-columns:1fr auto; }
+          .footer p { display:none; }
+        }
+
+        @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; } }
+      `), /* @__PURE__ */ import_react.default.createElement("header", { className: `site-header${scrolled ? " is-scrolled" : ""}` }, /* @__PURE__ */ import_react.default.createElement("div", { className: "header-inner" }, /* @__PURE__ */ import_react.default.createElement("button", { className: "brand", onClick: () => scrollTo("hero"), "aria-label": "Go to top", style: { border: 0, padding: 0, background: "transparent", cursor: "pointer" } }, /* @__PURE__ */ import_react.default.createElement("img", { src: LOGO_HEADER, alt: "Indo Group" })), /* @__PURE__ */ import_react.default.createElement("div", { className: "header-actions" }, /* @__PURE__ */ import_react.default.createElement("button", { className: "text-link", onClick: () => scrollTo("vision") }, "The vision"), /* @__PURE__ */ import_react.default.createElement("button", { className: "header-cta", onClick: () => scrollTo("hero-form", true) }, "Request access ", /* @__PURE__ */ import_react.default.createElement(Arrow, null))))), /* @__PURE__ */ import_react.default.createElement("section", { className: "hero", id: "hero" }, /* @__PURE__ */ import_react.default.createElement("div", { className: "hero-copy" }, /* @__PURE__ */ import_react.default.createElement("p", { className: "eyebrow" }, "A new residential experience \xB7 Guwahati"), /* @__PURE__ */ import_react.default.createElement("h1", null, "Live a little ", /* @__PURE__ */ import_react.default.createElement("span", null, "wilder.")), /* @__PURE__ */ import_react.default.createElement("div", { className: "hero-intro" }, /* @__PURE__ */ import_react.default.createElement("p", null, "Space to breathe. Nature at your doorstep. A considered new address is taking root."), /* @__PURE__ */ import_react.default.createElement("button", { className: "round-button", onClick: () => scrollTo("vision"), "aria-label": "Discover the vision" }, /* @__PURE__ */ import_react.default.createElement(Arrow, { down: true })))), /* @__PURE__ */ import_react.default.createElement("div", { className: "hero-visual", "aria-hidden": "true" }, /* @__PURE__ */ import_react.default.createElement("img", { src: "/uploads/cam-02_revised.webp", alt: "", fetchPriority: "high" })), /* @__PURE__ */ import_react.default.createElement("aside", { className: "hero-form-card", id: "hero-form", "aria-label": "Early access registration" }, submitted ? /* @__PURE__ */ import_react.default.createElement("div", { className: "success", role: "status" }, /* @__PURE__ */ import_react.default.createElement("span", { className: "success-mark" }, "\u2713"), /* @__PURE__ */ import_react.default.createElement("p", { className: "eyebrow" }, "You are on the list"), /* @__PURE__ */ import_react.default.createElement("h2", null, "Thank you, ", lead.name.split(" ")[0], "."), /* @__PURE__ */ import_react.default.createElement("p", null, "We have received your details. Our team will reach out when the private preview opens.")) : /* @__PURE__ */ import_react.default.createElement(import_react.default.Fragment, null, /* @__PURE__ */ import_react.default.createElement("p", { className: "eyebrow" }, "Register your interest"), /* @__PURE__ */ import_react.default.createElement("h2", null, "Get closer to the reveal."), /* @__PURE__ */ import_react.default.createElement("p", { className: "form-intro" }, "Leave your details for early updates and invitation-only previews."), /* @__PURE__ */ import_react.default.createElement("form", { className: "lead-form", onSubmit: handleSubmit, noValidate: true }, Object.entries(utm).map(([name, value]) => /* @__PURE__ */ import_react.default.createElement("input", { key: name, type: "hidden", name, value, readOnly: true })), /* @__PURE__ */ import_react.default.createElement("div", { className: "field field--wide" }, /* @__PURE__ */ import_react.default.createElement("label", { htmlFor: "lead-name" }, "Full name *"), /* @__PURE__ */ import_react.default.createElement("input", { ref: nameInputRef, id: "lead-name", name: "name", autoComplete: "name", value: lead.name, onChange: updateLead("name"), placeholder: "Your name", required: true })), /* @__PURE__ */ import_react.default.createElement("div", { className: "field" }, /* @__PURE__ */ import_react.default.createElement("label", { htmlFor: "lead-phone" }, "Mobile number *"), /* @__PURE__ */ import_react.default.createElement("input", { id: "lead-phone", name: "phone", type: "tel", inputMode: "tel", autoComplete: "tel", value: lead.phone, onChange: updateLead("phone"), placeholder: "+91 98765 43210", required: true })), /* @__PURE__ */ import_react.default.createElement("div", { className: "field" }, /* @__PURE__ */ import_react.default.createElement("label", { htmlFor: "lead-email" }, "Email address"), /* @__PURE__ */ import_react.default.createElement("input", { id: "lead-email", name: "email", type: "email", autoComplete: "email", value: lead.email, onChange: updateLead("email"), placeholder: "you@email.com" })), /* @__PURE__ */ import_react.default.createElement("div", { className: "field field--wide" }, /* @__PURE__ */ import_react.default.createElement("label", { htmlFor: "lead-pincode" }, "Pincode"), /* @__PURE__ */ import_react.default.createElement("input", { id: "lead-pincode", name: "pincode", inputMode: "numeric", maxLength: 6, autoComplete: "postal-code", value: lead.pincode, onChange: updateLead("pincode"), placeholder: "Your area pincode" })), error && /* @__PURE__ */ import_react.default.createElement("p", { className: "form-error", role: "alert" }, error), /* @__PURE__ */ import_react.default.createElement("button", { className: "primary-cta", type: "submit", disabled: loading }, loading ? "Saving your place\u2026" : /* @__PURE__ */ import_react.default.createElement(import_react.default.Fragment, null, "Request early access ", /* @__PURE__ */ import_react.default.createElement(Arrow, null))), /* @__PURE__ */ import_react.default.createElement("p", { className: "privacy" }, /* @__PURE__ */ import_react.default.createElement("span", { "aria-hidden": "true" }, "\u25CB"), " Your details stay private and are used only for project updates."))))), /* @__PURE__ */ import_react.default.createElement("div", { className: "marquee", "aria-hidden": "true" }, /* @__PURE__ */ import_react.default.createElement("div", { className: "marquee-track" }, [0, 1].map((group) => /* @__PURE__ */ import_react.default.createElement(import_react.default.Fragment, { key: group }, /* @__PURE__ */ import_react.default.createElement("span", null, "Nature-led living"), /* @__PURE__ */ import_react.default.createElement("span", null, "Private pre-launch"), /* @__PURE__ */ import_react.default.createElement("span", null, "A quieter address"), /* @__PURE__ */ import_react.default.createElement("span", null, "Made for more space"))))), /* @__PURE__ */ import_react.default.createElement("section", { className: "story", id: "vision" }, /* @__PURE__ */ import_react.default.createElement("div", { className: "story-inner" }, /* @__PURE__ */ import_react.default.createElement("div", { className: "section-heading" }, /* @__PURE__ */ import_react.default.createElement("p", { className: "section-kicker" }, "The idea / 01"), /* @__PURE__ */ import_react.default.createElement("h2", null, "Designed for life beyond four walls.")), /* @__PURE__ */ import_react.default.createElement("div", { className: "story-grid" }, /* @__PURE__ */ import_react.default.createElement("figure", { className: "story-image" }, /* @__PURE__ */ import_react.default.createElement("img", { src: "/uploads/shot%2015_v2.webp", alt: "Landscaped residential spaces at dusk", loading: "lazy" })), /* @__PURE__ */ import_react.default.createElement("div", { className: "story-stack" }, /* @__PURE__ */ import_react.default.createElement("article", { className: "story-note" }, /* @__PURE__ */ import_react.default.createElement("span", { className: "index" }, "02"), /* @__PURE__ */ import_react.default.createElement("h3", null, "A home that gives something back."), /* @__PURE__ */ import_react.default.createElement("p", null, "More daylight, more green, and more room for the rituals that make every day feel grounded. Thoughtful architecture meets a landscape made to be lived in.")), /* @__PURE__ */ import_react.default.createElement("div", { className: "metrics", "aria-label": "Project highlights" }, /* @__PURE__ */ import_react.default.createElement("div", { className: "metric" }, /* @__PURE__ */ import_react.default.createElement("strong", null, "70%"), /* @__PURE__ */ import_react.default.createElement("span", null, "Open green spaces")), /* @__PURE__ */ import_react.default.createElement("div", { className: "metric" }, /* @__PURE__ */ import_react.default.createElement("strong", null, "16K+"), /* @__PURE__ */ import_react.default.createElement("span", null, "Sq. ft. clubhouse")), /* @__PURE__ */ import_react.default.createElement("div", { className: "metric" }, /* @__PURE__ */ import_react.default.createElement("strong", null, "01"), /* @__PURE__ */ import_react.default.createElement("span", null, "Distinctive address"))))))), /* @__PURE__ */ import_react.default.createElement("section", { className: "closing", id: "closing" }, /* @__PURE__ */ import_react.default.createElement("div", { className: "closing-content" }, /* @__PURE__ */ import_react.default.createElement("h2", null, "The reveal is ", /* @__PURE__ */ import_react.default.createElement("em", null, "closer than you think.")), /* @__PURE__ */ import_react.default.createElement("div", { className: "closing-action" }, /* @__PURE__ */ import_react.default.createElement("p", null, "Join the private registry and be among the first to experience what is taking shape."), /* @__PURE__ */ import_react.default.createElement("button", { className: "header-cta", onClick: () => scrollTo("hero-form", true) }, "Register your interest ", /* @__PURE__ */ import_react.default.createElement(Arrow, null))))), /* @__PURE__ */ import_react.default.createElement("footer", { className: "footer" }, /* @__PURE__ */ import_react.default.createElement("div", { className: "footer-inner" }, /* @__PURE__ */ import_react.default.createElement("img", { src: LOGO_DARK, alt: "Rang Homes by Indo Group" }), /* @__PURE__ */ import_react.default.createElement("p", null, "Conceptual visuals for representational purposes only \xB7 \xA9 ", (/* @__PURE__ */ new Date()).getFullYear()), /* @__PURE__ */ import_react.default.createElement("button", { onClick: () => scrollTo("hero") }, "Back to top \u2191"))));
 }
 
 // src/entry-coming-soon-server.jsx

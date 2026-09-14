@@ -1,1009 +1,307 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-// ─── GOLD DIVIDER ─────────────────────────────────────────────────────────────
-function GoldDivider({ style }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 14, ...style }}>
-      <div style={{ height: 1, flex: 1, background: 'linear-gradient(to right, transparent, #c9a96e)' }} />
-      <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#c9a96e', flexShrink: 0 }} />
-      <div style={{ height: 1, flex: 1, background: 'linear-gradient(to left, transparent, #c9a96e)' }} />
-    </div>
-  );
-}
+const LOGO_HEADER = '/uploads/indo-group-logo.png';
+const LOGO_DARK = '/uploads/indo-group-logo-transparent.png';
 
-// ─── SCROLL REVEAL HOOK ───────────────────────────────────────────────────────
-function useReveal(threshold = 0.1) {
-  const ref = useRef(null);
-  const [vis, setVis] = useState(true);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    if (rect.top > window.innerHeight) {
-      setVis(false);
-      const obs = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting) {
-          setVis(true);
-          obs.disconnect();
-        }
-      }, { threshold });
-      obs.observe(el);
-      return () => obs.disconnect();
-    }
-  }, [threshold]);
-
-  return [ref, vis];
-}
+const Arrow = ({ down = false }) => (
+  <svg aria-hidden="true" className={down ? 'icon icon--down' : 'icon'} viewBox="0 0 24 24" fill="none">
+    <path d="M5 12h14M14 7l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
 
 export default function ComingSoonApp() {
-  const [lead, setLead] = useState({ name: '', phone: '', email: '', config: '3 BHK Celestial (1,379 sq ft)' });
-  const [submitted, setSubmitted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [lead, setLead] = useState({ name: '', email: '', phone: '', pincode: '' });
+  const [utm, setUtm] = useState({ utm_source: '', utm_medium: '', utm_campaign: '', utm_term: '', utm_content: '', source_url: '' });
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const nameInputRef = useRef(null);
 
-  const [heroRef, heroVis] = useReveal(0.05);
-  const [proofRef, proofVis] = useReveal(0.08);
-  const [formRef, formVis] = useReveal(0.08);
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const params = new URLSearchParams(window.location.search);
+    setUtm({
+      utm_source: params.get('utm_source') || '', utm_medium: params.get('utm_medium') || '',
+      utm_campaign: params.get('utm_campaign') || '', utm_term: params.get('utm_term') || '',
+      utm_content: params.get('utm_content') || '', source_url: window.location.href,
+    });
+    const onScroll = () => setScrolled(window.scrollY > 28);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-  const scrollToForm = () => {
-    const el = document.getElementById('early-access');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  const scrollTo = (id, focus = false) => {
+    if (typeof document === 'undefined') return;
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (focus) window.setTimeout(() => nameInputRef.current?.focus(), 650);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!lead.name.trim()) {
-      setError('Please enter your full name.');
-      return;
-    }
-    const clean = lead.phone.replace(/\D/g, '');
-    if (clean.length < 10) {
-      setError('Please enter a valid 10-digit phone number.');
-      return;
-    }
+  const updateLead = (field) => (event) => {
+    setLead((current) => ({ ...current, [field]: event.target.value }));
+    if (error) setError('');
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (!lead.name.trim()) return setError('Please enter your full name.');
+    if (lead.phone.replace(/\D/g, '').length < 10) return setError('Please enter a valid 10-digit mobile number.');
+    if (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email.trim())) return setError('Please enter a valid email address.');
+    if (lead.pincode && lead.pincode.replace(/\D/g, '').length !== 6) return setError('Please enter a valid 6-digit pincode.');
+
     setError('');
     setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-    }, 500);
+    const payload = { ...lead, ...utm, submitted_at: new Date().toISOString() };
+    try {
+      const saved = JSON.parse(window.localStorage.getItem('prelaunch_access_leads') || '[]');
+      window.localStorage.setItem('prelaunch_access_leads', JSON.stringify([...saved, payload]));
+    } catch (storageError) {
+      console.warn('Unable to save lead locally:', storageError);
+    }
+    window.setTimeout(() => { setLoading(false); setSubmitted(true); }, 650);
+    return undefined;
   };
 
   return (
-    <div style={{
-      background: '#fcfbfa',
-      color: '#1a2e1a',
-      fontFamily: "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-      minHeight: '100vh',
-      overflowX: 'hidden'
-    }}>
+    <main className="coming-soon">
+      <style>{`
+        :root { --ink:#10241b; --ink-deep:#091711; --paper:#f1f0e7; --paper-soft:#f8f7f1; --lime:#c9a96e; --moss:#55715f; --line:rgba(16,36,27,.16); }
+        .coming-soon { min-height:100vh; overflow:hidden; background:var(--paper); color:var(--ink); font-family:'DM Sans',system-ui,sans-serif; }
 
-      {/* ─── NAVIGATION (WHITE / CREAM FROSTED) ─── */}
-      <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
-        height: 76, padding: '0 clamp(20px, 5vw, 64px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: 'rgba(255, 255, 255, 0.94)', backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(201, 169, 110, 0.22)',
-        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.04)',
-        transition: 'background 0.3s ease'
-      }}>
-        {/* Brand Logo */}
-        <a href="#hero" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <img
-            src="uploads/logo design.webp"
-            alt="Aranya Logo"
-            style={{ height: 42, width: 'auto', objectFit: 'contain' }}
-          />
-          <div>
-            <span style={{
-              fontFamily: "'Cormorant Garamond', Georgia, serif",
-              fontSize: 22, letterSpacing: '0.18em', color: '#1a2e1a', fontWeight: 600, display: 'block', lineHeight: 1
-            }}>
-              ARANYA
-            </span>
-            <span style={{
-              display: 'block', fontSize: 9.5, letterSpacing: '0.24em', color: '#a07d3b',
-              textTransform: 'uppercase', marginTop: 3, fontWeight: 500
-            }}>
-              BY RANG HOMES
-            </span>
-          </div>
-        </a>
+        .site-header { position:fixed; z-index:50; inset:0 0 auto; padding:20px clamp(20px,4vw,64px); transition:background .3s,border-color .3s,padding .3s; border-bottom:1px solid transparent; }
+        .site-header.is-scrolled { padding-top:13px; padding-bottom:13px; background:rgba(9,23,17,.88); border-color:rgba(255,255,255,.1); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+        .header-inner { max-width:1440px; margin:auto; display:flex; align-items:center; justify-content:space-between; gap:24px; }
+        .brand { display:inline-flex; align-items:center; }
+        .brand img { width:auto; height:clamp(32px,3vw,42px); display:block; }
+        .header-actions { display:flex; align-items:center; gap:clamp(18px,3vw,42px); }
+        .text-link { border:0; padding:0; background:transparent; color:rgba(255,255,255,.7); font:500 11px/1 'DM Sans',sans-serif; letter-spacing:.16em; text-transform:uppercase; cursor:pointer; }
+        .text-link:hover { color:#fff; }
+        .header-cta,.primary-cta { border:0; display:inline-flex; align-items:center; justify-content:center; gap:14px; cursor:pointer; font:600 11px/1 'DM Sans',sans-serif; letter-spacing:.12em; text-transform:uppercase; transition:transform .25s,background .25s; }
+        .header-cta { min-height:43px; padding:0 22px; border-radius:0; background:#c9a96e; color:#1a2e1a; }
+        .header-cta:hover,.primary-cta:hover { transform:translateY(-2px); background:#dfc28e; }
+        .icon { width:21px; height:21px; flex:0 0 auto; }
+        .icon--down { transform:rotate(90deg); }
 
-        {/* Right Status Pill & CTA */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            padding: '7px 16px', borderRadius: 20,
-            background: '#faf7f0',
-            border: '1px solid rgba(201, 169, 110, 0.4)'
-          }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />
-            <span style={{ fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#8c6b2d', fontWeight: 600 }}>
-              PRE-LAUNCH
-            </span>
-          </div>
+        .hero { position:relative; min-height:100svh; display:grid; grid-template-columns:minmax(0,.82fr) minmax(500px,1.18fr); background:var(--ink-deep); color:#fff; }
+        .hero-copy { position:relative; z-index:2; display:flex; flex-direction:column; justify-content:flex-end; padding:clamp(130px,17vh,190px) clamp(28px,5vw,76px) clamp(48px,8vh,88px); }
+        .eyebrow { display:flex; align-items:center; gap:12px; margin:0 0 24px; color:rgba(255,255,255,.62); font-size:10px; font-weight:600; letter-spacing:.22em; text-transform:uppercase; }
+        .eyebrow::before { content:''; width:34px; height:1px; background:var(--lime); }
+        .hero h1 { max-width:680px; margin:0; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(4.4rem,8.4vw,9rem); font-weight:300; line-height:.78; letter-spacing:-.055em; }
+        .hero h1 span { display:block; margin-left:clamp(18px,5vw,82px); color:var(--lime); font-style:italic; }
+        .hero-intro { display:grid; grid-template-columns:1fr auto; align-items:end; gap:30px; margin-top:clamp(44px,8vh,86px); padding-top:24px; border-top:1px solid rgba(255,255,255,.16); }
+        .hero-intro p { max-width:420px; margin:0; color:rgba(255,255,255,.68); font-size:clamp(.9rem,1.1vw,1.05rem); line-height:1.7; }
+        .round-button { width:56px; height:56px; padding:0; display:grid; place-items:center; border:1px solid rgba(255,255,255,.35); border-radius:50%; background:transparent; color:#fff; cursor:pointer; transition:background .25s,color .25s,transform .25s; }
+        .round-button:hover { color:var(--ink); background:var(--lime); border-color:var(--lime); transform:translateY(3px); }
+        .hero-visual { position:relative; min-height:100svh; overflow:hidden; }
+        .hero-visual::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,rgba(9,23,17,.42),transparent 35%),linear-gradient(0deg,rgba(9,23,17,.35),transparent 45%); pointer-events:none; }
+        .hero-visual img { width:100%; height:100%; object-fit:cover; object-position:52% center; display:block; transform:scale(1.015); }
+        .hero-form-card { position:absolute; z-index:5; top:50%; right:clamp(24px,4vw,58px); width:min(410px,35vw); padding:clamp(26px,3vw,38px); color:#fff; background:rgba(7,22,15,.72); border:1px solid rgba(255,255,255,.2); border-radius:24px; box-shadow:0 30px 80px rgba(0,0,0,.32); backdrop-filter:blur(22px) saturate(1.15); -webkit-backdrop-filter:blur(22px) saturate(1.15); transform:translateY(-43%); }
+        .hero-form-card::before { content:''; position:absolute; inset:0; z-index:-1; border-radius:inherit; background:linear-gradient(145deg,rgba(255,255,255,.1),transparent 45%); pointer-events:none; }
+        .hero-form-card>.eyebrow { margin-bottom:15px; color:rgba(255,255,255,.68); }
+        .hero-form-card h2 { margin:0 0 10px; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(2rem,2.8vw,3rem); font-weight:400; line-height:1; }
+        .hero-form-card .form-intro { margin:0 0 25px; color:rgba(255,255,255,.62); font-size:.82rem; line-height:1.6; }
+        .hero-form-card .field label { color:rgba(255,255,255,.58); }
+        .hero-form-card .field input { height:45px; color:#fff; border-color:rgba(255,255,255,.28); }
+        .hero-form-card .field input:focus { border-color:var(--lime); }
+        .hero-form-card .field input::placeholder { color:rgba(255,255,255,.38); }
+        .hero-form-card .primary-cta { min-height:52px; margin-top:3px; border-radius:0; background:#c9a96e; color:#1a2e1a; }
+        .hero-form-card .privacy { color:rgba(255,255,255,.48); }
+        .hero-form-card .form-error { color:#ffd1c9; }
 
-          <button
-            onClick={scrollToForm}
-            style={{
-              background: 'linear-gradient(135deg, #c9a96e 0%, #b89355 100%)',
-              color: '#ffffff',
-              border: 'none',
-              padding: '11px 24px',
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 12,
-              fontWeight: 600,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              borderRadius: 4,
-              cursor: 'pointer',
-              boxShadow: '0 6px 18px rgba(184, 147, 85, 0.35)',
-              transition: 'all 0.25s ease'
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
-          >
-            Early Access
+        .marquee { overflow:hidden; border-bottom:1px solid var(--line); background:var(--lime); color:var(--ink); white-space:nowrap; }
+        .marquee-track { width:max-content; padding:15px 0; animation:marquee 28s linear infinite; }
+        .marquee-track span { display:inline-flex; align-items:center; gap:42px; padding-right:42px; font-size:10px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; }
+        .marquee-track span::after { content:'✦'; font-size:9px; }
+        @keyframes marquee { to { transform:translateX(-50%); } }
+
+        .story { padding:clamp(86px,12vw,170px) clamp(20px,5vw,72px); background:var(--paper); }
+        .story-inner { max-width:1380px; margin:auto; }
+        .section-heading { display:grid; grid-template-columns:.72fr 1.28fr; gap:clamp(40px,7vw,110px); align-items:start; margin-bottom:clamp(56px,8vw,108px); }
+        .section-kicker { margin:12px 0 0; color:var(--moss); font-size:10px; font-weight:600; letter-spacing:.21em; text-transform:uppercase; }
+        .section-heading h2 { max-width:890px; margin:0; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(3rem,6.3vw,6.8rem); font-weight:300; line-height:.93; letter-spacing:-.04em; }
+        .story-grid { display:grid; grid-template-columns:1.26fr .74fr; gap:clamp(20px,3vw,40px); }
+        .story-image { min-height:660px; margin:0; border-radius:28px; overflow:hidden; }
+        .story-image img { width:100%; height:100%; display:block; object-fit:cover; }
+        .story-stack { display:grid; grid-template-rows:auto 1fr; gap:clamp(20px,3vw,40px); }
+        .story-note { padding:clamp(30px,4vw,54px); border-radius:28px; background:var(--ink); color:#fff; }
+        .story-note .index { display:inline-grid; place-items:center; width:34px; height:34px; border:1px solid rgba(255,255,255,.24); border-radius:50%; color:var(--lime); font-size:10px; }
+        .story-note h3 { max-width:450px; margin:60px 0 22px; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(2rem,3.5vw,3.7rem); font-weight:300; line-height:1; }
+        .story-note p { max-width:430px; margin:0; color:rgba(255,255,255,.62); font-size:.9rem; line-height:1.75; }
+        .metrics { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--line); border-radius:28px; background:var(--paper-soft); overflow:hidden; }
+        .metric { min-height:190px; padding:28px 24px; display:flex; flex-direction:column; justify-content:space-between; border-right:1px solid var(--line); }
+        .metric:last-child { border-right:0; }
+        .metric strong { font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(2.7rem,4vw,4.5rem); font-weight:300; line-height:1; }
+        .metric span { max-width:110px; color:var(--moss); font-size:9px; font-weight:600; line-height:1.5; letter-spacing:.15em; text-transform:uppercase; }
+
+        .lead-form { display:grid; grid-template-columns:1fr 1fr; gap:22px 18px; }
+        .field--wide { grid-column:1/-1; }
+        .field label { display:block; margin:0 0 9px; color:var(--moss); font-size:9px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; }
+        .field input { width:100%; height:52px; padding:0 2px; border:0; border-bottom:1px solid rgba(16,36,27,.28); border-radius:0; outline:none; background:transparent; color:var(--ink); font:400 1rem/1 'DM Sans',sans-serif; transition:border-color .2s; }
+        .field input:focus { border-color:var(--ink); }
+        .field input::placeholder { color:rgba(16,36,27,.35); }
+        .form-error { grid-column:1/-1; margin:-6px 0 0; color:#a34235; font-size:12px; }
+        .primary-cta { grid-column:1/-1; min-height:58px; margin-top:8px; padding:0 28px; border-radius:0; background:#c9a96e; color:#1a2e1a; }
+        .primary-cta:disabled { cursor:wait; opacity:.65; }
+        .privacy { grid-column:1/-1; display:flex; align-items:center; justify-content:center; gap:8px; margin:0; color:rgba(16,36,27,.5); font-size:10px; line-height:1.5; text-align:center; }
+        .success { min-height:390px; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; }
+        .success-mark { width:62px; height:62px; display:grid; place-items:center; margin-bottom:34px; border-radius:50%; background:var(--lime); color:var(--ink); font-size:24px; }
+        .success h2 { margin-bottom:14px; }
+        .success p:last-child { max-width:440px; margin:0; color:rgba(255,255,255,.62); line-height:1.7; }
+
+        .closing { position:relative; min-height:760px; display:flex; align-items:flex-end; padding:clamp(70px,8vw,120px) clamp(24px,6vw,90px); overflow:hidden; color:#fff; background-image:linear-gradient(90deg,rgba(6,18,12,.88),rgba(6,18,12,.28) 62%,rgba(6,18,12,.18)),linear-gradient(0deg,rgba(6,18,12,.68),transparent 60%),url('/uploads/club%20cam_rang%20homes_rev.webp'); background-size:cover; background-position:center; }
+        .closing-content { position:relative; z-index:1; width:min(100%,1380px); margin:0 auto; display:grid; grid-template-columns:1fr auto; gap:40px; align-items:end; }
+        .closing h2 { max-width:820px; margin:0; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(4rem,8vw,8rem); font-weight:300; line-height:.82; letter-spacing:-.05em; }
+        .closing h2 em { display:block; color:var(--lime); font-weight:300; }
+        .closing-action { padding-bottom:8px; text-align:right; }
+        .closing-action p { max-width:320px; margin:0 0 22px; color:rgba(255,255,255,.7); font-size:.9rem; line-height:1.65; }
+        .closing-action .header-cta { min-height:54px; padding:0 28px; }
+
+        .footer { padding:28px clamp(20px,5vw,72px); background:var(--paper); border-top:1px solid var(--line); }
+        .footer-inner { max-width:1380px; margin:auto; display:grid; grid-template-columns:1fr auto 1fr; gap:24px; align-items:center; }
+        .footer img { width:auto; height:30px; }
+        .footer p,.footer button { margin:0; color:rgba(16,36,27,.55); font-size:9px; line-height:1.5; letter-spacing:.12em; text-transform:uppercase; }
+        .footer button { justify-self:end; border:0; background:transparent; cursor:pointer; }
+
+        @media (max-width:1050px) {
+          .hero { display:block; padding-bottom:54px; }
+          .hero-copy { min-height:780px; padding-right:clamp(28px,8vw,82px); background:linear-gradient(90deg,rgba(9,23,17,.96),rgba(9,23,17,.8) 55%,rgba(9,23,17,.38)); }
+          .hero-visual { position:absolute; inset:0; min-height:100%; }
+          .hero-visual::after { background:linear-gradient(0deg,rgba(9,23,17,.65),transparent 50%); }
+          .hero h1 { font-size:clamp(5rem,13vw,8.5rem); }
+          .hero-form-card { position:relative; top:auto; right:auto; width:min(640px,calc(100% - 80px)); margin:-92px auto 0; transform:none; }
+          .story-grid { grid-template-columns:1fr; }
+          .story-image { min-height:540px; }
+          .story-stack { grid-template-columns:1fr; grid-template-rows:auto auto; }
+          .closing-content { grid-template-columns:1fr; }
+          .closing-action { text-align:left; }
+        }
+
+        @media (max-width:700px) {
+          .site-header { padding:15px 18px; }
+          .text-link { display:none; }
+          .header-cta { min-height:39px; padding:0 17px; font-size:9px; }
+          .brand img { height:30px; }
+          .hero { padding-bottom:28px; }
+          .hero-copy { min-height:690px; padding:118px 20px 70px; background:linear-gradient(90deg,rgba(9,23,17,.9),rgba(9,23,17,.42)),linear-gradient(0deg,rgba(9,23,17,.8),transparent 55%); }
+          .hero h1 { font-size:clamp(4.2rem,22vw,6.3rem); line-height:.82; }
+          .hero h1 span { margin-left:10px; }
+          .hero-intro { margin-top:auto; padding-top:20px; gap:20px; }
+          .hero-intro p { font-size:.86rem; line-height:1.6; }
+          .round-button { width:48px; height:48px; }
+          .hero-form-card { width:calc(100% - 36px); margin:-42px auto 0; padding:26px 20px; border-radius:20px; }
+          .hero-form-card h2 { font-size:2.45rem; }
+          .story { padding:74px 18px; }
+          .section-heading { grid-template-columns:1fr; gap:26px; margin-bottom:44px; }
+          .section-heading h2 { font-size:clamp(3rem,15vw,4.6rem); }
+          .story-image { min-height:420px; border-radius:20px; }
+          .story-note { border-radius:20px; }
+          .story-note h3 { margin-top:46px; }
+          .metrics { grid-template-columns:1fr; border-radius:20px; }
+          .metric { min-height:130px; border-right:0; border-bottom:1px solid var(--line); }
+          .metric:last-child { border-bottom:0; }
+          .lead-form { grid-template-columns:1fr; }
+          .field--wide,.form-error,.primary-cta,.privacy { grid-column:auto; }
+          .closing { min-height:650px; padding:70px 20px 52px; background-position:58% center; }
+          .closing h2 { font-size:clamp(4rem,20vw,6rem); }
+          .footer-inner { grid-template-columns:1fr auto; }
+          .footer p { display:none; }
+        }
+
+        @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; } }
+      `}</style>
+
+      <header className={`site-header${scrolled ? ' is-scrolled' : ''}`}>
+        <div className="header-inner">
+          <button className="brand" onClick={() => scrollTo('hero')} aria-label="Go to top" style={{ border: 0, padding: 0, background: 'transparent', cursor: 'pointer' }}>
+            <img src={LOGO_HEADER} alt="Indo Group" />
           </button>
+          <div className="header-actions">
+            <button className="text-link" onClick={() => scrollTo('vision')}>The vision</button>
+            <button className="header-cta" onClick={() => scrollTo('hero-form', true)}>Request access <Arrow /></button>
+          </div>
         </div>
-      </nav>
+      </header>
 
-      {/* ─── 1. HERO / COMING SOON (LUMINOUS WHITE & CREAM WITH VISUAL) ─── */}
-      <section id="hero" style={{
-        position: 'relative',
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '130px clamp(20px, 6vw, 80px) 80px',
-        textAlign: 'center',
-        background: 'linear-gradient(180deg, #fcfbfa 0%, #f7f3eb 50%, #f4eee4 100%)',
-        overflow: 'hidden'
-      }}>
-        {/* Subtle Architectural Watermark Image with Cream/White Blend */}
-        <div style={{
-          position: 'absolute', inset: 0, zIndex: 0,
-          backgroundImage: 'url("uploads/cam-02_revised.webp")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center 35%',
-          opacity: 0.14,
-          filter: 'saturate(1.2)'
-        }} />
-
-        {/* Delicate Radial Ambient Glow */}
-        <div style={{
-          position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%, -50%)',
-          width: 900, height: 900,
-          background: 'radial-gradient(circle, rgba(201,169,110,0.12) 0%, rgba(252,251,250,0) 70%)',
-          pointerEvents: 'none'
-        }} />
-
-        {/* Hero Content */}
-        <div ref={heroRef} style={{
-          position: 'relative', zIndex: 2, maxWidth: 940, margin: '0 auto',
-          opacity: heroVis ? 1 : 0, transform: heroVis ? 'translateY(0)' : 'translateY(20px)',
-          transition: 'opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1)'
-        }}>
-
-          {/* Micro Eyebrow Pill */}
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 10,
-            padding: '7px 20px', borderRadius: 30,
-            background: '#ffffff',
-            border: '1px solid rgba(201, 169, 110, 0.4)',
-            boxShadow: '0 4px 16px rgba(160, 125, 59, 0.1)',
-            marginBottom: 26
-          }}>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#c9a96e' }} />
-            <span style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#8c6b2d', fontWeight: 600 }}>
-              COMING SOON • PRE-LAUNCH EXCLUSIVE
-            </span>
+      <section className="hero" id="hero">
+        <div className="hero-copy">
+          <p className="eyebrow">A new residential experience · Guwahati</p>
+          <h1>Live a little <span>wilder.</span></h1>
+          <div className="hero-intro">
+            <p>Space to breathe. Nature at your doorstep. A considered new address is taking root.</p>
+            <button className="round-button" onClick={() => scrollTo('vision')} aria-label="Discover the vision"><Arrow down /></button>
           </div>
-
-          {/* Main Title: ARANYA by Rang Homes */}
-          <h1 style={{
-            fontFamily: "'Cormorant Garamond', Georgia, serif",
-            fontSize: 'clamp(48px, 7.8vw, 96px)',
-            fontWeight: 300,
-            lineHeight: 1.02,
-            letterSpacing: '0.03em',
-            color: '#1a2e1a',
-            marginBottom: 16
-          }}>
-            ARANYA
-            <span style={{
-              display: 'block',
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 'clamp(14px, 2.2vw, 22px)',
-              fontWeight: 400,
-              letterSpacing: '0.28em',
-              textTransform: 'uppercase',
-              color: '#a07d3b',
-              marginTop: 10
-            }}>
-              BY RANG HOMES
-            </span>
-          </h1>
-
-          <GoldDivider style={{ maxWidth: 240, margin: '0 auto 24px' }} />
-
-          {/* Required Tagline: A different way to live in Guwahati */}
-          <p style={{
-            fontFamily: "'Cormorant Garamond', Georgia, serif",
-            fontSize: 'clamp(26px, 4vw, 44px)',
-            fontWeight: 300,
-            fontStyle: 'italic',
-            color: '#1a2e1a',
-            lineHeight: 1.25,
-            marginBottom: 12
-          }}>
-            "A different way to live in Guwahati."
-          </p>
-
-          {/* Required Subtitle: Premium nature-led living in Dharapur */}
-          <p style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 'clamp(13.5px, 1.8vw, 17px)',
-            fontWeight: 400,
-            letterSpacing: '0.16em',
-            textTransform: 'uppercase',
-            color: '#4d634d',
-            marginBottom: 38
-          }}>
-            Premium nature-led living in Dharapur
-          </p>
-
-          {/* Strong Visual CTAs */}
-          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button
-              onClick={scrollToForm}
-              style={{
-                background: 'linear-gradient(135deg, #c9a96e 0%, #b89355 100%)',
-                color: '#ffffff',
-                border: 'none',
-                padding: '16px 38px',
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 13,
-                fontWeight: 600,
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                borderRadius: 4,
-                cursor: 'pointer',
-                boxShadow: '0 8px 24px rgba(184, 147, 85, 0.4)',
-                transition: 'transform 0.25s, box-shadow 0.25s'
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
-            >
-              Get Early Access →
-            </button>
-
-            <a
-              href="uploads/Aranya brochure.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                background: '#ffffff',
-                color: '#1a2e1a',
-                border: '1px solid rgba(201, 169, 110, 0.45)',
-                padding: '16px 34px',
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 13,
-                fontWeight: 500,
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                borderRadius: 4,
-                textDecoration: 'none',
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
-                cursor: 'pointer',
-                transition: 'all 0.25s'
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = '#b89355';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = 'rgba(201, 169, 110, 0.45)';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              Download Preview PDF
-            </a>
-          </div>
-
-          {/* Quick Stats Pill Strip in Pure White & Cream */}
-          <div style={{
-            marginTop: 54,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: 'clamp(18px, 3.5vw, 44px)',
-            flexWrap: 'wrap',
-            padding: '22px clamp(20px, 4vw, 44px)',
-            background: '#ffffff',
-            borderRadius: 8,
-            boxShadow: '0 12px 36px rgba(30, 45, 30, 0.06)',
-            border: '1px solid rgba(201, 169, 110, 0.3)'
-          }}>
-            <div>
-              <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 30, fontWeight: 500, color: '#a07d3b', lineHeight: 1 }}>257</div>
-              <div style={{ fontSize: 10.5, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5b705b', marginTop: 5, fontWeight: 500 }}>Residences</div>
-            </div>
-            <div style={{ width: 1, height: 30, background: 'rgba(201, 169, 110, 0.3)' }} />
-            <div>
-              <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 30, fontWeight: 500, color: '#a07d3b', lineHeight: 1 }}>2 &amp; 3 BHK</div>
-              <div style={{ fontSize: 10.5, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5b705b', marginTop: 5, fontWeight: 500 }}>Sanctuary Units</div>
-            </div>
-            <div style={{ width: 1, height: 30, background: 'rgba(201, 169, 110, 0.3)' }} />
-            <div>
-              <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 30, fontWeight: 500, color: '#a07d3b', lineHeight: 1 }}>70%</div>
-              <div style={{ fontSize: 10.5, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5b705b', marginTop: 5, fontWeight: 500 }}>Open Greens</div>
-            </div>
-            <div style={{ width: 1, height: 30, background: 'rgba(201, 169, 110, 0.3)' }} />
-            <div>
-              <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 30, fontWeight: 500, color: '#a07d3b', lineHeight: 1 }}>2031</div>
-              <div style={{ fontSize: 10.5, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5b705b', marginTop: 5, fontWeight: 500 }}>Possession</div>
-            </div>
-          </div>
-
         </div>
+        <div className="hero-visual" aria-hidden="true">
+          <img src="/uploads/cam-02_revised.webp" alt="" fetchPriority="high" />
+        </div>
+        <aside className="hero-form-card" id="hero-form" aria-label="Early access registration">
+          {submitted ? (
+            <div className="success" role="status">
+              <span className="success-mark">✓</span>
+              <p className="eyebrow">You are on the list</p>
+              <h2>Thank you, {lead.name.split(' ')[0]}.</h2>
+              <p>We have received your details. Our team will reach out when the private preview opens.</p>
+            </div>
+          ) : (
+            <>
+              <p className="eyebrow">Register your interest</p>
+              <h2>Get closer to the reveal.</h2>
+              <p className="form-intro">Leave your details for early updates and invitation-only previews.</p>
+              <form className="lead-form" onSubmit={handleSubmit} noValidate>
+                {Object.entries(utm).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} readOnly />)}
+                <div className="field field--wide"><label htmlFor="lead-name">Full name *</label><input ref={nameInputRef} id="lead-name" name="name" autoComplete="name" value={lead.name} onChange={updateLead('name')} placeholder="Your name" required /></div>
+                <div className="field"><label htmlFor="lead-phone">Mobile number *</label><input id="lead-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" value={lead.phone} onChange={updateLead('phone')} placeholder="+91 98765 43210" required /></div>
+                <div className="field"><label htmlFor="lead-email">Email address</label><input id="lead-email" name="email" type="email" autoComplete="email" value={lead.email} onChange={updateLead('email')} placeholder="you@email.com" /></div>
+                <div className="field field--wide"><label htmlFor="lead-pincode">Pincode</label><input id="lead-pincode" name="pincode" inputMode="numeric" maxLength={6} autoComplete="postal-code" value={lead.pincode} onChange={updateLead('pincode')} placeholder="Your area pincode" /></div>
+                {error && <p className="form-error" role="alert">{error}</p>}
+                <button className="primary-cta" type="submit" disabled={loading}>{loading ? 'Saving your place…' : <>Request early access <Arrow /></>}</button>
+                <p className="privacy"><span aria-hidden="true">○</span> Your details stay private and are used only for project updates.</p>
+              </form>
+            </>
+          )}
+        </aside>
       </section>
 
-      {/* ─── 2. THREE PROOF POINTS (WARM CREAM CANVAS WITH CRISP WHITE CARDS) ─── */}
-      <section id="proof-points" style={{
-        padding: 'clamp(90px, 10vw, 140px) clamp(20px, 6vw, 96px)',
-        background: '#f5f0e8',
-        position: 'relative'
-      }}>
-        <div ref={proofRef} style={{
-          maxWidth: 1240, margin: '0 auto',
-          opacity: proofVis ? 1 : 0, transform: proofVis ? 'translateY(0)' : 'translateY(24px)',
-          transition: 'opacity 0.9s ease, transform 0.9s ease'
-        }}>
+      <div className="marquee" aria-hidden="true">
+        <div className="marquee-track">
+          {[0, 1].map((group) => <React.Fragment key={group}><span>Nature-led living</span><span>Private pre-launch</span><span>A quieter address</span><span>Made for more space</span></React.Fragment>)}
+        </div>
+      </div>
 
-          {/* Section Heading */}
-          <div style={{ textAlign: 'center', marginBottom: 'clamp(48px, 6vw, 76px)' }}>
-            <p style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 11.5,
-              letterSpacing: '0.3em',
-              textTransform: 'uppercase',
-              color: '#8c6b2d',
-              fontWeight: 600,
-              marginBottom: 12
-            }}>
-              THE THREE PROOF BLOCKS
-            </p>
-
-            <h2 style={{
-              fontFamily: "'Cormorant Garamond', Georgia, serif",
-              fontSize: 'clamp(38px, 4.8vw, 64px)',
-              fontWeight: 300,
-              lineHeight: 1.12,
-              color: '#1a2e1a',
-              letterSpacing: '-0.01em'
-            }}>
-              Sanctuary By Design
-            </h2>
-
-            <GoldDivider style={{ maxWidth: 220, margin: '18px auto 14px' }} />
-
-            <p style={{
-              fontSize: 'clamp(14px, 1.8vw, 17px)',
-              fontWeight: 300,
-              color: '#4d634d',
-              maxWidth: 640,
-              margin: '0 auto',
-              lineHeight: 1.7
-            }}>
-              Three definitive proof blocks engineered to bring peace, breathing room, and timeless luxury back to daily life in Guwahati.
-            </p>
-          </div>
-
-          {/* Three Pure White Architectural Cards */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-            gap: 'clamp(24px, 3vw, 36px)'
-          }}>
-
-            {/* BLOCK 1: GREEN — 70% green open space* */}
-            <div style={{
-              background: '#ffffff',
-              borderRadius: 8,
-              overflow: 'hidden',
-              boxShadow: '0 16px 44px rgba(30, 45, 30, 0.07)',
-              border: '1px solid rgba(201, 169, 110, 0.3)',
-              display: 'flex',
-              flexDirection: 'column',
-              transition: 'transform 0.35s ease, box-shadow 0.35s ease'
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.transform = 'translateY(-6px)';
-              e.currentTarget.style.boxShadow = '0 24px 56px rgba(30, 45, 30, 0.12)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 16px 44px rgba(30, 45, 30, 0.07)';
-            }}>
-              <div style={{ position: 'relative', height: 260, overflow: 'hidden' }}>
-                <img
-                  src="uploads/cam-02_revised.webp"
-                  alt="70% Green Open Space at Aranya"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(16,32,16,0.55) 0%, transparent 50%)' }} />
-                <div style={{
-                  position: 'absolute', top: 16, left: 18,
-                  background: '#ffffff',
-                  padding: '6px 14px', borderRadius: 20,
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  border: '1px solid rgba(201,169,110,0.4)'
-                }}>
-                  <span style={{ fontSize: 10, letterSpacing: '0.2em', color: '#8c6b2d', textTransform: 'uppercase', fontWeight: 600 }}>
-                    PROOF 01 • GREEN
-                  </span>
-                </div>
-              </div>
-
-              <div style={{ padding: '34px 30px 36px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <div style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, serif",
-                  fontSize: 'clamp(46px, 4vw, 56px)',
-                  fontWeight: 300,
-                  color: '#a07d3b',
-                  lineHeight: 1,
-                  marginBottom: 6
-                }}>
-                  70%
-                </div>
-
-                <h3 style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, serif",
-                  fontSize: 26,
-                  fontWeight: 400,
-                  color: '#1a2e1a',
-                  marginBottom: 14
-                }}>
-                  Green Open Space*
-                </h3>
-
-                <p style={{ fontSize: 14, fontWeight: 300, color: '#3d523d', lineHeight: 1.85, marginBottom: 22, flex: 1 }}>
-                  A vast natural landscape with native botanical canopies, aroma gardens, butterfly habitats, and quiet shaded groves. <strong>Zero vehicular movement at surface level</strong> ensures clean, safe, oxygen-rich environments for children and seniors.
-                </p>
-
-                <div style={{
-                  borderTop: '1px solid rgba(201, 169, 110, 0.2)',
-                  paddingTop: 16, fontSize: 11.5,
-                  letterSpacing: '0.1em', color: '#2b5f2e',
-                  fontWeight: 600, textTransform: 'uppercase'
-                }}>
-                  ✓ 0 Surface Traffic • Pure Air Canopies • Themed Gardens
-                </div>
+      <section className="story" id="vision">
+        <div className="story-inner">
+          <div className="section-heading"><p className="section-kicker">The idea / 01</p><h2>Designed for life beyond four walls.</h2></div>
+          <div className="story-grid">
+            <figure className="story-image"><img src="/uploads/shot%2015_v2.webp" alt="Landscaped residential spaces at dusk" loading="lazy" /></figure>
+            <div className="story-stack">
+              <article className="story-note">
+                <span className="index">02</span><h3>A home that gives something back.</h3>
+                <p>More daylight, more green, and more room for the rituals that make every day feel grounded. Thoughtful architecture meets a landscape made to be lived in.</p>
+              </article>
+              <div className="metrics" aria-label="Project highlights">
+                <div className="metric"><strong>70%</strong><span>Open green spaces</span></div>
+                <div className="metric"><strong>16K+</strong><span>Sq. ft. clubhouse</span></div>
+                <div className="metric"><strong>01</strong><span>Distinctive address</span></div>
               </div>
             </div>
-
-            {/* BLOCK 2: WELLNESS — Holistic wellness */}
-            <div style={{
-              background: '#ffffff',
-              borderRadius: 8,
-              overflow: 'hidden',
-              boxShadow: '0 16px 44px rgba(30, 45, 30, 0.07)',
-              border: '1px solid rgba(201, 169, 110, 0.3)',
-              display: 'flex',
-              flexDirection: 'column',
-              transition: 'transform 0.35s ease, box-shadow 0.35s ease'
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.transform = 'translateY(-6px)';
-              e.currentTarget.style.boxShadow = '0 24px 56px rgba(30, 45, 30, 0.12)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 16px 44px rgba(30, 45, 30, 0.07)';
-            }}>
-              <div style={{ position: 'relative', height: 260, overflow: 'hidden' }}>
-                <img
-                  src="uploads/pool cam.webp"
-                  alt="Holistic Wellness at Aranya"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(16,32,16,0.55) 0%, transparent 50%)' }} />
-                <div style={{
-                  position: 'absolute', top: 16, left: 18,
-                  background: '#ffffff',
-                  padding: '6px 14px', borderRadius: 20,
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  border: '1px solid rgba(201,169,110,0.4)'
-                }}>
-                  <span style={{ fontSize: 10, letterSpacing: '0.2em', color: '#8c6b2d', textTransform: 'uppercase', fontWeight: 600 }}>
-                    PROOF 02 • WELLNESS
-                  </span>
-                </div>
-              </div>
-
-              <div style={{ padding: '34px 30px 36px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <div style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, serif",
-                  fontSize: 'clamp(46px, 4vw, 56px)',
-                  fontWeight: 300,
-                  color: '#a07d3b',
-                  lineHeight: 1,
-                  marginBottom: 6
-                }}>
-                  Holistic
-                </div>
-
-                <h3 style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, serif",
-                  fontSize: 26,
-                  fontWeight: 400,
-                  color: '#1a2e1a',
-                  marginBottom: 14
-                }}>
-                  Holistic Wellness
-                </h3>
-
-                <p style={{ fontSize: 14, fontWeight: 300, color: '#3d523d', lineHeight: 1.85, marginBottom: 22, flex: 1 }}>
-                  Homes harmonized with circadian sunlight and valley winds. Morning yoga lawns, reflexology footpaths, sensory water bodies, and expansive private balconies created to decompress the mind and revitalize the body daily.
-                </p>
-
-                <div style={{
-                  borderTop: '1px solid rgba(201, 169, 110, 0.2)',
-                  paddingTop: 16, fontSize: 11.5,
-                  letterSpacing: '0.1em', color: '#2b5f2e',
-                  fontWeight: 600, textTransform: 'uppercase'
-                }}>
-                  ✓ Swimming Pool Oasis • Yoga Lawn • Sensory Water Deck
-                </div>
-              </div>
-            </div>
-
-            {/* BLOCK 3: CLUB — Club Aranya, 16,000+ sq. ft.* */}
-            <div style={{
-              background: '#ffffff',
-              borderRadius: 8,
-              overflow: 'hidden',
-              boxShadow: '0 16px 44px rgba(30, 45, 30, 0.07)',
-              border: '1px solid rgba(201, 169, 110, 0.3)',
-              display: 'flex',
-              flexDirection: 'column',
-              transition: 'transform 0.35s ease, box-shadow 0.35s ease'
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.transform = 'translateY(-6px)';
-              e.currentTarget.style.boxShadow = '0 24px 56px rgba(30, 45, 30, 0.12)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 16px 44px rgba(30, 45, 30, 0.07)';
-            }}>
-              <div style={{ position: 'relative', height: 260, overflow: 'hidden' }}>
-                <img
-                  src="uploads/club cam_rang homes_rev.webp"
-                  alt="Club Aranya 16,000+ sq. ft."
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(16,32,16,0.55) 0%, transparent 50%)' }} />
-                <div style={{
-                  position: 'absolute', top: 16, left: 18,
-                  background: '#ffffff',
-                  padding: '6px 14px', borderRadius: 20,
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  border: '1px solid rgba(201,169,110,0.4)'
-                }}>
-                  <span style={{ fontSize: 10, letterSpacing: '0.2em', color: '#8c6b2d', textTransform: 'uppercase', fontWeight: 600 }}>
-                    PROOF 03 • CLUB
-                  </span>
-                </div>
-              </div>
-
-              <div style={{ padding: '34px 30px 36px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <div style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, serif",
-                  fontSize: 'clamp(46px, 4vw, 56px)',
-                  fontWeight: 300,
-                  color: '#a07d3b',
-                  lineHeight: 1,
-                  marginBottom: 6
-                }}>
-                  16,000+
-                </div>
-
-                <h3 style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, serif",
-                  fontSize: 26,
-                  fontWeight: 400,
-                  color: '#1a2e1a',
-                  marginBottom: 14
-                }}>
-                  Club Aranya, Sq. Ft.*
-                </h3>
-
-                <p style={{ fontSize: 14, fontWeight: 300, color: '#3d523d', lineHeight: 1.85, marginBottom: 22, flex: 1 }}>
-                  The crown jewel of community living in Guwahati. A sprawling multi-level club with a semi-Olympic pool, high-tech fitness centre, squash and badminton court, gaming arcade, kids' creative studio, and elegant private banquet hall.
-                </p>
-
-                <div style={{
-                  borderTop: '1px solid rgba(201, 169, 110, 0.2)',
-                  paddingTop: 16, fontSize: 11.5,
-                  letterSpacing: '0.1em', color: '#2b5f2e',
-                  fontWeight: 600, textTransform: 'uppercase'
-                }}>
-                  ✓ Gymnasium • Banquet Hall • Squash &amp; Badminton • Rooftop
-                </div>
-              </div>
-            </div>
-
           </div>
         </div>
       </section>
 
-      {/* ─── 3. EARLY ACCESS / LEAD FORM (PURE WHITE ELEVATED SUITE ON WARM IVORY) ─── */}
-      <section id="early-access" style={{
-        padding: 'clamp(90px, 10vw, 140px) clamp(20px, 6vw, 96px)',
-        background: 'linear-gradient(180deg, #f5f0e8 0%, #fcfbfa 100%)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        {/* Soft Gold Radial Illumination */}
-        <div style={{
-          position: 'absolute', top: '35%', left: '50%', transform: 'translate(-50%, -50%)',
-          width: 800, height: 800,
-          background: 'radial-gradient(circle, rgba(201,169,110,0.1) 0%, rgba(252,251,250,0) 70%)',
-          pointerEvents: 'none'
-        }} />
-
-        <div ref={formRef} style={{
-          maxWidth: 720, margin: '0 auto', position: 'relative', zIndex: 2,
-          opacity: formVis ? 1 : 0, transform: formVis ? 'translateY(0)' : 'translateY(24px)',
-          transition: 'opacity 0.9s ease, transform 0.9s ease'
-        }}>
-
-          {/* Elevated Pure White Card */}
-          <div style={{
-            background: '#ffffff',
-            borderRadius: 12,
-            padding: 'clamp(36px, 6vw, 56px) clamp(24px, 5vw, 48px)',
-            boxShadow: '0 24px 70px rgba(30, 45, 30, 0.08)',
-            border: '1px solid rgba(201, 169, 110, 0.35)'
-          }}>
-
-            {!submitted ? (
-              <>
-                <div style={{ textAlign: 'center', marginBottom: 36 }}>
-                  <div style={{
-                    display: 'inline-block', padding: '6px 18px', borderRadius: 20,
-                    background: '#faf7f0', border: '1px solid rgba(201, 169, 110, 0.4)',
-                    marginBottom: 16
-                  }}>
-                    <span style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#8c6b2d', fontWeight: 600 }}>
-                      PRIORITY INVITATION
-                    </span>
-                  </div>
-
-                  {/* Required Heading: Be First in Line */}
-                  <h2 style={{
-                    fontFamily: "'Cormorant Garamond', Georgia, serif",
-                    fontSize: 'clamp(36px, 4.5vw, 52px)',
-                    fontWeight: 300,
-                    lineHeight: 1.12,
-                    color: '#1a2e1a',
-                    marginBottom: 16
-                  }}>
-                    Be First in Line
-                  </h2>
-
-                  {/* Required Description */}
-                  <p style={{
-                    fontSize: 'clamp(14px, 1.8vw, 16.5px)',
-                    fontWeight: 300,
-                    color: '#4d634d',
-                    lineHeight: 1.75,
-                    maxWidth: 580,
-                    margin: '0 auto'
-                  }}>
-                    Register for Early Access to receive launch updates, configuration details and first access to project information before the wider launch communication.
-                  </p>
-                </div>
-
-                {error && (
-                  <div style={{
-                    background: '#fef2f2', border: '1px solid #fca5a5', color: '#b91c1c',
-                    padding: '12px 16px', borderRadius: 4, fontSize: 13.5, marginBottom: 20, textAlign: 'center'
-                  }}>
-                    {error}
-                  </div>
-                )}
-
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: 11.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#1a2e1a', fontWeight: 600, marginBottom: 7 }}>
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Rahul Sharma"
-                      value={lead.name}
-                      onChange={(e) => setLead({ ...lead, name: e.target.value })}
-                      style={{
-                        width: '100%',
-                        padding: '14px 16px',
-                        background: '#faf8f5',
-                        border: '1px solid rgba(26, 46, 26, 0.18)',
-                        borderRadius: 4,
-                        color: '#1a2e1a',
-                        fontFamily: "'DM Sans', sans-serif",
-                        fontSize: 15,
-                        outline: 'none',
-                        boxSizing: 'border-box',
-                        transition: 'border-color 0.2s'
-                      }}
-                      onFocus={e => { e.currentTarget.style.borderColor = '#b89355'; }}
-                      onBlur={e => { e.currentTarget.style.borderColor = 'rgba(26, 46, 26, 0.18)'; }}
-                    />
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 18 }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: 11.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#1a2e1a', fontWeight: 600, marginBottom: 7 }}>
-                        Mobile Number *
-                      </label>
-                      <input
-                        type="tel"
-                        required
-                        placeholder="+91 98765 43210"
-                        value={lead.phone}
-                        onChange={(e) => setLead({ ...lead, phone: e.target.value })}
-                        style={{
-                          width: '100%',
-                          padding: '14px 16px',
-                          background: '#faf8f5',
-                          border: '1px solid rgba(26, 46, 26, 0.18)',
-                          borderRadius: 4,
-                          color: '#1a2e1a',
-                          fontFamily: "'DM Sans', sans-serif",
-                          fontSize: 15,
-                          outline: 'none',
-                          boxSizing: 'border-box'
-                        }}
-                        onFocus={e => { e.currentTarget.style.borderColor = '#b89355'; }}
-                        onBlur={e => { e.currentTarget.style.borderColor = 'rgba(26, 46, 26, 0.18)'; }}
-                      />
-                    </div>
-
-                    <div>
-                      <label style={{ display: 'block', fontSize: 11.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#1a2e1a', fontWeight: 600, marginBottom: 7 }}>
-                        Email Address
-                      </label>
-                      <input
-                        type="email"
-                        placeholder="rahul@example.com"
-                        value={lead.email}
-                        onChange={(e) => setLead({ ...lead, email: e.target.value })}
-                        style={{
-                          width: '100%',
-                          padding: '14px 16px',
-                          background: '#faf8f5',
-                          border: '1px solid rgba(26, 46, 26, 0.18)',
-                          borderRadius: 4,
-                          color: '#1a2e1a',
-                          fontFamily: "'DM Sans', sans-serif",
-                          fontSize: 15,
-                          outline: 'none',
-                          boxSizing: 'border-box'
-                        }}
-                        onFocus={e => { e.currentTarget.style.borderColor = '#b89355'; }}
-                        onBlur={e => { e.currentTarget.style.borderColor = 'rgba(26, 46, 26, 0.18)'; }}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: 11.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#1a2e1a', fontWeight: 600, marginBottom: 7 }}>
-                      Configuration of Interest
-                    </label>
-                    <select
-                      value={lead.config}
-                      onChange={(e) => setLead({ ...lead, config: e.target.value })}
-                      style={{
-                        width: '100%',
-                        padding: '14px 16px',
-                        background: '#faf8f5',
-                        border: '1px solid rgba(26, 46, 26, 0.18)',
-                        borderRadius: 4,
-                        color: '#1a2e1a',
-                        fontFamily: "'DM Sans', sans-serif",
-                        fontSize: 15,
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
-                    >
-                      <option value="2 BHK Aura (924 sq ft)">2 BHK Aura (924 sq ft)</option>
-                      <option value="3 BHK Celestial (1,379 sq ft)">3 BHK Celestial (1,379 sq ft)</option>
-                      <option value="3 BHK + Private Terrace">3 BHK + Private Terrace</option>
-                      <option value="4 BHK Signature Sanctuary">4 BHK Signature Sanctuary</option>
-                      <option value="All Configurations">Open to All Configurations</option>
-                    </select>
-                  </div>
-
-                  {/* Required CTA Button: Get Early Access */}
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    style={{
-                      marginTop: 10,
-                      background: 'linear-gradient(135deg, #c9a96e 0%, #b89355 100%)',
-                      color: '#ffffff',
-                      border: 'none',
-                      padding: '17px 28px',
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 13.5,
-                      fontWeight: 600,
-                      letterSpacing: '0.14em',
-                      textTransform: 'uppercase',
-                      borderRadius: 4,
-                      cursor: loading ? 'wait' : 'pointer',
-                      boxShadow: '0 8px 24px rgba(184, 147, 85, 0.35)',
-                      transition: 'transform 0.2s, box-shadow 0.2s'
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
-                  >
-                    {loading ? 'Confirming Priority...' : 'Get Early Access →'}
-                  </button>
-
-                  <div style={{
-                    display: 'flex', justifyContent: 'center', gap: 18, marginTop: 12,
-                    color: '#6e856e', fontSize: 11.5
-                  }}>
-                    <span>🔒 100% Confidential</span>
-                    <span>•</span>
-                    <span>Direct Developer Priority</span>
-                    <span>•</span>
-                    <span>Zero Spam</span>
-                  </div>
-                </form>
-              </>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '24px 10px' }}>
-                <div style={{
-                  width: 68, height: 68, borderRadius: '50%',
-                  background: '#faf7f0', border: '2px solid #a07d3b',
-                  color: '#a07d3b', fontSize: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 20px', fontWeight: 'bold'
-                }}>
-                  ✓
-                </div>
-
-                <h3 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 38, color: '#1a2e1a', fontWeight: 400, marginBottom: 12 }}>
-                  Priority Access Confirmed
-                </h3>
-
-                <p style={{ fontSize: 15.5, color: '#3d523d', lineHeight: 1.7, marginBottom: 28, maxWidth: 520, margin: '0 auto 28px' }}>
-                  Thank you, <strong>{lead.name}</strong>. Your early access request has been registered. You will receive first-tier floor plans and priority allocation before public announcement.
-                </p>
-
-                <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <a
-                    href="uploads/Aranya brochure.pdf"
-                    download
-                    style={{
-                      background: 'linear-gradient(135deg, #c9a96e 0%, #b89355 100%)',
-                      color: '#ffffff',
-                      padding: '14px 28px',
-                      borderRadius: 4,
-                      textDecoration: 'none',
-                      fontSize: 13,
-                      fontWeight: 600,
-                      letterSpacing: '0.1em',
-                      textTransform: 'uppercase',
-                      boxShadow: '0 6px 18px rgba(184, 147, 85, 0.3)'
-                    }}
-                  >
-                    Download Project Preview (PDF)
-                  </a>
-
-                  <a
-                    href={`https://wa.me/919311852020?text=Hi%20Aranya%20Team%2C%20I%20registered%20for%20Early%20Access%20as%20${encodeURIComponent(lead.name)}.`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      background: '#25D366',
-                      color: '#ffffff',
-                      border: 'none',
-                      padding: '14px 26px',
-                      borderRadius: 4,
-                      textDecoration: 'none',
-                      fontSize: 13,
-                      fontWeight: 600,
-                      letterSpacing: '0.08em',
-                      textTransform: 'uppercase'
-                    }}
-                  >
-                    WhatsApp Advisory Desk
-                  </a>
-                </div>
-              </div>
-            )}
-
+      <section className="closing" id="closing">
+        <div className="closing-content">
+          <h2>The reveal is <em>closer than you think.</em></h2>
+          <div className="closing-action">
+            <p>Join the private registry and be among the first to experience what is taking shape.</p>
+            <button className="header-cta" onClick={() => scrollTo('hero-form', true)}>Register your interest <Arrow /></button>
           </div>
-
         </div>
       </section>
 
-      {/* ─── 4. FOOTER (WARM CREAM & ALABASTER ELEGANCE) ─── */}
-      <footer style={{
-        background: '#f2ede4',
-        color: '#4d634d',
-        padding: '56px clamp(20px, 6vw, 96px) 38px',
-        borderTop: '1px solid rgba(201, 169, 110, 0.25)'
-      }}>
-        <div style={{ maxWidth: 1240, margin: '0 auto' }}>
-
-          <div style={{
-            display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-            flexWrap: 'wrap', gap: 32, marginBottom: 36
-          }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                <img
-                  src="uploads/logo design.webp"
-                  alt="Aranya Logo"
-                  style={{ height: 38, width: 'auto' }}
-                />
-                <span style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, serif",
-                  fontSize: 22, letterSpacing: '0.18em', color: '#1a2e1a', fontWeight: 600
-                }}>
-                  ARANYA
-                </span>
-              </div>
-              <p style={{ fontSize: 13.5, color: '#4d634d', lineHeight: 1.65, maxWidth: 420 }}>
-                Rang Homes Aerocity, Dharapur, Guwahati, Assam 781017.<br />
-                Conveniently located 10 minutes from Lokpriya Gopinath Bordoloi International Airport.
-              </p>
-            </div>
-
-            <div style={{ textAlign: 'right' }}>
-              <p style={{
-                fontFamily: "'Cormorant Garamond', Georgia, serif",
-                fontSize: 20, fontStyle: 'italic', color: '#8c6b2d', marginBottom: 6
-              }}>
-                "The whistling winds are getting greener."
-              </p>
-              <p style={{ fontSize: 13, color: '#4d634d' }}>
-                VIP Desk: <a href="tel:+919311852020" style={{ color: '#8c6b2d', textDecoration: 'none', fontWeight: 600 }}>+91 93118 52020</a>
-              </p>
-            </div>
-          </div>
-
-          <GoldDivider style={{ marginBottom: 24 }} />
-
-          <div style={{
-            display: 'flex', justifyContent: 'space-between',
-            flexWrap: 'wrap', gap: 16, fontSize: 11, lineHeight: 1.7,
-            color: '#6e856e'
-          }}>
-            <p style={{ maxWidth: 780 }}>
-              *RERA Registration: Under Process. Expected Possession: 2031. 70% open green space &amp; 16,000+ sq ft clubhouse are part of the proposed master plan. Information is indicative and subject to change without prior notice. Indotech Infracon Pvt. Ltd. © 2026.
-            </p>
-            <p>
-              <a href="/" style={{ color: '#8c6b2d', textDecoration: 'none', marginRight: 18, fontWeight: 500 }}>View Full Website</a>
-              <a href="https://wa.me/919311852020" target="_blank" rel="noopener noreferrer" style={{ color: '#8c6b2d', textDecoration: 'none', fontWeight: 500 }}>WhatsApp Advisory</a>
-            </p>
-          </div>
-
-        </div>
+      <footer className="footer">
+        <div className="footer-inner"><img src={LOGO_DARK} alt="Rang Homes by Indo Group" /><p>Conceptual visuals for representational purposes only · © {new Date().getFullYear()}</p><button onClick={() => scrollTo('hero')}>Back to top ↑</button></div>
       </footer>
-
-    </div>
+    </main>
   );
 }
