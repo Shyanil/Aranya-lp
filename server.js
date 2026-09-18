@@ -12,6 +12,14 @@ const MAIN_SSR_PATH = path.join(PUBLIC_DIR, 'dist', 'entry-server.cjs');
 const CS_TEMPLATE_PATH = path.join(PUBLIC_DIR, 'coming-soon.template.html');
 const CS_SSR_PATH = path.join(PUBLIC_DIR, 'dist', 'coming-soon-server.cjs');
 
+function versionedAsset(publicPath, filePath) {
+  try {
+    return `${publicPath}?v=${Math.floor(fs.statSync(filePath).mtimeMs)}`;
+  } catch (_) {
+    return publicPath;
+  }
+}
+
 // Auto-build if dist doesn't exist
 if (!fs.existsSync(MAIN_SSR_PATH) || !fs.existsSync(CS_SSR_PATH)) {
   console.log('⚡ Initializing SSR build for main and coming-soon pages...');
@@ -56,7 +64,7 @@ function renderMainSSR() {
 
     return template
       .replace('<div id="root"></div>', `<div id="root">${appHtml}</div>`)
-      .replace('<!-- APP_SCRIPTS -->', '<script src="/dist/client.js" defer></script>');
+      .replace('<!-- APP_SCRIPTS -->', `<script src="${versionedAsset('/dist/client.js', path.join(PUBLIC_DIR, 'dist', 'client.js'))}" defer></script>`);
   } catch (err) {
     console.error('Main SSR render error:', err);
     return null;
@@ -77,7 +85,7 @@ function renderComingSoonSSR() {
 
     return template
       .replace('<div id="root"></div>', `<div id="root">${appHtml}</div>`)
-      .replace('<!-- APP_SCRIPTS -->', '<script src="/dist/coming-soon-client.js" defer></script>');
+      .replace('<!-- APP_SCRIPTS -->', `<script src="${versionedAsset('/dist/coming-soon-client.js', path.join(PUBLIC_DIR, 'dist', 'coming-soon-client.js'))}" defer></script>`);
   } catch (err) {
     console.error('Coming Soon SSR render error:', err);
     return null;

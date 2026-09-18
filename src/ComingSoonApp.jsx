@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const LOGO_HEADER = '/uploads/indo-group-logo.png';
-const LOGO_DARK = '/uploads/indo-group-logo-transparent.png';
+const DEVELOPER_LOGO = '/uploads/indo-group-logo-transparent.png';
+const BRAND_LOGO = DEVELOPER_LOGO;
 
 const Arrow = ({ down = false }) => (
   <svg aria-hidden="true" className={down ? 'icon icon--down' : 'icon'} viewBox="0 0 24 24" fill="none">
@@ -11,6 +11,7 @@ const Arrow = ({ down = false }) => (
 
 export default function ComingSoonApp() {
   const [scrolled, setScrolled] = useState(false);
+  const [ready, setReady] = useState(false);
   const [lead, setLead] = useState({ name: '', email: '', phone: '', pincode: '' });
   const [utm, setUtm] = useState({ utm_source: '', utm_medium: '', utm_campaign: '', utm_term: '', utm_content: '', source_url: '' });
   const [loading, setLoading] = useState(false);
@@ -22,20 +23,28 @@ export default function ComingSoonApp() {
     if (typeof window === 'undefined') return undefined;
     const params = new URLSearchParams(window.location.search);
     setUtm({
-      utm_source: params.get('utm_source') || '', utm_medium: params.get('utm_medium') || '',
-      utm_campaign: params.get('utm_campaign') || '', utm_term: params.get('utm_term') || '',
-      utm_content: params.get('utm_content') || '', source_url: window.location.href,
+      utm_source: params.get('utm_source') || '',
+      utm_medium: params.get('utm_medium') || '',
+      utm_campaign: params.get('utm_campaign') || '',
+      utm_term: params.get('utm_term') || '',
+      utm_content: params.get('utm_content') || '',
+      source_url: window.location.href,
     });
-    const onScroll = () => setScrolled(window.scrollY > 28);
+    const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener('scroll', onScroll, { passive: true });
+    const timer = window.setTimeout(() => setReady(true), 80);
     onScroll();
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.clearTimeout(timer);
+    };
   }, []);
 
   const scrollTo = (id, focus = false) => {
     if (typeof document === 'undefined') return;
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    if (focus) window.setTimeout(() => nameInputRef.current?.focus(), 650);
+    const target = document.getElementById(id);
+    target?.scrollIntoView({ behavior: 'smooth', block: id === 'hero-form' ? 'center' : 'start' });
+    if (focus) window.setTimeout(() => nameInputRef.current?.focus({ preventScroll: true }), 650);
   };
 
   const updateLead = (field) => (event) => {
@@ -59,248 +68,206 @@ export default function ComingSoonApp() {
     } catch (storageError) {
       console.warn('Unable to save lead locally:', storageError);
     }
-    window.setTimeout(() => { setLoading(false); setSubmitted(true); }, 650);
+    window.setTimeout(() => {
+      setLoading(false);
+      setSubmitted(true);
+    }, 650);
     return undefined;
   };
 
   return (
     <main className="coming-soon">
       <style>{`
-        :root { --ink:#10241b; --ink-deep:#091711; --paper:#f1f0e7; --paper-soft:#f8f7f1; --lime:#c9a96e; --moss:#55715f; --line:rgba(16,36,27,.16); }
-        .coming-soon { min-height:100vh; overflow:hidden; background:var(--paper); color:var(--ink); font-family:'DM Sans',system-ui,sans-serif; }
-
-        .site-header { position:fixed; z-index:50; inset:0 0 auto; padding:20px clamp(20px,4vw,64px); transition:background .3s,border-color .3s,padding .3s; border-bottom:1px solid transparent; }
-        .site-header.is-scrolled { padding-top:13px; padding-bottom:13px; background:rgba(9,23,17,.88); border-color:rgba(255,255,255,.1); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
-        .header-inner { max-width:1440px; margin:auto; display:flex; align-items:center; justify-content:space-between; gap:24px; }
-        .brand { display:inline-flex; align-items:center; }
-        .brand img { width:auto; height:clamp(32px,3vw,42px); display:block; }
-        .header-actions { display:flex; align-items:center; gap:clamp(18px,3vw,42px); }
-        .text-link { border:0; padding:0; background:transparent; color:rgba(255,255,255,.7); font:500 11px/1 'DM Sans',sans-serif; letter-spacing:.16em; text-transform:uppercase; cursor:pointer; }
-        .text-link:hover { color:#fff; }
-        .header-cta,.primary-cta { border:0; display:inline-flex; align-items:center; justify-content:center; gap:14px; cursor:pointer; font:600 11px/1 'DM Sans',sans-serif; letter-spacing:.12em; text-transform:uppercase; transition:transform .25s,background .25s; }
-        .header-cta { min-height:43px; padding:0 22px; border-radius:0; background:#c9a96e; color:#1a2e1a; }
-        .header-cta:hover,.primary-cta:hover { transform:translateY(-2px); background:#dfc28e; }
-        .icon { width:21px; height:21px; flex:0 0 auto; }
+        :root { --forest:#1a2e1a; --forest-deep:#0a130a; --cream:#f5f0e8; --cream-deep:#ebe4d7; --gold:#c9a96e; --sage:#7a9e7e; --line:rgba(26,46,26,.18); }
+        .coming-soon { min-height:100vh; overflow:hidden; background:var(--cream); color:var(--forest); font-family:'DM Sans',system-ui,sans-serif; font-weight:300; }
+        .section-shell { width:min(1140px,calc(100% - 40px)); margin:0 auto; }
+        .icon { width:19px; height:19px; flex:0 0 auto; }
         .icon--down { transform:rotate(90deg); }
+        .eyebrow { margin:0 0 20px; color:var(--gold); font-size:10px; font-weight:500; letter-spacing:.3em; text-transform:uppercase; }
+        .button { min-height:48px; padding:0 30px; display:inline-flex; align-items:center; justify-content:center; gap:14px; border:1px solid var(--gold); border-radius:0; background:var(--gold); color:var(--forest); cursor:pointer; font:500 10px/1 'DM Sans',sans-serif; letter-spacing:.15em; text-transform:uppercase; transition:background .3s,color .3s,transform .3s; }
+        .button:hover { background:#dfc28e; transform:translateY(-2px); }
+        .button--outline { background:transparent; color:var(--cream); border-color:rgba(245,240,232,.55); }
+        .button--outline:hover { background:var(--cream); color:var(--forest); border-color:var(--cream); }
 
-        .hero { position:relative; min-height:100svh; display:grid; grid-template-columns:minmax(0,.82fr) minmax(500px,1.18fr); background:var(--ink-deep); color:#fff; }
-        .hero-copy { position:relative; z-index:2; display:flex; flex-direction:column; justify-content:flex-end; padding:clamp(130px,17vh,190px) clamp(28px,5vw,76px) clamp(48px,8vh,88px); }
-        .eyebrow { display:flex; align-items:center; gap:12px; margin:0 0 24px; color:rgba(255,255,255,.62); font-size:10px; font-weight:600; letter-spacing:.22em; text-transform:uppercase; }
-        .eyebrow::before { content:''; width:34px; height:1px; background:var(--lime); }
-        .hero h1 { max-width:680px; margin:0; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(4.4rem,8.4vw,9rem); font-weight:300; line-height:.78; letter-spacing:-.055em; }
-        .hero h1 span { display:block; margin-left:clamp(18px,5vw,82px); color:var(--lime); font-style:italic; }
-        .hero-intro { display:grid; grid-template-columns:1fr auto; align-items:end; gap:30px; margin-top:clamp(44px,8vh,86px); padding-top:24px; border-top:1px solid rgba(255,255,255,.16); }
-        .hero-intro p { max-width:420px; margin:0; color:rgba(255,255,255,.68); font-size:clamp(.9rem,1.1vw,1.05rem); line-height:1.7; }
-        .round-button { width:56px; height:56px; padding:0; display:grid; place-items:center; border:1px solid rgba(255,255,255,.35); border-radius:50%; background:transparent; color:#fff; cursor:pointer; transition:background .25s,color .25s,transform .25s; }
-        .round-button:hover { color:var(--ink); background:var(--lime); border-color:var(--lime); transform:translateY(3px); }
-        .hero-visual { position:relative; min-height:100svh; overflow:hidden; }
-        .hero-visual::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg,rgba(9,23,17,.42),transparent 35%),linear-gradient(0deg,rgba(9,23,17,.35),transparent 45%); pointer-events:none; }
-        .hero-visual img { width:100%; height:100%; object-fit:cover; object-position:52% center; display:block; transform:scale(1.015); }
-        .hero-form-card { position:absolute; z-index:5; top:50%; right:clamp(24px,4vw,58px); width:min(410px,35vw); padding:clamp(26px,3vw,38px); color:#fff; background:rgba(7,22,15,.72); border:1px solid rgba(255,255,255,.2); border-radius:24px; box-shadow:0 30px 80px rgba(0,0,0,.32); backdrop-filter:blur(22px) saturate(1.15); -webkit-backdrop-filter:blur(22px) saturate(1.15); transform:translateY(-43%); }
-        .hero-form-card::before { content:''; position:absolute; inset:0; z-index:-1; border-radius:inherit; background:linear-gradient(145deg,rgba(255,255,255,.1),transparent 45%); pointer-events:none; }
-        .hero-form-card>.eyebrow { margin-bottom:15px; color:rgba(255,255,255,.68); }
-        .hero-form-card h2 { margin:0 0 10px; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(2rem,2.8vw,3rem); font-weight:400; line-height:1; }
-        .hero-form-card .form-intro { margin:0 0 25px; color:rgba(255,255,255,.62); font-size:.82rem; line-height:1.6; }
-        .hero-form-card .field label { color:rgba(255,255,255,.58); }
-        .hero-form-card .field input { height:45px; color:#fff; border-color:rgba(255,255,255,.28); }
-        .hero-form-card .field input:focus { border-color:var(--lime); }
-        .hero-form-card .field input::placeholder { color:rgba(255,255,255,.38); }
-        .hero-form-card .primary-cta { min-height:52px; margin-top:3px; border-radius:0; background:#c9a96e; color:#1a2e1a; }
-        .hero-form-card .privacy { color:rgba(255,255,255,.48); }
-        .hero-form-card .form-error { color:#ffd1c9; }
+        .site-header { position:fixed; z-index:50; inset:0 0 auto; height:80px; padding:0 clamp(20px,5vw,72px); display:flex; align-items:center; background:rgba(10,19,10,.34); border-bottom:1px solid rgba(201,169,110,.12); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); transition:height .35s,background .35s,border-color .35s; }
+        .site-header.is-scrolled { height:70px; background:rgba(10,19,10,.96); border-color:rgba(201,169,110,.3); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+        .header-inner { width:100%; max-width:1440px; margin:auto; display:flex; align-items:center; justify-content:space-between; gap:24px; }
+        .brand { display:inline-flex; align-items:center; border:0; padding:0; background:transparent; cursor:pointer; }
+        .brand img { width:auto; height:42px; display:block; object-fit:contain; }
+        .header-actions { display:flex; align-items:center; gap:34px; }
+        .header-link { border:0; padding:5px 0; background:transparent; color:rgba(245,240,232,.75); cursor:pointer; font:400 10px/1 'DM Sans',sans-serif; letter-spacing:.12em; text-transform:uppercase; transition:color .3s; }
+        .header-link:hover { color:var(--gold); }
+        .header-cta { min-height:38px; padding:0 21px; background:transparent; color:var(--gold); }
+        .header-cta:hover { background:var(--gold); color:var(--forest); }
 
-        .marquee { overflow:hidden; border-bottom:1px solid var(--line); background:var(--lime); color:var(--ink); white-space:nowrap; }
-        .marquee-track { width:max-content; padding:15px 0; animation:marquee 28s linear infinite; }
-        .marquee-track span { display:inline-flex; align-items:center; gap:42px; padding-right:42px; font-size:10px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; }
-        .marquee-track span::after { content:'✦'; font-size:9px; }
-        @keyframes marquee { to { transform:translateX(-50%); } }
+        .hero { position:relative; min-height:100svh; display:flex; align-items:center; justify-content:center; padding:120px 0 72px; overflow:hidden; color:var(--cream); }
+        .hero-bg { position:absolute; inset:-5%; background:url('/uploads/shot_07_5kshot_07_5k.webp') center 40%/cover no-repeat; transform:scale(1.04); animation:heroDrift 16s ease-out both; }
+        .hero-overlay { position:absolute; inset:0; background:linear-gradient(90deg,rgba(8,18,8,.88),rgba(8,18,8,.45) 58%,rgba(8,18,8,.56)),linear-gradient(to bottom,rgba(8,18,8,.35),rgba(8,18,8,.76)); }
+        .hero-layout { position:relative; z-index:2; width:min(1240px,calc(100% - 40px)); display:grid; grid-template-columns:minmax(0,1fr) minmax(360px,450px); gap:clamp(48px,7vw,100px); align-items:center; }
+        .hero-content { opacity:0; transform:translateY(24px); transition:opacity 1.1s ease,transform 1.1s ease; }
+        .hero-content.is-ready { opacity:1; transform:translateY(0); }
+        .hero h1 { max-width:720px; margin:0 0 26px; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(3.5rem,6.3vw,6.6rem); font-weight:300; line-height:1.01; letter-spacing:-.02em; }
+        .hero h1 em { display:block; color:var(--gold); font-weight:300; }
+        .hero-copy { max-width:530px; margin:0 0 38px; color:rgba(245,240,232,.7); font-size:14px; line-height:1.9; letter-spacing:.035em; }
+        .hero-actions { display:flex; justify-content:flex-start; gap:14px; flex-wrap:wrap; }
 
-        .story { padding:clamp(86px,12vw,170px) clamp(20px,5vw,72px); background:var(--paper); }
-        .story-inner { max-width:1380px; margin:auto; }
-        .section-heading { display:grid; grid-template-columns:.72fr 1.28fr; gap:clamp(40px,7vw,110px); align-items:start; margin-bottom:clamp(56px,8vw,108px); }
-        .section-kicker { margin:12px 0 0; color:var(--moss); font-size:10px; font-weight:600; letter-spacing:.21em; text-transform:uppercase; }
-        .section-heading h2 { max-width:890px; margin:0; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(3rem,6.3vw,6.8rem); font-weight:300; line-height:.93; letter-spacing:-.04em; }
-        .story-grid { display:grid; grid-template-columns:1.26fr .74fr; gap:clamp(20px,3vw,40px); }
-        .story-image { min-height:660px; margin:0; border-radius:28px; overflow:hidden; }
-        .story-image img { width:100%; height:100%; display:block; object-fit:cover; }
-        .story-stack { display:grid; grid-template-rows:auto 1fr; gap:clamp(20px,3vw,40px); }
-        .story-note { padding:clamp(30px,4vw,54px); border-radius:28px; background:var(--ink); color:#fff; }
-        .story-note .index { display:inline-grid; place-items:center; width:34px; height:34px; border:1px solid rgba(255,255,255,.24); border-radius:50%; color:var(--lime); font-size:10px; }
-        .story-note h3 { max-width:450px; margin:60px 0 22px; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(2rem,3.5vw,3.7rem); font-weight:300; line-height:1; }
-        .story-note p { max-width:430px; margin:0; color:rgba(255,255,255,.62); font-size:.9rem; line-height:1.75; }
-        .metrics { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--line); border-radius:28px; background:var(--paper-soft); overflow:hidden; }
-        .metric { min-height:190px; padding:28px 24px; display:flex; flex-direction:column; justify-content:space-between; border-right:1px solid var(--line); }
-        .metric:last-child { border-right:0; }
-        .metric strong { font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(2.7rem,4vw,4.5rem); font-weight:300; line-height:1; }
-        .metric span { max-width:110px; color:var(--moss); font-size:9px; font-weight:600; line-height:1.5; letter-spacing:.15em; text-transform:uppercase; }
+        .teaser { padding:clamp(90px,12vw,170px) 0; background:var(--cream); }
+        .teaser-inner { max-width:900px; text-align:center; }
+        .teaser h2,.overview h2 { margin:0; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(2.8rem,5vw,5.1rem); font-weight:300; line-height:1.03; letter-spacing:-.025em; }
+        .teaser h2 em,.overview h2 em { color:var(--gold); font-weight:300; }
+        .gold-rule { width:160px; height:1px; margin:30px 0; background:linear-gradient(to right,var(--gold),transparent); }
+        .teaser .gold-rule { margin:30px auto; }
+        .teaser-copy { max-width:600px; margin:0 auto; color:#4a5a4a; font-size:14px; line-height:1.95; }
+        .form-panel { min-height:0; padding:clamp(28px,3.4vw,42px); display:flex; flex-direction:column; justify-content:center; scroll-margin-top:90px; background:rgba(10,19,10,.86); color:var(--cream); border:1px solid rgba(201,169,110,.3); box-shadow:0 28px 70px rgba(0,0,0,.28); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+        .form-panel h3 { margin:0 0 12px; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(2rem,3vw,3rem); font-weight:300; line-height:1.1; }
+        .form-intro { margin:0 0 24px; color:rgba(245,240,232,.58); font-size:12px; line-height:1.7; }
+        .lead-form { display:grid; grid-template-columns:1fr 1fr; gap:17px 20px; }
+        .field--wide,.form-error,.form-submit,.privacy { grid-column:1/-1; }
+        .field label { display:block; margin:0 0 8px; color:rgba(245,240,232,.52); font-size:9px; font-weight:500; letter-spacing:.18em; text-transform:uppercase; }
+        .field input { width:100%; height:42px; padding:0 1px; border:0; border-bottom:1px solid rgba(245,240,232,.26); border-radius:0; outline:none; background:transparent; color:var(--cream); font:300 14px/1 'DM Sans',sans-serif; transition:border-color .25s; }
+        .field input:focus { border-color:var(--gold); }
+        .field input::placeholder { color:rgba(245,240,232,.3); }
+        .form-error { margin:-5px 0 0; color:#efb0a5; font-size:12px; }
+        .form-submit { width:100%; margin-top:8px; }
+        .form-submit:disabled { cursor:wait; opacity:.65; }
+        .privacy { margin:0; color:rgba(245,240,232,.38); font-size:9px; line-height:1.6; text-align:center; letter-spacing:.04em; }
+        .success { min-height:360px; display:flex; flex-direction:column; justify-content:center; }
+        .success-mark { width:54px; height:54px; display:grid; place-items:center; margin-bottom:28px; border:1px solid var(--gold); border-radius:50%; color:var(--gold); font-size:20px; }
+        .success p:last-child { max-width:440px; margin:8px 0 0; color:rgba(245,240,232,.6); font-size:14px; line-height:1.8; }
 
-        .lead-form { display:grid; grid-template-columns:1fr 1fr; gap:22px 18px; }
-        .field--wide { grid-column:1/-1; }
-        .field label { display:block; margin:0 0 9px; color:var(--moss); font-size:9px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; }
-        .field input { width:100%; height:52px; padding:0 2px; border:0; border-bottom:1px solid rgba(16,36,27,.28); border-radius:0; outline:none; background:transparent; color:var(--ink); font:400 1rem/1 'DM Sans',sans-serif; transition:border-color .2s; }
-        .field input:focus { border-color:var(--ink); }
-        .field input::placeholder { color:rgba(16,36,27,.35); }
-        .form-error { grid-column:1/-1; margin:-6px 0 0; color:#a34235; font-size:12px; }
-        .primary-cta { grid-column:1/-1; min-height:58px; margin-top:8px; padding:0 28px; border-radius:0; background:#c9a96e; color:#1a2e1a; }
-        .primary-cta:disabled { cursor:wait; opacity:.65; }
-        .privacy { grid-column:1/-1; display:flex; align-items:center; justify-content:center; gap:8px; margin:0; color:rgba(16,36,27,.5); font-size:10px; line-height:1.5; text-align:center; }
-        .success { min-height:390px; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; }
-        .success-mark { width:62px; height:62px; display:grid; place-items:center; margin-bottom:34px; border-radius:50%; background:var(--lime); color:var(--ink); font-size:24px; }
-        .success h2 { margin-bottom:14px; }
-        .success p:last-child { max-width:440px; margin:0; color:rgba(255,255,255,.62); line-height:1.7; }
+        .overview { scroll-margin-top:70px; position:relative; padding:clamp(84px,11vw,150px) 0; overflow:hidden; background:var(--forest-deep); color:var(--cream); }
+        .overview::before { content:'Coming Soon'; position:absolute; right:-2vw; top:30px; color:rgba(201,169,110,.035); font-family:'Cormorant Garamond',Georgia,serif; font-size:min(20vw,250px); line-height:1; pointer-events:none; white-space:nowrap; }
+        .overview-grid { position:relative; display:grid; grid-template-columns:1.03fr .97fr; gap:clamp(44px,8vw,112px); align-items:center; }
+        .overview-image { position:relative; min-height:620px; overflow:hidden; }
+        .overview-image img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+        .image-label { position:absolute; z-index:1; bottom:16px; left:16px; margin:0; padding:6px 12px; border:1px solid rgba(245,240,232,.2); background:rgba(10,19,10,.68); color:rgba(245,240,232,.78); font-size:8px; letter-spacing:.16em; text-transform:uppercase; }
+        .overview-copy>p.overview-intro { max-width:520px; margin:28px 0 36px; color:rgba(245,240,232,.62); font-size:14px; line-height:1.95; }
+        .overview-note { margin:0 0 40px; padding:22px 0; border-top:1px solid rgba(245,240,232,.16); border-bottom:1px solid rgba(245,240,232,.16); color:rgba(245,240,232,.48); font-size:10px; line-height:1.7; letter-spacing:.15em; text-transform:uppercase; }
 
-        .closing { position:relative; min-height:760px; display:flex; align-items:flex-end; padding:clamp(70px,8vw,120px) clamp(24px,6vw,90px); overflow:hidden; color:#fff; background-image:linear-gradient(90deg,rgba(6,18,12,.88),rgba(6,18,12,.28) 62%,rgba(6,18,12,.18)),linear-gradient(0deg,rgba(6,18,12,.68),transparent 60%),url('/uploads/club%20cam_rang%20homes_rev.webp'); background-size:cover; background-position:center; }
-        .closing-content { position:relative; z-index:1; width:min(100%,1380px); margin:0 auto; display:grid; grid-template-columns:1fr auto; gap:40px; align-items:end; }
-        .closing h2 { max-width:820px; margin:0; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(4rem,8vw,8rem); font-weight:300; line-height:.82; letter-spacing:-.05em; }
-        .closing h2 em { display:block; color:var(--lime); font-weight:300; }
-        .closing-action { padding-bottom:8px; text-align:right; }
-        .closing-action p { max-width:320px; margin:0 0 22px; color:rgba(255,255,255,.7); font-size:.9rem; line-height:1.65; }
-        .closing-action .header-cta { min-height:54px; padding:0 28px; }
+        .footer { padding:26px clamp(20px,5vw,72px); background:var(--cream); border-top:1px solid var(--line); }
+        .footer-inner { max-width:1140px; margin:auto; display:grid; grid-template-columns:1fr auto 1fr; gap:24px; align-items:center; }
+        .footer img { width:auto; height:32px; display:block; }
+        .footer p,.footer button { margin:0; color:rgba(26,46,26,.52); font-size:8px; line-height:1.6; letter-spacing:.13em; text-transform:uppercase; }
+        .footer button { justify-self:end; border:0; padding:5px 0; background:transparent; cursor:pointer; }
 
-        .footer { padding:28px clamp(20px,5vw,72px); background:var(--paper); border-top:1px solid var(--line); }
-        .footer-inner { max-width:1380px; margin:auto; display:grid; grid-template-columns:1fr auto 1fr; gap:24px; align-items:center; }
-        .footer img { width:auto; height:30px; }
-        .footer p,.footer button { margin:0; color:rgba(16,36,27,.55); font-size:9px; line-height:1.5; letter-spacing:.12em; text-transform:uppercase; }
-        .footer button { justify-self:end; border:0; background:transparent; cursor:pointer; }
+        @keyframes heroDrift { from { transform:scale(1.1); } to { transform:scale(1.04); } }
+        @keyframes scrollPulse { 0%,100% { opacity:.35; transform:scaleY(.75); transform-origin:top; } 50% { opacity:1; transform:scaleY(1); transform-origin:top; } }
 
-        @media (max-width:1050px) {
-          .hero { display:block; padding-bottom:54px; }
-          .hero-copy { min-height:780px; padding-right:clamp(28px,8vw,82px); background:linear-gradient(90deg,rgba(9,23,17,.96),rgba(9,23,17,.8) 55%,rgba(9,23,17,.38)); }
-          .hero-visual { position:absolute; inset:0; min-height:100%; }
-          .hero-visual::after { background:linear-gradient(0deg,rgba(9,23,17,.65),transparent 50%); }
-          .hero h1 { font-size:clamp(5rem,13vw,8.5rem); }
-          .hero-form-card { position:relative; top:auto; right:auto; width:min(640px,calc(100% - 80px)); margin:-92px auto 0; transform:none; }
-          .story-grid { grid-template-columns:1fr; }
-          .story-image { min-height:540px; }
-          .story-stack { grid-template-columns:1fr; grid-template-rows:auto auto; }
-          .closing-content { grid-template-columns:1fr; }
-          .closing-action { text-align:left; }
+        @media (max-width:900px) {
+          .hero { min-height:auto; padding:120px 0 80px; }
+          .hero-layout,.overview-grid { grid-template-columns:1fr; }
+          .hero-content { max-width:720px; }
+          .form-panel { width:min(100%,620px); }
+          .overview-image { min-height:520px; order:2; }
+          .overview-copy { order:1; }
         }
 
-        @media (max-width:700px) {
-          .site-header { padding:15px 18px; }
-          .text-link { display:none; }
-          .header-cta { min-height:39px; padding:0 17px; font-size:9px; }
-          .brand img { height:30px; }
-          .hero { padding-bottom:28px; }
-          .hero-copy { min-height:690px; padding:118px 20px 70px; background:linear-gradient(90deg,rgba(9,23,17,.9),rgba(9,23,17,.42)),linear-gradient(0deg,rgba(9,23,17,.8),transparent 55%); }
-          .hero h1 { font-size:clamp(4.2rem,22vw,6.3rem); line-height:.82; }
-          .hero h1 span { margin-left:10px; }
-          .hero-intro { margin-top:auto; padding-top:20px; gap:20px; }
-          .hero-intro p { font-size:.86rem; line-height:1.6; }
-          .round-button { width:48px; height:48px; }
-          .hero-form-card { width:calc(100% - 36px); margin:-42px auto 0; padding:26px 20px; border-radius:20px; }
-          .hero-form-card h2 { font-size:2.45rem; }
-          .story { padding:74px 18px; }
-          .section-heading { grid-template-columns:1fr; gap:26px; margin-bottom:44px; }
-          .section-heading h2 { font-size:clamp(3rem,15vw,4.6rem); }
-          .story-image { min-height:420px; border-radius:20px; }
-          .story-note { border-radius:20px; }
-          .story-note h3 { margin-top:46px; }
-          .metrics { grid-template-columns:1fr; border-radius:20px; }
-          .metric { min-height:130px; border-right:0; border-bottom:1px solid var(--line); }
-          .metric:last-child { border-bottom:0; }
+        @media (max-width:620px) {
+          .section-shell { width:min(100% - 36px,1140px); }
+          .site-header { height:68px; padding:0 18px; }
+          .site-header.is-scrolled { height:62px; }
+          .brand img { height:34px; }
+          .header-link { display:none; }
+          .header-cta { min-height:35px; padding:0 14px; font-size:8px; }
+          .hero h1 { font-size:clamp(3.25rem,15vw,5rem); }
+          .hero-copy { font-size:13px; }
+          .hero-actions { flex-direction:column; align-items:stretch; width:min(100%,310px); margin:auto; }
+          .form-panel { width:auto; margin:0 -2px; padding:34px 22px; }
           .lead-form { grid-template-columns:1fr; }
-          .field--wide,.form-error,.primary-cta,.privacy { grid-column:auto; }
-          .closing { min-height:650px; padding:70px 20px 52px; background-position:58% center; }
-          .closing h2 { font-size:clamp(4rem,20vw,6rem); }
+          .field--wide,.form-error,.form-submit,.privacy { grid-column:auto; }
+          .overview-image { min-height:410px; }
           .footer-inner { grid-template-columns:1fr auto; }
           .footer p { display:none; }
         }
 
-        @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; } }
+        @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }
       `}</style>
 
       <header className={`site-header${scrolled ? ' is-scrolled' : ''}`}>
         <div className="header-inner">
-          <button className="brand" onClick={() => scrollTo('hero')} aria-label="Go to top" style={{ border: 0, padding: 0, background: 'transparent', cursor: 'pointer' }}>
-            <img src={LOGO_HEADER} alt="Indo Group" />
+          <button className="brand" onClick={() => scrollTo('hero')} aria-label="Go to top">
+            <img src={BRAND_LOGO} alt="Indo Group" />
           </button>
           <div className="header-actions">
-            <button className="text-link" onClick={() => scrollTo('vision')}>The vision</button>
-            <button className="header-cta" onClick={() => scrollTo('hero-form', true)}>Request access <Arrow /></button>
+            <button className="header-link" onClick={() => scrollTo('overview')}>Overview</button>
+            <button className="button header-cta" onClick={() => scrollTo('hero-form', true)}>Register interest</button>
           </div>
         </div>
       </header>
 
-      <section className="hero" id="hero">
-        <div className="hero-copy">
-          <p className="eyebrow">A new residential experience · Guwahati</p>
-          <h1>Live a little <span>wilder.</span></h1>
-          <div className="hero-intro">
-            <p>Space to breathe. Nature at your doorstep. A considered new address is taking root.</p>
-            <button className="round-button" onClick={() => scrollTo('vision')} aria-label="Discover the vision"><Arrow down /></button>
-          </div>
-        </div>
-        <div className="hero-visual" aria-hidden="true">
-          <img src="/uploads/cam-02_revised.webp" alt="" fetchPriority="high" />
-        </div>
-        <aside className="hero-form-card" id="hero-form" aria-label="Early access registration">
-          {submitted ? (
-            <div className="success" role="status">
-              <span className="success-mark">✓</span>
-              <p className="eyebrow">You are on the list</p>
-              <h2>Thank you, {lead.name.split(' ')[0]}.</h2>
-              <p>We have received your details. Our team will reach out when the private preview opens.</p>
+      <section className="hero" id="hero" aria-labelledby="hero-title">
+        <div className="hero-bg" aria-hidden="true" />
+        <div className="hero-overlay" aria-hidden="true" />
+        <div className="hero-layout">
+          <div className={`hero-content${ready ? ' is-ready' : ''}`}>
+            <p className="eyebrow">An Indo Group presentation</p>
+            <h1 id="hero-title">Something exceptional <em>is taking shape.</em></h1>
+            <p className="hero-copy">A new residential experience is coming soon. Join the private registry to be among the first to know.</p>
+            <div className="hero-actions">
+              <button className="button button--outline" onClick={() => scrollTo('overview')}>A quiet first look <Arrow down /></button>
             </div>
-          ) : (
-            <>
-              <p className="eyebrow">Register your interest</p>
-              <h2>Get closer to the reveal.</h2>
-              <p className="form-intro">Leave your details for early updates and invitation-only previews.</p>
-              <form className="lead-form" onSubmit={handleSubmit} noValidate>
-                {Object.entries(utm).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} readOnly />)}
-                <div className="field field--wide"><label htmlFor="lead-name">Full name *</label><input ref={nameInputRef} id="lead-name" name="name" autoComplete="name" value={lead.name} onChange={updateLead('name')} placeholder="Your name" required /></div>
-                <div className="field"><label htmlFor="lead-phone">Mobile number *</label><input id="lead-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" value={lead.phone} onChange={updateLead('phone')} placeholder="+91 98765 43210" required /></div>
-                <div className="field"><label htmlFor="lead-email">Email address</label><input id="lead-email" name="email" type="email" autoComplete="email" value={lead.email} onChange={updateLead('email')} placeholder="you@email.com" /></div>
-                <div className="field field--wide"><label htmlFor="lead-pincode">Pincode</label><input id="lead-pincode" name="pincode" inputMode="numeric" maxLength={6} autoComplete="postal-code" value={lead.pincode} onChange={updateLead('pincode')} placeholder="Your area pincode" /></div>
-                {error && <p className="form-error" role="alert">{error}</p>}
-                <button className="primary-cta" type="submit" disabled={loading}>{loading ? 'Saving your place…' : <>Request early access <Arrow /></>}</button>
-                <p className="privacy"><span aria-hidden="true">○</span> Your details stay private and are used only for project updates.</p>
-              </form>
-            </>
-          )}
-        </aside>
-      </section>
+          </div>
 
-      <div className="marquee" aria-hidden="true">
-        <div className="marquee-track">
-          {[0, 1].map((group) => <React.Fragment key={group}><span>Nature-led living</span><span>Private pre-launch</span><span>A quieter address</span><span>Made for more space</span></React.Fragment>)}
-        </div>
-      </div>
-
-      <section className="story" id="vision">
-        <div className="story-inner">
-          <div className="section-heading"><p className="section-kicker">The idea / 01</p><h2>Designed for life beyond four walls.</h2></div>
-          <div className="story-grid">
-            <figure className="story-image"><img src="/uploads/shot%2015_v2.webp" alt="Landscaped residential spaces at dusk" loading="lazy" /></figure>
-            <div className="story-stack">
-              <article className="story-note">
-                <span className="index">02</span><h3>A home that gives something back.</h3>
-                <p>More daylight, more green, and more room for the rituals that make every day feel grounded. Thoughtful architecture meets a landscape made to be lived in.</p>
-              </article>
-              <div className="metrics" aria-label="Project highlights">
-                <div className="metric"><strong>70%</strong><span>Open green spaces</span></div>
-                <div className="metric"><strong>16K+</strong><span>Sq. ft. clubhouse</span></div>
-                <div className="metric"><strong>01</strong><span>Distinctive address</span></div>
+          <div className="form-panel" id="hero-form" aria-label="Early access registration">
+            {submitted ? (
+              <div className="success" role="status">
+                <span className="success-mark">✓</span>
+                <p className="eyebrow">You are on the list</p>
+                <h3>Thank you, {lead.name.split(' ')[0]}.</h3>
+                <p>We have received your details. Our team will be in touch when the private preview opens.</p>
               </div>
-            </div>
+            ) : (
+              <>
+                <p className="eyebrow">Private registry</p>
+                <h3>Be first to know.</h3>
+                <p className="form-intro">Register for selected updates and early access.</p>
+                <form className="lead-form" onSubmit={handleSubmit} noValidate>
+                  {Object.entries(utm).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} readOnly />)}
+                  <div className="field field--wide"><label htmlFor="lead-name">Full name *</label><input ref={nameInputRef} id="lead-name" name="name" autoComplete="name" value={lead.name} onChange={updateLead('name')} placeholder="Your name" required /></div>
+                  <div className="field"><label htmlFor="lead-phone">Mobile number *</label><input id="lead-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" value={lead.phone} onChange={updateLead('phone')} placeholder="+91 98765 43210" required /></div>
+                  <div className="field"><label htmlFor="lead-email">Email address</label><input id="lead-email" name="email" type="email" autoComplete="email" value={lead.email} onChange={updateLead('email')} placeholder="you@email.com" /></div>
+                  <div className="field field--wide"><label htmlFor="lead-pincode">Pincode</label><input id="lead-pincode" name="pincode" inputMode="numeric" maxLength={6} autoComplete="postal-code" value={lead.pincode} onChange={updateLead('pincode')} placeholder="Your area pincode" /></div>
+                  {error && <p className="form-error" role="alert">{error}</p>}
+                  <button className="button form-submit" type="submit" disabled={loading}>{loading ? 'Saving your place…' : <>Request early access <Arrow /></>}</button>
+                  <p className="privacy">Your details remain private and are used only for relevant updates.</p>
+                </form>
+              </>
+            )}
           </div>
         </div>
       </section>
 
-      <section className="closing" id="closing">
-        <div className="closing-content">
-          <h2>The reveal is <em>closer than you think.</em></h2>
-          <div className="closing-action">
-            <p>Join the private registry and be among the first to experience what is taking shape.</p>
-            <button className="header-cta" onClick={() => scrollTo('hero-form', true)}>Register your interest <Arrow /></button>
+      <section className="teaser" aria-labelledby="teaser-title">
+        <div className="section-shell teaser-inner">
+            <p className="eyebrow">Coming soon / 02</p>
+            <h2 id="teaser-title">The best things are revealed <em>at the right moment.</em></h2>
+            <div className="gold-rule" aria-hidden="true" />
+            <p className="teaser-copy">This first look is intentionally brief. More will be shared privately with registered guests as the official reveal approaches.</p>
+        </div>
+      </section>
+
+      <section className="overview" id="overview" aria-labelledby="overview-title">
+        <div className="section-shell overview-grid">
+          <figure className="overview-image">
+            <img src="/uploads/entrance%20cam_rang%20homes.webp" alt="A nature-led residential arrival envisioned at dusk" loading="lazy" />
+            <figcaption className="image-label">Artist's impression</figcaption>
+          </figure>
+          <div className="overview-copy">
+            <p className="eyebrow">A quiet glimpse / 03</p>
+            <h2 id="overview-title">A different way to feel <em>at home.</em></h2>
+            <p className="overview-intro">Thoughtful, calm and connected to nature. For now, that is all we are ready to share.</p>
+            <p className="overview-note">The complete story remains private until the official reveal.</p>
+            <button className="button" onClick={() => scrollTo('hero-form', true)}>Join the private registry <Arrow /></button>
           </div>
         </div>
       </section>
 
       <footer className="footer">
-        <div className="footer-inner"><img src={LOGO_DARK} alt="Rang Homes by Indo Group" /><p>Conceptual visuals for representational purposes only · © {new Date().getFullYear()}</p><button onClick={() => scrollTo('hero')}>Back to top ↑</button></div>
+        <div className="footer-inner">
+          <img src={DEVELOPER_LOGO} alt="Indo Group" />
+          <p>Conceptual visuals for representational purposes only · © {new Date().getFullYear()}</p>
+          <button onClick={() => scrollTo('hero')}>Back to top ↑</button>
+        </div>
       </footer>
     </main>
   );

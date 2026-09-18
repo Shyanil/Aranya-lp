@@ -1,6 +1,11 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const esbuild = require('esbuild');
+
+function assetVersion(filePath) {
+  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex').slice(0, 12);
+}
 
 async function build() {
   console.log('🚀 Starting Aranya SSR & Client Build...');
@@ -51,7 +56,7 @@ async function build() {
 
   const finalMainHtml = mainTemplate
     .replace('<div id="root"></div>', `<div id="root">${renderedAppHtml}</div>`)
-    .replace('<!-- APP_SCRIPTS -->', '<script src="/dist/client.js" defer></script>');
+    .replace('<!-- APP_SCRIPTS -->', `<script src="/dist/client.js?v=${assetVersion(path.join(distDir, 'client.js'))}" defer></script>`);
 
   fs.writeFileSync(path.join(__dirname, 'index.html'), finalMainHtml, 'utf8');
   console.log('✅ Pre-rendered index.html generated with full SSR content!');
@@ -97,7 +102,7 @@ async function build() {
 
   const finalCsHtml = csTemplate
     .replace('<div id="root"></div>', `<div id="root">${renderedComingSoonHtml}</div>`)
-    .replace('<!-- APP_SCRIPTS -->', '<script src="/dist/coming-soon-client.js" defer></script>');
+    .replace('<!-- APP_SCRIPTS -->', `<script src="/dist/coming-soon-client.js?v=${assetVersion(path.join(distDir, 'coming-soon-client.js'))}" defer></script>`);
 
   fs.writeFileSync(path.join(__dirname, 'coming-soon.html'), finalCsHtml, 'utf8');
   console.log('✅ Pre-rendered coming-soon.html generated with full SSR content!');
