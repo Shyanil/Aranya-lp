@@ -127,7 +127,6 @@ export default function ComingSoonApp() {
         .hero h1 { max-width:720px; margin:0 0 24px; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(3.4rem,6vw,6.4rem); font-weight:300; line-height:1.01; letter-spacing:-.02em; }
         .hero h1 em { display:block; color:var(--gold); font-weight:300; }
         .hero-copy { max-width:530px; margin:0 0 32px; color:rgba(245,240,232,.72); font-size:14px; line-height:1.9; letter-spacing:.035em; }
-        .hero-actions { display:flex; justify-content:flex-start; gap:14px; flex-wrap:wrap; margin-bottom:34px; }
 
         .hero-stats { display:flex; align-items:center; gap:clamp(14px,2.2vw,28px); padding-top:26px; border-top:1px solid rgba(245,240,232,.18); flex-wrap:wrap; }
         .hero-stat-card { display:flex; flex-direction:column; gap:4px; }
@@ -240,10 +239,6 @@ export default function ComingSoonApp() {
           .developer-grid { grid-template-columns:1fr; gap:40px; }
         }
 
-        @media (max-width:768px) {
-          .hero-actions { display:none; }
-        }
-
         @media (max-width:620px) {
           .section-shell { width:calc(100% - 36px); }
           .site-header { height:68px; padding:0; }
@@ -293,11 +288,6 @@ export default function ComingSoonApp() {
             <p className="eyebrow">An Indo Group presentation</p>
             <h1 id="hero-title">Something exceptional <em>is taking shape.</em></h1>
             <p className="hero-copy">A new residential experience is coming soon. Join the private registry to be among the first to know.</p>
-            
-            <div className="hero-actions">
-              <button className="button button--outline" onClick={() => scrollTo('developer')}>About Developer <Arrow down /></button>
-              <button className="button button--outline" onClick={() => scrollTo('location')}>Location <Arrow down /></button>
-            </div>
 
             <div className="hero-stats">
               <div className="hero-stat-card">
