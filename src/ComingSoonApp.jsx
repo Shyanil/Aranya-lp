@@ -126,9 +126,9 @@ export default function ComingSoonApp() {
         .hero-content.is-ready { opacity:1; transform:translateY(0); }
         .hero h1 { max-width:720px; margin:0 0 24px; font-family:'Cormorant Garamond',Georgia,serif; font-size:clamp(3.4rem,6vw,6.4rem); font-weight:300; line-height:1.01; letter-spacing:-.02em; }
         .hero h1 em { display:block; color:var(--gold); font-weight:300; }
-        .hero-copy { max-width:530px; margin:0 0 32px; color:rgba(245,240,232,.72); font-size:14px; line-height:1.9; letter-spacing:.035em; }
+        .hero-copy { max-width:530px; margin:0 0 20px; color:rgba(245,240,232,.72); font-size:14px; line-height:1.9; letter-spacing:.035em; }
 
-        .hero-stats { display:flex; align-items:center; gap:clamp(14px,2.2vw,28px); padding-top:26px; border-top:1px solid rgba(245,240,232,.18); flex-wrap:wrap; }
+        .hero-stats { display:flex; align-items:center; gap:clamp(14px,2.2vw,28px); width:fit-content; max-width:530px; padding-top:18px; border-top:1px solid rgba(201,169,110,.25); flex-wrap:wrap; }
         .hero-stat-card { display:flex; flex-direction:column; gap:4px; }
         .hero-stat-card--clickable { cursor:pointer; transition:transform .2s; }
         .hero-stat-card--clickable:hover { transform:translateY(-2px); }
@@ -247,9 +247,8 @@ export default function ComingSoonApp() {
           .header-link { display:none; }
           .header-cta { min-height:35px; padding:0 14px; font-size:8px; }
           .hero h1 { font-size:clamp(2.9rem,13vw,4.4rem); }
-          .hero-copy { font-size:13px; margin-bottom:24px; }
-          .hero-actions { display:none; }
-          .hero-stats { gap:14px; justify-content:space-between; }
+          .hero-copy { font-size:13px; margin-bottom:18px; }
+          .hero-stats { width:100%; gap:14px; justify-content:space-between; }
           .hero-stat-divider { display:none; }
           .form-panel { width:100%; margin:0; padding:28px 18px; }
           .lead-form { grid-template-columns:1fr; }
