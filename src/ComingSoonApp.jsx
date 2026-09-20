@@ -289,9 +289,9 @@ export default function ComingSoonApp() {
             <p className="hero-copy">A new residential experience is coming soon. Join the private registry to be among the first to know.</p>
 
             <div className="hero-stats">
-              <div className="hero-stat-card">
-                <span className="hero-stat-num">257</span>
-                <span className="hero-stat-label">Curated Residences</span>
+              <div className="hero-stat-card hero-stat-card--clickable" onClick={() => scrollTo('location')} title="View Location Details">
+                <span className="hero-stat-num">Aerocity</span>
+                <span className="hero-stat-label">Dharapur, Guwahati</span>
               </div>
               <div className="hero-stat-divider" aria-hidden="true" />
               <div className="hero-stat-card">
@@ -302,11 +302,6 @@ export default function ComingSoonApp() {
               <div className="hero-stat-card">
                 <span className="hero-stat-num">16,000+</span>
                 <span className="hero-stat-label">Sq Ft Clubhouse</span>
-              </div>
-              <div className="hero-stat-divider" aria-hidden="true" />
-              <div className="hero-stat-card hero-stat-card--clickable" onClick={() => scrollTo('location')} title="View Location Details">
-                <span className="hero-stat-num">Aerocity</span>
-                <span className="hero-stat-label">Dharapur, Guwahati</span>
               </div>
             </div>
           </div>
