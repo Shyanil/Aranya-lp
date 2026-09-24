@@ -105,6 +105,41 @@ async function build() {
     .replace('<!-- APP_SCRIPTS -->', `<script src="/dist/coming-soon-client.js?v=${assetVersion(path.join(distDir, 'coming-soon-client.js'))}" defer></script>`);
 
   fs.writeFileSync(path.join(__dirname, 'coming-soon.html'), finalCsHtml, 'utf8');
+  // Only browser assets belong in the Cloudflare upload directory.
+  const siteDir = path.resolve(__dirname, 'site');
+  if (path.dirname(siteDir) !== path.resolve(__dirname)) throw new Error('Invalid site output directory');
+  fs.rmSync(siteDir, { recursive: true, force: true });
+  fs.mkdirSync(path.join(siteDir, 'dist'), { recursive: true });
+  for (const file of ['index.html', 'coming-soon.html', 'thank-you.html', 'thank-you-coming-soon.html']) {
+    const src = path.join(__dirname, file);
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, path.join(siteDir, file));
+    }
+  }
+  for (const [routeDir, srcFile] of [
+    ['coming-soon', 'coming-soon.html'],
+    ['thank-you', 'thank-you.html'],
+    ['thank-you-coming-soon', 'thank-you-coming-soon.html'],
+  ]) {
+    const src = path.join(__dirname, srcFile);
+    if (fs.existsSync(src)) {
+      const destDir = path.join(siteDir, routeDir);
+      fs.mkdirSync(destDir, { recursive: true });
+      fs.copyFileSync(src, path.join(destDir, 'index.html'));
+    }
+  }
+  for (const file of ['client.js', 'coming-soon-client.js']) {
+    fs.copyFileSync(path.join(distDir, file), path.join(siteDir, 'dist', file));
+  }
+  fs.cpSync(path.join(__dirname, 'uploads'), path.join(siteDir, 'uploads'), { recursive: true });
+  const checkAssets = (directory) => {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const file = path.join(directory, entry.name);
+      if (entry.isDirectory()) checkAssets(file);
+      else if (fs.statSync(file).size > 25 * 1024 * 1024) throw new Error(`Cloudflare asset exceeds 25 MiB: ${path.relative(siteDir, file)}`);
+    }
+  };
+  checkAssets(siteDir);
   console.log('✅ Pre-rendered coming-soon.html generated with full SSR content!');
 
   console.log('🎉 Full build completed successfully.');

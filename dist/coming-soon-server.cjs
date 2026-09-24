@@ -12131,6 +12131,20 @@ var import_server = __toESM(require_server_node());
 
 // src/ComingSoonApp.jsx
 var import_react = __toESM(require_react());
+
+// src/submitLead.js
+async function submitLead(fields, formSource) {
+  const params = new URLSearchParams(window.location.search);
+  const tracking = Object.fromEntries(["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].map((key) => [key, params.get(key) || ""]));
+  const response = await fetch("/api/leads", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...fields, ...tracking, form_source: formSource, source_url: window.location.href })
+  });
+  if (!response.ok) throw new Error("Unable to send your enquiry. Please try again.");
+}
+
+// src/ComingSoonApp.jsx
 var DEVELOPER_LOGO = "/uploads/indo-group-logo.webp";
 var BRAND_LOGO = DEVELOPER_LOGO;
 var Arrow = ({ down = false }) => /* @__PURE__ */ import_react.default.createElement("svg", { "aria-hidden": "true", className: down ? "icon icon--down" : "icon", viewBox: "0 0 24 24", fill: "none" }, /* @__PURE__ */ import_react.default.createElement("path", { d: "M5 12h14M14 7l5 5-5 5", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round" }));
@@ -12185,25 +12199,26 @@ function ComingSoonApp() {
     setLead((current) => ({ ...current, [field]: event.target.value }));
     if (error) setError("");
   };
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    if (loading) return;
     if (!lead.name.trim()) return setError("Please enter your full name.");
     if (lead.phone.replace(/\D/g, "").length < 10) return setError("Please enter a valid 10-digit mobile number.");
     if (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email.trim())) return setError("Please enter a valid email address.");
     if (lead.pincode && lead.pincode.replace(/\D/g, "").length !== 6) return setError("Please enter a valid 6-digit pincode.");
     setError("");
     setLoading(true);
-    const payload = { ...lead, ...utm, submitted_at: (/* @__PURE__ */ new Date()).toISOString() };
     try {
-      const saved = JSON.parse(window.localStorage.getItem("prelaunch_access_leads") || "[]");
-      window.localStorage.setItem("prelaunch_access_leads", JSON.stringify([...saved, payload]));
-    } catch (storageError) {
-      console.warn("Unable to save lead locally:", storageError);
-    }
-    window.setTimeout(() => {
-      setLoading(false);
+      await submitLead({ ...lead, ...utm }, "coming_soon");
       setSubmitted(true);
-    }, 650);
+      const params = new URLSearchParams(window.location.search);
+      params.set("source", "coming_soon");
+      if (lead.name) params.set("name", lead.name.trim());
+      window.location.href = `/thank-you?${params.toString()}`;
+    } catch (error2) {
+      setError(error2.message || "Unable to send your enquiry. Please try again.");
+      setLoading(false);
+    }
     return void 0;
   };
   return /* @__PURE__ */ import_react.default.createElement("main", { className: "coming-soon" }, /* @__PURE__ */ import_react.default.createElement("style", null, `

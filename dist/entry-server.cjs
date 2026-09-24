@@ -12131,6 +12131,20 @@ var import_server = __toESM(require_server_node());
 
 // src/App.jsx
 var import_react = __toESM(require_react());
+
+// src/submitLead.js
+async function submitLead(fields, formSource) {
+  const params = new URLSearchParams(window.location.search);
+  const tracking = Object.fromEntries(["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"].map((key) => [key, params.get(key) || ""]));
+  const response = await fetch("/api/leads", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...fields, ...tracking, form_source: formSource, source_url: window.location.href })
+  });
+  if (!response.ok) throw new Error("Unable to send your enquiry. Please try again.");
+}
+
+// src/App.jsx
 var ModalCtx = (0, import_react.createContext)(null);
 var TWEAK_DEFAULTS = (
   /*EDITMODE-BEGIN*/
@@ -12267,6 +12281,7 @@ function PopupModal({ isOpen, onClose, defaultInterest }) {
   const [form, setForm] = (0, import_react.useState)({ name: "", phone: "", email: "", interest: defaultInterest || "", message: "" });
   const [errors, setErrors] = (0, import_react.useState)({});
   const [done, setDone] = (0, import_react.useState)(false);
+  const [loading, setLoading] = (0, import_react.useState)(false);
   (0, import_react.useEffect)(() => {
     setForm((f) => ({ ...f, interest: defaultInterest || "" }));
     setDone(false);
@@ -12292,35 +12307,27 @@ function PopupModal({ isOpen, onClose, defaultInterest }) {
     if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) e.email = true;
     return e;
   };
-  const submit = (ev) => {
+  const submit = async (ev) => {
     ev.preventDefault();
+    if (loading) return;
     const e = validate();
     if (Object.keys(e).length) {
       setErrors(e);
       return;
     }
     setErrors({});
-    setDone(true);
-    const pdfUrl = "uploads/Aranya%20brochure.pdf";
+    setLoading(true);
     try {
-      const win = window.open(pdfUrl, "_blank");
-      if (!win || win.closed || typeof win.closed === "undefined") {
-        const a = document.createElement("a");
-        a.href = pdfUrl;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }
-    } catch (err) {
-      const a = document.createElement("a");
-      a.href = pdfUrl;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      await submitLead(form, "main_enquiry");
+      setDone(true);
+      const params = new URLSearchParams(window.location.search);
+      params.set("source", "main");
+      if (form.name) params.set("name", form.name.trim());
+      window.location.href = `/thank-you?${params.toString()}`;
+    } catch (error) {
+      setErrors({ submit: error.message || "Unable to send your enquiry. Please try again." });
+      setLoading(false);
+      return;
     }
   };
   const inp = (err) => ({ width: "100%", background: "#fff", border: `1px solid ${err ? "#e07a5f" : "rgba(26,46,26,0.18)"}`, padding: "12px 16px", outline: "none", fontFamily: "DM Sans", fontSize: 13, fontWeight: 300, color: "#1a2e1a", transition: "border-color 0.3s", borderRadius: 0 });
@@ -12363,7 +12370,8 @@ function PopupModal({ isOpen, onClose, defaultInterest }) {
     "button",
     {
       type: "submit",
-      style: { background: "#1a2e1a", color: "#c9a96e", border: "none", cursor: "pointer", padding: "14px 36px", fontFamily: "DM Sans", fontSize: 11, fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase", transition: "all 0.3s", flexShrink: 0 },
+      disabled: loading,
+      style: { background: "#1a2e1a", color: "#c9a96e", border: "none", cursor: loading ? "wait" : "pointer", opacity: loading ? 0.65 : 1, padding: "14px 36px", fontFamily: "DM Sans", fontSize: 11, fontWeight: 500, letterSpacing: "0.15em", textTransform: "uppercase", transition: "all 0.3s", flexShrink: 0 },
       onMouseEnter: (e) => {
         e.currentTarget.style.background = "#c9a96e";
         e.currentTarget.style.color = "#1a2e1a";
@@ -12375,8 +12383,8 @@ function PopupModal({ isOpen, onClose, defaultInterest }) {
         e.currentTarget.style.transform = "translateY(0)";
       }
     },
-    "DOWNLOAD BROCHURE"
-  )))), !done && /* @__PURE__ */ import_react.default.createElement("div", { style: { borderTop: "1px solid rgba(26,46,26,0.1)", padding: "16px 36px", display: "flex", gap: 28, flexWrap: "wrap", background: "rgba(26,46,26,0.04)" } }, [["\u{1F4DE}", "1800 12012 5555 / 9311852020"], ["\u2709", "info@indogroup.in"], ["\u{1F4CD}", "4JM6+R77, Azara, Guwahati, Assam 781017"]].map(([ico, txt], i) => /* @__PURE__ */ import_react.default.createElement("span", { key: i, style: { fontFamily: "DM Sans", fontSize: 11, fontWeight: 300, color: "rgba(26,46,26,0.5)", display: "flex", alignItems: "center", gap: 7 } }, /* @__PURE__ */ import_react.default.createElement("span", { style: { fontSize: 13 } }, ico), txt)))));
+    loading ? "SENDING..." : "DOWNLOAD BROCHURE"
+  )), errors.submit && /* @__PURE__ */ import_react.default.createElement("p", { role: "alert", style: { color: "#b6432b", fontSize: 13, marginTop: 12 } }, errors.submit))), !done && /* @__PURE__ */ import_react.default.createElement("div", { style: { borderTop: "1px solid rgba(26,46,26,0.1)", padding: "16px 36px", display: "flex", gap: 28, flexWrap: "wrap", background: "rgba(26,46,26,0.04)" } }, [["\u{1F4DE}", "1800 12012 5555 / 9311852020"], ["\u2709", "info@indogroup.in"], ["\u{1F4CD}", "4JM6+R77, Azara, Guwahati, Assam 781017"]].map(([ico, txt], i) => /* @__PURE__ */ import_react.default.createElement("span", { key: i, style: { fontFamily: "DM Sans", fontSize: 11, fontWeight: 300, color: "rgba(26,46,26,0.5)", display: "flex", alignItems: "center", gap: 7 } }, /* @__PURE__ */ import_react.default.createElement("span", { style: { fontSize: 13 } }, ico), txt)))));
 }
 function Nav() {
   const [scrolled, setScrolled] = (0, import_react.useState)(false);

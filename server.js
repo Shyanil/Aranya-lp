@@ -5,6 +5,8 @@ const zlib = require('zlib');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = __dirname;
+if (fs.existsSync(path.join(PUBLIC_DIR, '.env'))) process.loadEnvFile(path.join(PUBLIC_DIR, '.env'));
+const { handleLead } = require('./lib/leads.cjs');
 
 const MAIN_TEMPLATE_PATH = path.join(PUBLIC_DIR, 'index.template.html');
 const MAIN_SSR_PATH = path.join(PUBLIC_DIR, 'dist', 'entry-server.cjs');
@@ -113,9 +115,33 @@ function sendHtml(res, req, htmlContent) {
   }
 }
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   const parsedUrl = new URL(req.url, 'http://localhost:' + PORT);
   let pathname = decodeURIComponent(parsedUrl.pathname);
+
+  if (pathname === '/api/leads') {
+    const chunks = [];
+    let size = 0;
+    for await (const chunk of req) {
+      size += chunk.length;
+      if (size > 16384) {
+        res.writeHead(413, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Submission too large' }));
+        return;
+      }
+      chunks.push(chunk);
+    }
+    const result = await handleLead(req.method, Buffer.concat(chunks).toString('utf8'));
+    res.writeHead(result.statusCode, result.headers);
+    res.end(result.body);
+    return;
+  }
+
+  if (pathname.replace(/\\/g, '/').split('/').some(segment => segment.startsWith('.'))) {
+    res.writeHead(404);
+    res.end('404 Not Found');
+    return;
+  }
 
   // 1. Coming Soon Route: /coming-soon or /coming-soon.html
   if (pathname === '/coming-soon' || pathname === '/coming-soon.html') {
@@ -123,6 +149,20 @@ const server = http.createServer((req, res) => {
     const fallbackFile = path.join(PUBLIC_DIR, 'coming-soon.html');
     const htmlToSend = ssrHtml || (fs.existsSync(fallbackFile) ? fs.readFileSync(fallbackFile, 'utf8') : '<h1>Aranya Coming Soon</h1>');
     return sendHtml(res, req, htmlToSend);
+  }
+
+  // 2. Thank You Routes: /thank-you, /thank-you.html, /thank-you-coming-soon, /thank-you-coming-soon.html
+  if (pathname === '/thank-you' || pathname === '/thank-you.html') {
+    const thankYouFile = path.join(PUBLIC_DIR, 'thank-you.html');
+    if (fs.existsSync(thankYouFile)) {
+      return sendHtml(res, req, fs.readFileSync(thankYouFile, 'utf8'));
+    }
+  }
+  if (pathname === '/thank-you-coming-soon' || pathname === '/thank-you-coming-soon.html') {
+    const csThankYouFile = path.join(PUBLIC_DIR, 'thank-you-coming-soon.html');
+    if (fs.existsSync(csThankYouFile)) {
+      return sendHtml(res, req, fs.readFileSync(csThankYouFile, 'utf8'));
+    }
   }
 
   // 2. Main Page Route: / or /index.html

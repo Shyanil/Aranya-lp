@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useContext, createContext } from "react";
+import { submitLead } from './submitLead';
 
     // ─── MODAL CONTEXT ────────────────────────────────────────────────────────────
     const ModalCtx = createContext(null);
@@ -138,6 +139,7 @@ import React, { useState, useEffect, useRef, useCallback, useContext, createCont
       const [form, setForm] = useState({ name: '', phone: '', email: '', interest: defaultInterest || '', message: '' });
       const [errors, setErrors] = useState({});
       const [done, setDone] = useState(false);
+      const [loading, setLoading] = useState(false);
 
       useEffect(() => {
         setForm(f => ({ ...f, interest: defaultInterest || '' }));
@@ -162,32 +164,24 @@ import React, { useState, useEffect, useRef, useCallback, useContext, createCont
         if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) e.email = true;
         return e;
       };
-      const submit = ev => {
+      const submit = async ev => {
         ev.preventDefault();
+        if (loading) return;
         const e = validate();
         if (Object.keys(e).length) { setErrors(e); return; }
         setErrors({});
-        setDone(true);
-        const pdfUrl = 'uploads/Aranya%20brochure.pdf';
+        setLoading(true);
         try {
-          const win = window.open(pdfUrl, '_blank');
-          if (!win || win.closed || typeof win.closed === 'undefined') {
-            const a = document.createElement('a');
-            a.href = pdfUrl;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-          }
-        } catch (err) {
-          const a = document.createElement('a');
-          a.href = pdfUrl;
-          a.target = '_blank';
-          a.rel = 'noopener noreferrer';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
+          await submitLead(form, 'main_enquiry');
+          setDone(true);
+          const params = new URLSearchParams(window.location.search);
+          params.set('source', 'main');
+          if (form.name) params.set('name', form.name.trim());
+          window.location.href = `/thank-you?${params.toString()}`;
+        } catch (error) {
+          setErrors({ submit: error.message || 'Unable to send your enquiry. Please try again.' });
+          setLoading(false);
+          return;
         }
       };
       const inp = (err) => ({ width: '100%', background: '#fff', border: `1px solid ${err ? '#e07a5f' : 'rgba(26,46,26,0.18)'}`, padding: '12px 16px', outline: 'none', fontFamily: 'DM Sans', fontSize: 13, fontWeight: 300, color: '#1a2e1a', transition: 'border-color 0.3s', borderRadius: 0 });
@@ -273,12 +267,13 @@ import React, { useState, useEffect, useRef, useCallback, useContext, createCont
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
                     <p style={{ fontFamily: 'DM Sans', fontSize: 10, fontWeight: 300, color: 'rgba(26,46,26,0.38)', flex: 1, minWidth: 180, lineHeight: 1.6 }}>Held in strict confidence.</p>
-                    <button type="submit" style={{ background: '#1a2e1a', color: '#c9a96e', border: 'none', cursor: 'pointer', padding: '14px 36px', fontFamily: 'DM Sans', fontSize: 11, fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', transition: 'all 0.3s', flexShrink: 0 }}
+                    <button type="submit" disabled={loading} style={{ background: '#1a2e1a', color: '#c9a96e', border: 'none', cursor: loading ? 'wait' : 'pointer', opacity: loading ? 0.65 : 1, padding: '14px 36px', fontFamily: 'DM Sans', fontSize: 11, fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', transition: 'all 0.3s', flexShrink: 0 }}
                       onMouseEnter={e => { e.currentTarget.style.background = '#c9a96e'; e.currentTarget.style.color = '#1a2e1a'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                       onMouseLeave={e => { e.currentTarget.style.background = '#1a2e1a'; e.currentTarget.style.color = '#c9a96e'; e.currentTarget.style.transform = 'translateY(0)'; }}>
-                      DOWNLOAD BROCHURE
+                      {loading ? 'SENDING...' : 'DOWNLOAD BROCHURE'}
                     </button>
                   </div>
+                  {errors.submit && <p role="alert" style={{ color: '#b6432b', fontSize: 13, marginTop: 12 }}>{errors.submit}</p>}
                 </form>
               )}
             </div>

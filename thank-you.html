@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-5V5B7CKC');</script>
+  <!-- End Google Tag Manager -->
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thank You | Aranya by Rang Homes</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/webp" href="/uploads/logo%20design.webp" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    :root {
+      --forest: #1a2e1a;
+      --forest-deep: #0a130a;
+      --cream: #f5f0e8;
+      --cream-light: #fdfbf7;
+      --gold: #c9a96e;
+      --gold-deep: #a67c3b;
+      --gold-light: #dfc28e;
+      --sage: #7a9e7e;
+      --line: rgba(201, 169, 110, 0.22);
+      --card-bg: rgba(26, 46, 26, 0.45);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--forest-deep);
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(201, 169, 110, 0.12) 0%, transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(26, 46, 26, 0.6) 0%, transparent 50%),
+        radial-gradient(circle at 0% 50%, rgba(20, 38, 20, 0.4) 0%, transparent 50%);
+      color: var(--cream);
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      font-weight: 300;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Top Navigation / Brand Header */
+    .header {
+      width: 100%;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+      background: rgba(10, 19, 10, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--cream);
+    }
+
+    .brand img {
+      height: 38px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .brand-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .header-contact {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--cream);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      padding: 8px 18px;
+      transition: all 0.3s ease;
+    }
+
+    .header-contact:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(201, 169, 110, 0.08);
+    }
+
+    /* Main Container */
+    .container {
+      width: min(780px, calc(100% - 40px));
+      margin: 40px auto 60px;
+      text-align: center;
+    }
+
+    .badge-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(201, 169, 110, 0.25), rgba(10, 19, 10, 0.8));
+      border: 1px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      font-size: 32px;
+      box-shadow: 0 0 30px rgba(201, 169, 110, 0.15);
+      animation: pulseGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(201, 169, 110, 0.15); }
+      50% { box-shadow: 0 0 35px rgba(201, 169, 110, 0.3); }
+    }
+
+    .eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .headline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(34px, 5vw, 54px);
+      font-weight: 300;
+      color: var(--cream-light);
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .headline em {
+      color: var(--gold);
+      font-style: italic;
+    }
+
+    .lead-text {
+      font-size: clamp(14px, 1.8vw, 16px);
+      color: rgba(245, 240, 232, 0.82);
+      max-width: 620px;
+      margin: 0 auto 36px;
+      line-height: 1.75;
+    }
+
+    /* Brochure Card */
+    .brochure-card {
+      background: linear-gradient(135deg, rgba(26, 46, 26, 0.7) 0%, rgba(10, 19, 10, 0.85) 100%);
+      border: 1px solid var(--gold);
+      padding: 32px 36px;
+      margin: 0 auto 36px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brochure-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .brochure-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brochure-icon {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      background: rgba(201, 169, 110, 0.12);
+      border: 1px solid rgba(201, 169, 110, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+    }
+
+    .brochure-meta h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      color: var(--cream);
+      font-weight: 400;
+      line-height: 1.2;
+    }
+
+    .brochure-meta p {
+      font-size: 12px;
+      color: rgba(245, 240, 232, 0.65);
+      letter-spacing: 0.05em;
+    }
+
+    .brochure-desc {
+      font-size: 13px;
+      color: rgba(245, 240, 232, 0.75);
+      line-height: 1.6;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: var(--gold);
+      color: var(--forest-deep);
+      text-decoration: none;
+      padding: 16px 36px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+    }
+
+    .btn-download:hover {
+      background: var(--gold-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(201, 169, 110, 0.25);
+    }
+
+    /* Highlights Grid */
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+
+    .highlight-item {
+      background: rgba(26, 46, 26, 0.25);
+      border: 1px solid var(--line);
+      padding: 18px 14px;
+      text-align: center;
+    }
+
+    .highlight-value {
+      display: block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+
+    .highlight-label {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(245, 240, 232, 0.65);
+    }
+
+    /* Action Buttons */
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: transparent;
+      color: var(--cream);
+      border: 1px solid var(--line);
+    }
+
+    .btn-primary:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(201, 169, 110, 0.08);
+    }
+
+    .btn-whatsapp {
+      background: #25d366;
+      color: #0a130a;
+      border: 1px solid #25d366;
+    }
+
+    .btn-whatsapp:hover {
+      background: #20ba5a;
+      transform: translateY(-2px);
+    }
+
+    /* Footer Note */
+    .footer {
+      border-top: 1px solid var(--line);
+      padding: 24px 32px;
+      text-align: center;
+      font-size: 11px;
+      color: rgba(245, 240, 232, 0.5);
+      background: rgba(10, 19, 10, 0.8);
+    }
+
+    .footer a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+      .header {
+        padding: 16px 20px;
+      }
+      .container {
+        width: calc(100% - 32px);
+        margin: 24px auto 40px;
+      }
+      .brochure-card {
+        padding: 24px 20px;
+      }
+      .actions-row {
+        flex-direction: column;
+        width: 100%;
+      }
+      .btn-action {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5V5B7CKC"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+  <!-- Top Header -->
+  <header class="header">
+    <a href="/" class="brand" id="brand-link">
+      <img src="/uploads/logo%20design.webp" alt="Aranya Logo" onerror="this.src='/uploads/indo-group-logo.png'" />
+      <span class="brand-title">ARANYA</span>
+    </a>
+    <a href="tel:+919311852020" class="header-contact">
+      <span>Call: +91 9311852020</span>
+    </a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    <div class="badge-icon">✦</div>
+    <p class="eyebrow" id="page-eyebrow">ENQUIRY RECEIVED</p>
+    <h1 class="headline" id="page-headline">Your journey <em>has begun.</em></h1>
+    <p class="lead-text" id="page-lead">
+      Thank you for your interest in Aranya by Rang Homes. Our residential concierge has received your details and will connect with you within 24 hours to arrange your private consultation and site visit.
+    </p>
+
+    <!-- Brochure Section (Shown for Main Enquiry; Hidden for Coming Soon) -->
+    <section class="brochure-card" id="brochure-section">
+      <div class="brochure-header">
+        <div class="brochure-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <div class="brochure-meta">
+          <h3>Aranya Master Brochure</h3>
+          <p>Official Presentation • Architectural Plans & Specifications (PDF)</p>
+        </div>
+      </div>
+      <p class="brochure-desc">
+        Explore 257 luxury sanctuary residences, 70% open green landscapes, the grand 16,000+ sq ft clubhouse, and world-class amenities in Aerocity Dharapur, Guwahati.
+      </p>
+      <a href="/uploads/Aranya%20brochure.pdf" download="Aranya_Brochure.pdf" target="_blank" rel="noopener noreferrer" class="btn-download" id="brochure-download-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>Download Brochure (PDF)</span>
+      </a>
+    </section>
+
+    <!-- Key Highlights -->
+    <div class="highlights-grid">
+      <div class="highlight-item">
+        <span class="highlight-value">257</span>
+        <span class="highlight-label">Curated Residences</span>
+      </div>
+      <div class="highlight-item">
+        <span class="highlight-value">70%</span>
+        <span class="highlight-label">Open Forest Greens</span>
+      </div>
+      <div class="highlight-item">
+        <span class="highlight-value">16,000+</span>
+        <span class="highlight-label">Sq Ft Clubhouse</span>
+      </div>
+      <div class="highlight-item">
+        <span class="highlight-value">Aerocity</span>
+        <span class="highlight-label">Dharapur, Guwahati</span>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions-row">
+      <a href="/" class="btn-action btn-primary" id="return-link">← Return to Homepage</a>
+      <a href="https://wa.me/919311852020?text=Hi%2C%20I%20have%20submitted%20an%20enquiry%20for%20Aranya." target="_blank" rel="noopener noreferrer" class="btn-action btn-whatsapp">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.074-2.127-.519-1.503-.62-2.457-2.13-2.532-2.23-.075-.1-1.025-1.365-1.025-2.604 0-1.238.647-1.848.877-2.098.23-.25.501-.313.668-.313.167 0 .334.002.48.009.157.007.365-.059.57.433.21.502.71 1.733.773 1.859.063.125.104.271.021.438-.083.167-.125.271-.25.417-.125.146-.263.327-.375.438-.125.125-.256.261-.11.511.146.25.65 1.072 1.394 1.734.957.852 1.765 1.116 2.016 1.241.25.125.396.104.542-.063.146-.167.626-.73.793-.98.167-.25.334-.209.563-.125.23.084 1.46.689 1.71.814.25.125.417.188.48.292.063.104.063.605-.081 1.01zM12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.66 1.436 5.176L2 22l4.981-1.309A9.957 9.957 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+        </svg>
+        <span>Chat on WhatsApp</span>
+      </a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>Aranya by Rang Homes Phase 1 • Indotech Infracon Pvt. Ltd. • PIN 781017</p>
+    <p style="margin-top: 6px;">Aerocity, Dharapur-Palashbari Road, Guwahati, Assam</p>
+  </footer>
+
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var source = (params.get('source') || '').toLowerCase();
+      var name = params.get('name') || '';
+
+      var isComingSoon = source === 'coming_soon' || source === 'coming-soon' || window.location.pathname.indexOf('coming-soon') !== -1;
+
+      var eyebrow = document.getElementById('page-eyebrow');
+      var headline = document.getElementById('page-headline');
+      var lead = document.getElementById('page-lead');
+      var brochure = document.getElementById('brochure-section');
+      var returnLink = document.getElementById('return-link');
+      var brandLink = document.getElementById('brand-link');
+
+      // Personalized greeting
+      var firstName = name ? name.trim().split(' ')[0] : '';
+      if (firstName) {
+        // Sanitize for basic XSS safety
+        firstName = firstName.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+
+      if (isComingSoon) {
+        // 1. COMING SOON: NO BROCHURE NEEDED
+        if (brochure) brochure.style.display = 'none';
+
+        if (eyebrow) eyebrow.textContent = 'PRIVATE REGISTRY';
+        if (headline) {
+          headline.innerHTML = firstName 
+            ? 'Thank you, ' + firstName + '.<br><em>You are on the list.</em>' 
+            : 'Thank you.<br><em>You are on the list.</em>';
+        }
+        if (lead) {
+          lead.textContent = 'We have received your registration for early access to Aranya by Indo Group. You will be among the select few to receive priority updates, project announcements, and private preview invitations.';
+        }
+        if (returnLink) {
+          returnLink.href = '/coming-soon';
+          returnLink.textContent = '← Return to Coming Soon';
+        }
+        if (brandLink) {
+          brandLink.href = '/coming-soon';
+        }
+        document.title = 'Thank You | Indo Group Private Registry';
+      } else {
+        // 2. MAIN ENQUIRY: BROCHURE PRESENT
+        if (headline && firstName) {
+          headline.innerHTML = 'Thank you, ' + firstName + '.<br><em>Your journey has begun.</em>';
+        }
+      }
+    })();
+  </script>
+</body>
+
+</html>

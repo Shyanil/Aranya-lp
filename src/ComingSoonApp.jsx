@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { submitLead } from './submitLead';
 
 const DEVELOPER_LOGO = '/uploads/indo-group-logo.webp';
 const BRAND_LOGO = DEVELOPER_LOGO;
@@ -66,8 +67,9 @@ export default function ComingSoonApp() {
     if (error) setError('');
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    if (loading) return;
     if (!lead.name.trim()) return setError('Please enter your full name.');
     if (lead.phone.replace(/\D/g, '').length < 10) return setError('Please enter a valid 10-digit mobile number.');
     if (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email.trim())) return setError('Please enter a valid email address.');
@@ -75,17 +77,17 @@ export default function ComingSoonApp() {
 
     setError('');
     setLoading(true);
-    const payload = { ...lead, ...utm, submitted_at: new Date().toISOString() };
     try {
-      const saved = JSON.parse(window.localStorage.getItem('prelaunch_access_leads') || '[]');
-      window.localStorage.setItem('prelaunch_access_leads', JSON.stringify([...saved, payload]));
-    } catch (storageError) {
-      console.warn('Unable to save lead locally:', storageError);
-    }
-    window.setTimeout(() => {
-      setLoading(false);
+      await submitLead({ ...lead, ...utm }, 'coming_soon');
       setSubmitted(true);
-    }, 650);
+      const params = new URLSearchParams(window.location.search);
+      params.set('source', 'coming_soon');
+      if (lead.name) params.set('name', lead.name.trim());
+      window.location.href = `/thank-you?${params.toString()}`;
+    } catch (error) {
+      setError(error.message || 'Unable to send your enquiry. Please try again.');
+      setLoading(false);
+    }
     return undefined;
   };
 
