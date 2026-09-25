@@ -24,10 +24,19 @@ const DESIGN_TEAM = [
   { role: 'Local Architect', firm: 'Banka & Associates, Guwahati' },
 ];
 
+const INTEREST_OPTIONS = [
+  { value: '2bhk', label: '2 BHK — Aura' },
+  { value: '3bhk', label: '3 BHK — Celestial' },
+  { value: '3bhk-3t', label: '3 BHK + 3T — Grande' },
+  { value: '3bhk-t', label: '3 BHK + Terrace — Garden Home' },
+  { value: '4bhk', label: '4 BHK — Prestige' },
+  { value: '4bhk-t', label: '4 BHK + Terrace — Signature' },
+];
+
 export default function ComingSoonApp() {
   const [scrolled, setScrolled] = useState(false);
   const [ready, setReady] = useState(false);
-  const [lead, setLead] = useState({ name: '', email: '', phone: '', pincode: '' });
+  const [lead, setLead] = useState({ name: '', email: '', phone: '', pincode: '', interest: '' });
   const [utm, setUtm] = useState({ utm_source: '', utm_medium: '', utm_campaign: '', utm_term: '', utm_content: '', source_url: '' });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -63,7 +72,10 @@ export default function ComingSoonApp() {
   };
 
   const updateLead = (field) => (event) => {
-    setLead((current) => ({ ...current, [field]: event.target.value }));
+    let value = event.target.value;
+    if (field === 'phone') value = value.replace(/\D/g, '').slice(0, 10);
+    if (field === 'pincode') value = value.replace(/\D/g, '').slice(0, 6);
+    setLead((current) => ({ ...current, [field]: value }));
     if (error) setError('');
   };
 
@@ -71,9 +83,10 @@ export default function ComingSoonApp() {
     event.preventDefault();
     if (loading) return;
     if (!lead.name.trim()) return setError('Please enter your full name.');
-    if (lead.phone.replace(/\D/g, '').length < 10) return setError('Please enter a valid 10-digit mobile number.');
+    if (lead.phone.replace(/\D/g, '').length !== 10) return setError('Please enter a valid 10-digit mobile number.');
     if (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email.trim())) return setError('Please enter a valid email address.');
     if (lead.pincode && lead.pincode.replace(/\D/g, '').length !== 6) return setError('Please enter a valid 6-digit pincode.');
+    if (!lead.interest) return setError('Please select your apartment interest.');
 
     setError('');
     setLoading(true);
@@ -145,8 +158,10 @@ export default function ComingSoonApp() {
         .lead-form { display:grid; grid-template-columns:1fr 1fr; gap:17px 20px; }
         .field--wide,.form-error,.form-submit,.privacy { grid-column:1/-1; }
         .field label { display:block; margin:0 0 8px; color:rgba(245,240,232,.52); font-size:9px; font-weight:500; letter-spacing:.18em; text-transform:uppercase; }
-        .field input { width:100%; height:42px; padding:0 1px; border:0; border-bottom:1px solid rgba(245,240,232,.26); border-radius:0; outline:none; background:transparent; color:var(--cream); font:300 14px/1 'DM Sans',sans-serif; transition:border-color .25s; }
-        .field input:focus { border-color:var(--gold); }
+        .field input,.field select { width:100%; height:42px; padding:0 1px; border:0; border-bottom:1px solid rgba(245,240,232,.26); border-radius:0; outline:none; background:transparent; color:var(--cream); font:300 14px/1 'DM Sans',sans-serif; transition:border-color .25s; }
+        .field select { cursor:pointer; appearance:none; -webkit-appearance:none; background-image:linear-gradient(45deg,transparent 50%,rgba(245,240,232,.55) 50%),linear-gradient(135deg,rgba(245,240,232,.55) 50%,transparent 50%); background-position:calc(100% - 12px) 18px,calc(100% - 6px) 18px; background-size:6px 6px,6px 6px; background-repeat:no-repeat; padding-right:22px; }
+        .field select option { color:var(--forest); background:#f5f0e8; }
+        .field input:focus,.field select:focus { border-color:var(--gold); }
         .field input::placeholder { color:rgba(245,240,232,.3); }
         .form-error { margin:-5px 0 0; color:#efb0a5; font-size:12px; }
         .form-submit { width:100%; margin-top:8px; }
@@ -324,9 +339,17 @@ export default function ComingSoonApp() {
                 <form className="lead-form" onSubmit={handleSubmit} noValidate>
                   {Object.entries(utm).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} readOnly />)}
                   <div className="field field--wide"><label htmlFor="lead-name">Full name *</label><input ref={nameInputRef} id="lead-name" name="name" autoComplete="name" value={lead.name} onChange={updateLead('name')} placeholder="Your name" required /></div>
-                  <div className="field"><label htmlFor="lead-phone">Mobile number *</label><input id="lead-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" value={lead.phone} onChange={updateLead('phone')} placeholder="+91 98765 43210" required /></div>
+                  <div className="field"><label htmlFor="lead-phone">Mobile number *</label><input id="lead-phone" name="phone" type="tel" inputMode="numeric" autoComplete="tel" maxLength={10} value={lead.phone} onChange={updateLead('phone')} placeholder="9876543210" required /></div>
                   <div className="field"><label htmlFor="lead-email">Email address</label><input id="lead-email" name="email" type="email" autoComplete="email" value={lead.email} onChange={updateLead('email')} placeholder="you@email.com" /></div>
-                  <div className="field field--wide"><label htmlFor="lead-pincode">Pincode</label><input id="lead-pincode" name="pincode" inputMode="numeric" maxLength={6} autoComplete="postal-code" value={lead.pincode} onChange={updateLead('pincode')} placeholder="Your area pincode" /></div>
+                  <div className="field"><label htmlFor="lead-interest">Interest *</label>
+                    <select id="lead-interest" name="interest" value={lead.interest} onChange={updateLead('interest')} required>
+                      <option value="">Select type</option>
+                      {INTEREST_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="field"><label htmlFor="lead-pincode">Pincode</label><input id="lead-pincode" name="pincode" inputMode="numeric" maxLength={6} autoComplete="postal-code" value={lead.pincode} onChange={updateLead('pincode')} placeholder="Your area pincode" /></div>
                   {error && <p className="form-error" role="alert">{error}</p>}
                   <button className="button form-submit" type="submit" disabled={loading}>{loading ? 'Saving your place…' : <>Request early access <Arrow /></>}</button>
                   <p className="privacy">Your details remain private and are used only for relevant updates.</p>
